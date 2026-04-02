@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,9 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
   const tags = useTags();
   const config = useGlobalConfig();
 
-  const [amount, setAmount] = useState(expense?.amount.toString() ?? "");
+  const [amount, setAmount] = useState(
+    expense ? expense.amount.toFixed(2) : ""
+  );
   const [description, setDescription] = useState(expense?.description ?? "");
   const [sourceId, setSourceId] = useState(expense?.sourceId ?? "");
   const [selectedTags, setSelectedTags] = useState<string[]>(expense?.tagIds ?? []);
@@ -73,7 +76,7 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
       toast.success("Gasto actualizado");
     } else {
       await addExpense(data);
-      await showAlerts(parsedAmount, sourceId);
+      await showAlerts(sourceId);
     }
 
     onOpenChange(false);
@@ -84,15 +87,14 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
     }
   }
 
-  async function showAlerts(newAmount: number, sid: string) {
+  async function showAlerts(sid: string) {
     if (!config) return;
 
     const allExpenses = await db.expenses.toArray();
     const source = sources.find((s) => s.id === sid);
 
     if (source && source.maxLimit > 0) {
-      const spent =
-        computeSpentInInterval(allExpenses, config.limitInterval, sid) + newAmount;
+      const spent = computeSpentInInterval(allExpenses, config.limitInterval, sid);
       const level = evaluateAlert(spent, source.maxLimit, config);
       const msg = getAlertMessage(level, spent, source.maxLimit);
       if (level === "danger") toast.error(`${source.name}: ${msg}`);
@@ -101,8 +103,7 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
     }
 
     if (config.totalMaxLimit > 0) {
-      const totalSpent =
-        computeSpentInInterval(allExpenses, config.limitInterval) + newAmount;
+      const totalSpent = computeSpentInInterval(allExpenses, config.limitInterval);
       const globalLevel = evaluateAlert(totalSpent, config.totalMaxLimit, config);
       const globalMsg = getAlertMessage(globalLevel, totalSpent, config.totalMaxLimit);
       if (globalLevel === "danger") toast.error(`Global: ${globalMsg}`);
@@ -133,6 +134,10 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              onBlur={() => {
+                const n = parseFloat(amount);
+                if (!Number.isNaN(n) && n > 0) setAmount(n.toFixed(2));
+              }}
               required
               autoFocus
             />
@@ -151,9 +156,22 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
 
           <div className="space-y-2">
             <Label>Fuente de pago</Label>
-            <Select value={sourceId} onValueChange={(v) => v && setSourceId(v)}>
-              <SelectTrigger>
-                <span data-slot="select-value" className={cn(!sourceId && "text-muted-foreground")}>
+            <Select
+              value={sourceId}
+              onValueChange={(v) => v && setSourceId(v)}
+              disabled={sources.length === 0}
+            >
+              <SelectTrigger
+                className="w-full min-w-0"
+                title={sourceId ? sources.find((s) => s.id === sourceId)?.name : undefined}
+              >
+                <span
+                  data-slot="select-value"
+                  className={cn(
+                    "min-w-0 flex-1 text-left",
+                    !sourceId && "text-muted-foreground"
+                  )}
+                >
                   {sourceId
                     ? sources.find((s) => s.id === sourceId)?.name ?? "Fuente"
                     : "Seleccionar fuente"}
@@ -162,12 +180,12 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
               <SelectContent>
                 {sources.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
                       <span
-                        className="size-2.5 rounded-full shrink-0"
+                        className="size-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: s.color }}
                       />
-                      {s.name}
+                      <span className="min-w-0 truncate">{s.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -195,13 +213,14 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
                 }
               >
                 <CalendarIcon className="mr-2 size-4" />
-                {date ? format(date, "PPP") : "Seleccionar fecha"}
+                {date ? format(date, "PPP", { locale: es }) : "Seleccionar fecha"}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={(d) => d && setDate(d)}
+                  locale={es}
                 />
               </PopoverContent>
             </Popover>

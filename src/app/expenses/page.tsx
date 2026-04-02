@@ -149,7 +149,10 @@ export default function ExpensesPage() {
           />
         </div>
         <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v ?? "all")}>
-          <SelectTrigger className="w-full sm:w-44">
+          <SelectTrigger
+            className="w-full sm:w-44"
+            title={sourceFilter !== "all" ? sources.find((s) => s.id === sourceFilter)?.name : undefined}
+          >
             <span data-slot="select-value">
               {sourceFilter === "all"
                 ? "Todas las fuentes"
@@ -172,7 +175,10 @@ export default function ExpensesPage() {
           </SelectContent>
         </Select>
         <Select value={tagFilter} onValueChange={(v) => setTagFilter(v ?? "all")}>
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger
+            className="w-full sm:w-40"
+            title={tagFilter !== "all" ? tags.find((t) => t.id === tagFilter)?.name : undefined}
+          >
             <span data-slot="select-value">
               {tagFilter === "all"
                 ? "Todos los tags"

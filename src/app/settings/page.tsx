@@ -7,12 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -28,10 +22,10 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { LimitIntervalSelect } from "@/components/limit-interval-select";
 import { useGlobalConfig, updateGlobalConfig } from "@/lib/db-hooks";
 import { exportDatabase, importDatabase } from "@/lib/export-import";
 import { useTheme } from "@/providers/theme-provider";
-import type { LimitInterval } from "@/lib/types";
 
 export default function SettingsPage() {
   const config = useGlobalConfig();
@@ -119,23 +113,10 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-2">
               <Label>Intervalo del límite</Label>
-              <Select
+              <LimitIntervalSelect
                 value={config.limitInterval}
-                onValueChange={(v) =>
-                  v && handleSaveConfig("limitInterval", v as LimitInterval)
-                }
-              >
-                <SelectTrigger>
-                  <span data-slot="select-value">
-                    {{ daily: "Diario", weekly: "Semanal", monthly: "Mensual" }[config.limitInterval]}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Diario</SelectItem>
-                  <SelectItem value="weekly">Semanal</SelectItem>
-                  <SelectItem value="monthly">Mensual</SelectItem>
-                </SelectContent>
-              </Select>
+                onValueChange={(v) => handleSaveConfig("limitInterval", v)}
+              />
             </div>
           </div>
 

@@ -1,12 +1,56 @@
 "use client";
 
+import { useRef, useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { Expense, Source, Tag } from "@/lib/types";
 import { formatPEN } from "@/lib/limits";
+
+function ClampedText({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [clamped, setClamped] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const check = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    setClamped(el.scrollHeight > el.clientHeight + 1);
+  }, []);
+
+  useEffect(() => {
+    check();
+    const ro = new ResizeObserver(check);
+    if (ref.current) ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, [check]);
+
+  return (
+    <div>
+      <p
+        ref={expanded ? undefined : ref}
+        className={cn(
+          "min-w-0 wrap-break-word text-sm font-medium",
+          !expanded && "line-clamp-2"
+        )}
+      >
+        {text}
+      </p>
+      {(clamped || expanded) && (
+        <button
+          type="button"
+          className="mt-0.5 text-xs text-muted-foreground underline decoration-dotted underline-offset-2 hover:text-foreground"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? "ver menos" : "ver más"}
+        </button>
+      )}
+    </div>
+  );
+}
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -45,26 +89,22 @@ export function ExpenseList({
         return (
           <div
             key={expense.id}
-            className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+            className="flex min-w-0 items-start gap-3 overflow-hidden rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
           >
             {source && (
               <div
-                className="size-2.5 rounded-full shrink-0"
+                className="size-2.5 shrink-0 rounded-full mt-1.5"
                 style={{ backgroundColor: source.color }}
               />
             )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2">
-                <span className="font-medium text-sm truncate">
-                  {expense.description || "Sin descripción"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-xs text-muted-foreground">
+            <div className="min-w-0 flex-1">
+              <ClampedText text={expense.description || "Sin descripción"} />
+              <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {format(expense.date, "dd MMM yyyy", { locale: es })}
                 </span>
                 {source && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
                     {source.name}
                   </span>
                 )}

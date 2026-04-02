@@ -1,25 +1,22 @@
 "use client";
 
 import { useMemo } from "react";
+import { toast } from "sonner";
 import { TrendingUp, Receipt, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LimitIntervalSelect } from "@/components/limit-interval-select";
 import {
   useSources,
   useTags,
   useExpensesInInterval,
   useGlobalConfig,
+  updateGlobalConfig,
 } from "@/lib/db-hooks";
 import { formatPEN } from "@/lib/limits";
 import { GlobalLimitGauge } from "@/components/charts/global-limit-gauge";
 import { SpendingBySource } from "@/components/charts/spending-by-source";
 import { SpendingByTag } from "@/components/charts/spending-by-tag";
 import { SpendingTrend } from "@/components/charts/spending-trend";
-
-const INTERVAL_LABELS = {
-  daily: "hoy",
-  weekly: "esta semana",
-  monthly: "este mes",
-} as const;
 
 export default function DashboardPage() {
   const config = useGlobalConfig();
@@ -56,8 +53,18 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          Resumen de gastos {INTERVAL_LABELS[interval]}
+        <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5">
+          <span>Resumen de gastos</span>
+          <LimitIntervalSelect
+            variant="inline"
+            value={interval}
+            disabled={!config}
+            onValueChange={async (v) => {
+              if (!config) return;
+              await updateGlobalConfig({ limitInterval: v });
+              toast.success("Configuración guardada");
+            }}
+          />
         </p>
       </div>
 

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SonnerToaster } from "@/components/sonner-toaster";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { DbProvider } from "@/providers/db-provider";
 import { AppShell } from "@/components/layout/app-shell";
@@ -57,7 +57,7 @@ export default function RootLayout({
               </ServiceWorkerProvider>
             </DbProvider>
           </TooltipProvider>
-          <Toaster richColors position="top-right" />
+          <SonnerToaster />
         </ThemeProvider>
       </body>
     </html>
