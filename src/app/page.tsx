@@ -1,65 +1,119 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useMemo } from "react";
+import { TrendingUp, Receipt, Wallet } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  useSources,
+  useTags,
+  useExpensesInInterval,
+  useGlobalConfig,
+} from "@/lib/db-hooks";
+import { formatPEN } from "@/lib/limits";
+import { GlobalLimitGauge } from "@/components/charts/global-limit-gauge";
+import { SpendingBySource } from "@/components/charts/spending-by-source";
+import { SpendingByTag } from "@/components/charts/spending-by-tag";
+import { SpendingTrend } from "@/components/charts/spending-trend";
+
+const INTERVAL_LABELS = {
+  daily: "hoy",
+  weekly: "esta semana",
+  monthly: "este mes",
+} as const;
+
+export default function DashboardPage() {
+  const config = useGlobalConfig();
+  const interval = config?.limitInterval ?? "monthly";
+  const expenses = useExpensesInInterval(interval);
+  const sources = useSources();
+  const tags = useTags();
+
+  const stats = useMemo(() => {
+    const total = expenses.reduce((s, e) => s + e.amount, 0);
+    const count = expenses.length;
+    const avgPerExpense = count > 0 ? total / count : 0;
+
+    const bySource = new Map<string, number>();
+    expenses.forEach((e) => {
+      bySource.set(e.sourceId, (bySource.get(e.sourceId) ?? 0) + e.amount);
+    });
+
+    let topSourceId = "";
+    let topAmount = 0;
+    bySource.forEach((amount, id) => {
+      if (amount > topAmount) {
+        topAmount = amount;
+        topSourceId = id;
+      }
+    });
+
+    const topSource = sources.find((s) => s.id === topSourceId);
+
+    return { total, count, avgPerExpense, topSource, topAmount };
+  }, [expenses, sources]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">
+          Resumen de gastos {INTERVAL_LABELS[interval]}
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <GlobalLimitGauge expenses={expenses} config={config} />
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Transacciones</CardTitle>
+            <Receipt className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.count}</div>
+            <p className="text-xs text-muted-foreground">
+              Promedio: {formatPEN(stats.avgPerExpense)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Top Fuente</CardTitle>
+            <Wallet className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-bold truncate">
+              {stats.topSource?.name ?? "—"}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {stats.topAmount > 0 ? formatPEN(stats.topAmount) : "Sin gastos"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Fuentes Activas</CardTitle>
+            <TrendingUp className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {new Set(expenses.map((e) => e.sourceId)).size}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              de {sources.length} configuradas
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SpendingBySource expenses={expenses} sources={sources} />
+        <SpendingByTag expenses={expenses} tags={tags} />
+      </div>
+
+      <SpendingTrend expenses={expenses} />
     </div>
   );
 }
