@@ -52,7 +52,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Inicio</h1>
         <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5">
           <span>Resumen de gastos</span>
           <LimitIntervalSelect
@@ -101,7 +101,9 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Fuentes Activas</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Fuentes Activas
+            </CardTitle>
             <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

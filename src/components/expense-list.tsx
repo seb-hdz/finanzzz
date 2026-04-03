@@ -56,8 +56,8 @@ interface ExpenseListProps {
   expenses: Expense[];
   sources: Source[];
   tags: Tag[];
-  onEdit: (expense: Expense) => void;
-  onDelete: (expense: Expense) => void;
+  onEdit?: (expense: Expense) => void;
+  onDelete?: (expense: Expense) => void;
 }
 
 export function ExpenseList({
@@ -123,24 +123,26 @@ export function ExpenseList({
             <span className="font-semibold text-sm whitespace-nowrap">
               {formatPEN(expense.amount)}
             </span>
-            <div className="flex gap-0.5 shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7"
-                onClick={() => onEdit(expense)}
-              >
-                <Pencil className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 text-destructive"
-                onClick={() => onDelete(expense)}
-              >
-                <Trash2 className="size-3" />
-              </Button>
-            </div>
+            {onEdit && onDelete ? (
+              <div className="flex gap-0.5 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7"
+                  onClick={() => onEdit(expense)}
+                >
+                  <Pencil className="size-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 text-destructive"
+                  onClick={() => onDelete(expense)}
+                >
+                  <Trash2 className="size-3" />
+                </Button>
+              </div>
+            ) : null}
           </div>
         );
       })}

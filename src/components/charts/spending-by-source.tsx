@@ -11,6 +11,13 @@ import {
   Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  chartBarCursor,
+  chartTooltipContentStyle,
+  chartTooltipItemStyle,
+  chartTooltipLabelStyle,
+  chartTooltipWrapperStyle,
+} from "@/components/charts/chart-theme";
 import type { Expense, Source } from "@/lib/types";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 
@@ -54,20 +61,31 @@ export function SpendingBySource({ expenses, sources }: Props) {
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--border)"
+              opacity={0.45}
+            />
             <XAxis
               type="number"
               tickFormatter={(v) => `${CURRENCY_SYMBOL}${v}`}
-              fontSize={11}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+              axisLine={{ stroke: "var(--border)" }}
             />
             <YAxis
               type="category"
               dataKey="name"
               width={100}
-              fontSize={11}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
               tickLine={false}
+              axisLine={{ stroke: "var(--border)" }}
             />
             <Tooltip
+              contentStyle={chartTooltipContentStyle}
+              labelStyle={chartTooltipLabelStyle}
+              itemStyle={chartTooltipItemStyle}
+              wrapperStyle={chartTooltipWrapperStyle}
+              cursor={chartBarCursor}
               formatter={(value) => [`${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`, "Monto"]}
             />
             <Bar dataKey="amount" radius={[0, 4, 4, 0]}>

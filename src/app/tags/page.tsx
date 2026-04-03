@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,14 +47,14 @@ export default function TagsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Tags</h1>
           <p className="text-sm text-muted-foreground">
             Etiquetas para categorizar tus gastos
           </p>
         </div>
-        <Button onClick={handleNew} size="sm">
+        <Button className="mt-2 md:mt-0" onClick={handleNew} size="sm">
           <Plus className="size-4 mr-1" />
           Nuevo
         </Button>
@@ -67,21 +67,14 @@ export default function TagsPage() {
           </h2>
           <div className="flex flex-wrap gap-x-1 gap-y-2">
             {predefined.map((tag) => (
-              <div key={tag.id} className="group flex items-center">
-                <Badge
-                  className="text-white cursor-pointer"
-                  style={{ backgroundColor: tag.color }}
-                  onClick={() => handleEdit(tag)}
-                >
-                  {tag.name}
-                </Badge>
-                <button
-                  onClick={() => handleEdit(tag)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Pencil className="size-3 text-muted-foreground hover:text-foreground" />
-                </button>
-              </div>
+              <Badge
+                key={tag.id}
+                className="text-white cursor-pointer"
+                style={{ backgroundColor: tag.color }}
+                onClick={() => handleEdit(tag)}
+              >
+                {tag.name}
+              </Badge>
             ))}
           </div>
         </div>
@@ -96,25 +89,16 @@ export default function TagsPage() {
             No hay tags personalizados. Crea uno para empezar.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-x-1 gap-y-2">
             {custom.map((tag) => (
-              <div key={tag.id} className="group flex items-center gap-1">
-                <Badge
-                  className="text-white cursor-pointer"
-                  style={{ backgroundColor: tag.color }}
-                  onClick={() => handleEdit(tag)}
-                >
-                  {tag.name}
-                </Badge>
-                <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleEdit(tag)}>
-                    <Pencil className="size-3 text-muted-foreground hover:text-foreground" />
-                  </button>
-                  <button onClick={() => setDeleting(tag)}>
-                    <Trash2 className="size-3 text-muted-foreground hover:text-destructive" />
-                  </button>
-                </div>
-              </div>
+              <Badge
+                key={tag.id}
+                className="text-white cursor-pointer"
+                style={{ backgroundColor: tag.color }}
+                onClick={() => handleEdit(tag)}
+              >
+                {tag.name}
+              </Badge>
             ))}
           </div>
         )}
@@ -125,6 +109,14 @@ export default function TagsPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         tag={editing}
+        onDeleteRequest={
+          editing && !editing.isPredefined
+            ? () => {
+                setDeleting(editing);
+                setFormOpen(false);
+              }
+            : undefined
+        }
       />
 
       <AlertDialog

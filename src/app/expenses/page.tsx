@@ -54,7 +54,10 @@ function getRange(period: Period) {
         end: endOfWeek(now, { weekStartsOn: 1 }).getTime(),
       };
     case "monthly":
-      return { start: startOfMonth(now).getTime(), end: endOfMonth(now).getTime() };
+      return {
+        start: startOfMonth(now).getTime(),
+        end: endOfMonth(now).getTime(),
+      };
   }
 }
 
@@ -113,7 +116,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gastos</h1>
           <p className="text-sm text-muted-foreground">
@@ -121,20 +124,23 @@ export default function ExpensesPage() {
             {formatPEN(total)}
           </p>
         </div>
-        <Button onClick={handleNew} size="sm">
+        <Button className="mt-2 md:mt-0" onClick={handleNew} size="sm">
           <Plus className="size-4 mr-1" />
           Nuevo
         </Button>
       </div>
 
-      <Tabs
-        value={period}
-        onValueChange={(v) => setPeriod(v as Period)}
-      >
+      <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
         <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="daily" className="flex-1 sm:flex-none">Hoy</TabsTrigger>
-          <TabsTrigger value="weekly" className="flex-1 sm:flex-none">Semana</TabsTrigger>
-          <TabsTrigger value="monthly" className="flex-1 sm:flex-none">Mes</TabsTrigger>
+          <TabsTrigger value="daily" className="flex-1 sm:flex-none">
+            Hoy
+          </TabsTrigger>
+          <TabsTrigger value="weekly" className="flex-1 sm:flex-none">
+            Semana
+          </TabsTrigger>
+          <TabsTrigger value="monthly" className="flex-1 sm:flex-none">
+            Mes
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -148,10 +154,17 @@ export default function ExpensesPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v ?? "all")}>
+        <Select
+          value={sourceFilter}
+          onValueChange={(v) => setSourceFilter(v ?? "all")}
+        >
           <SelectTrigger
             className="w-full sm:w-44"
-            title={sourceFilter !== "all" ? sources.find((s) => s.id === sourceFilter)?.name : undefined}
+            title={
+              sourceFilter !== "all"
+                ? sources.find((s) => s.id === sourceFilter)?.name
+                : undefined
+            }
           >
             <span data-slot="select-value">
               {sourceFilter === "all"
@@ -174,10 +187,17 @@ export default function ExpensesPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={tagFilter} onValueChange={(v) => setTagFilter(v ?? "all")}>
+        <Select
+          value={tagFilter}
+          onValueChange={(v) => setTagFilter(v ?? "all")}
+        >
           <SelectTrigger
             className="w-full sm:w-40"
-            title={tagFilter !== "all" ? tags.find((t) => t.id === tagFilter)?.name : undefined}
+            title={
+              tagFilter !== "all"
+                ? tags.find((t) => t.id === tagFilter)?.name
+                : undefined
+            }
           >
             <span data-slot="select-value">
               {tagFilter === "all"
@@ -211,7 +231,10 @@ export default function ExpensesPage() {
         expense={editing}
       />
 
-      <AlertDialog open={!!deleting} onOpenChange={() => setDeleting(undefined)}>
+      <AlertDialog
+        open={!!deleting}
+        onOpenChange={() => setDeleting(undefined)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar gasto?</AlertDialogTitle>
@@ -222,7 +245,9 @@ export default function ExpensesPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Eliminar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>
+              Eliminar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

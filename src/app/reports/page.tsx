@@ -98,7 +98,7 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reportes</h1>
           <p className="text-sm text-muted-foreground">
@@ -106,6 +106,7 @@ export default function ReportsPage() {
           </p>
         </div>
         <Button
+          className="mt-2 md:mt-0"
           onClick={handleExportPDF}
           size="sm"
           disabled={filtered.length === 0}
@@ -240,13 +241,7 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <ExpenseList
-        expenses={filtered}
-        sources={sources}
-        tags={tags}
-        onEdit={() => {}}
-        onDelete={() => {}}
-      />
+      <ExpenseList expenses={filtered} sources={sources} tags={tags} />
     </div>
   );
 }

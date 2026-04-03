@@ -2,30 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Receipt,
-  Wallet,
-  Tags,
-  Settings,
-  FileText,
-  Moon,
-  Sun,
-  BadgeDollarSign,
-} from "lucide-react";
+import { Moon, Sun, BadgeDollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/expenses", label: "Gastos", icon: Receipt },
-  { href: "/sources", label: "Fuentes", icon: Wallet },
-  { href: "/tags", label: "Tags", icon: Tags },
-  { href: "/reports", label: "Reportes", icon: FileText },
-  { href: "/settings", label: "Ajustes", icon: Settings },
-];
+import { NAV_ITEMS } from "./nav-config";
 
 export function Sidebar() {
   const pathname = usePathname();

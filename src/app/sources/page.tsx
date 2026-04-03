@@ -56,14 +56,14 @@ export default function SourcesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Fuentes de Pago</h1>
           <p className="text-sm text-muted-foreground">
             Administra tus cuentas, tarjetas y métodos de pago
           </p>
         </div>
-        <Button onClick={handleNew} size="sm">
+        <Button className="mt-2 md:mt-0" onClick={handleNew} size="sm">
           <Plus className="size-4 mr-1" />
           Nueva
         </Button>
@@ -98,17 +98,23 @@ export default function SourcesPage() {
         source={editing}
       />
 
-      <AlertDialog open={!!deleting} onOpenChange={() => setDeleting(undefined)}>
+      <AlertDialog
+        open={!!deleting}
+        onOpenChange={() => setDeleting(undefined)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar fuente?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminará &quot;{deleting?.name}&quot;. Esta acción no se puede deshacer.
+              Se eliminará &quot;{deleting?.name}&quot;. Esta acción no se puede
+              deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Eliminar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>
+              Eliminar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -20,9 +20,16 @@ interface TagFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tag?: Tag;
+  /** Shown below the footer when editing a custom (non-predefined) tag */
+  onDeleteRequest?: () => void;
 }
 
-export function TagForm({ open, onOpenChange, tag }: TagFormProps) {
+export function TagForm({
+  open,
+  onOpenChange,
+  tag,
+  onDeleteRequest,
+}: TagFormProps) {
   const [name, setName] = useState(tag?.name ?? "");
   const [color, setColor] = useState(tag?.color ?? PRESET_COLORS[4]);
 
@@ -83,12 +90,42 @@ export function TagForm({ open, onOpenChange, tag }: TagFormProps) {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit">{isEditing ? "Guardar" : "Crear"}</Button>
-          </DialogFooter>
+          {tag && !tag.isPredefined && onDeleteRequest ? (
+            <DialogFooter className="flex flex-col gap-2 sm:flex-col">
+              <div className="flex w-full flex-row gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-w-0 flex-1"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" className="min-w-0 flex-1">
+                  {isEditing ? "Guardar" : "Crear"}
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full border-destructive bg-destructive/20 text-destructive",
+                  "hover:border-destructive hover:bg-destructive/30 hover:text-destructive",
+                  "dark:bg-destructive/35 dark:hover:bg-destructive/45"
+                )}
+                onClick={onDeleteRequest}
+              >
+                Eliminar tag
+              </Button>
+            </DialogFooter>
+          ) : (
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">{isEditing ? "Guardar" : "Crear"}</Button>
+            </DialogFooter>
+          )}
         </form>
       </DialogContent>
     </Dialog>

@@ -2,6 +2,12 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  chartTooltipContentStyle,
+  chartTooltipItemStyle,
+  chartTooltipLabelStyle,
+  chartTooltipWrapperStyle,
+} from "@/components/charts/chart-theme";
 import type { Expense, Tag } from "@/lib/types";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 
@@ -64,18 +70,28 @@ export function SpendingByTag({ expenses, tags }: Props) {
               innerRadius={50}
               outerRadius={90}
               paddingAngle={2}
+              stroke="none"
             >
               {data.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip
+              contentStyle={chartTooltipContentStyle}
+              labelStyle={chartTooltipLabelStyle}
+              itemStyle={chartTooltipItemStyle}
+              wrapperStyle={chartTooltipWrapperStyle}
               formatter={(value) => [`${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`, "Monto"]}
             />
             <Legend
               verticalAlign="bottom"
               height={36}
-              formatter={(value) => <span className="text-xs">{value}</span>}
+              wrapperStyle={{ color: "var(--foreground)" }}
+              labelStyle={{ color: "var(--foreground)" }}
+              inactiveColor="var(--muted-foreground)"
+              formatter={(value) => (
+                <span className="text-xs text-foreground">{value}</span>
+              )}
             />
           </PieChart>
         </ResponsiveContainer>

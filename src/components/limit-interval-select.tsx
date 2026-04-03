@@ -54,11 +54,16 @@ export function LimitIntervalSelect({
         size={variant === "inline" ? "sm" : "default"}
         className={
           variant === "inline"
-            ? "h-auto min-h-0 w-fit max-w-[min(100%,12rem)] border-0 bg-transparent px-0 py-0 shadow-none hover:bg-transparent focus-visible:border-transparent focus-visible:ring-0 data-[size=sm]:h-auto gap-0.5 text-muted-foreground underline decoration-dotted underline-offset-2 hover:text-foreground"
+            ? "group h-auto min-h-0 w-fit max-w-[min(100%,12rem)] border-0 bg-transparent px-0 py-0 shadow-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent focus-visible:border-transparent focus-visible:ring-0 data-[size=sm]:h-auto gap-0.5"
             : undefined
         }
       >
-        <span data-slot="select-value">{labels[value]}</span>
+        <span
+          data-slot="select-value"
+          className="text-muted-foreground underline decoration-dotted underline-offset-2 transition-colors duration-200 ease-out group-hover:text-foreground"
+        >
+          {labels[value]}
+        </span>
       </SelectTrigger>
       <SelectContent>
         {LIMIT_INTERVALS.map((key) => (

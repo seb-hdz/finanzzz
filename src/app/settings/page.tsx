@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-import { Download, Upload, Moon, Sun } from "lucide-react";
+import { Download, Upload, Moon, Sun, BadgeDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ import { LimitIntervalSelect } from "@/components/limit-interval-select";
 import { useGlobalConfig, updateGlobalConfig } from "@/lib/db-hooks";
 import { exportDatabase, importDatabase } from "@/lib/export-import";
 import { useTheme } from "@/providers/theme-provider";
+import { Logo } from "@/components/logo";
 
 export default function SettingsPage() {
   const config = useGlobalConfig();
@@ -51,7 +52,9 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `finanzzz-backup-${new Date().toISOString().slice(0, 10)}.finanzzz`;
+      a.download = `finanzzz-backup-${new Date()
+        .toISOString()
+        .slice(0, 10)}.finanzzz`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Base de datos exportada");
@@ -85,7 +88,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Ajustes</h1>
         <p className="text-sm text-muted-foreground">
-          Configuración global de la aplicación
+          Configuración de Finanzzz
         </p>
       </div>
 
@@ -104,7 +107,9 @@ export default function SettingsPage() {
                 type="number"
                 step="0.01"
                 placeholder="Sin límite"
-                defaultValue={config.totalMaxLimit > 0 ? config.totalMaxLimit : ""}
+                defaultValue={
+                  config.totalMaxLimit > 0 ? config.totalMaxLimit : ""
+                }
                 onBlur={(e) => {
                   const val = e.target.value ? parseFloat(e.target.value) : -1;
                   handleSaveConfig("totalMaxLimit", val);
@@ -165,8 +170,14 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <Button variant="outline" onClick={toggle} className="gap-2">
-            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            {theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+            {theme === "dark" ? (
+              <Sun className="size-4" />
+            ) : (
+              <Moon className="size-4" />
+            )}
+            {theme === "dark"
+              ? "Cambiar a modo claro"
+              : "Cambiar a modo oscuro"}
           </Button>
         </CardContent>
       </Card>
@@ -179,16 +190,31 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => setExportOpen(true)} className="gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setExportOpen(true)}
+            className="gap-2"
+          >
             <Download className="size-4" />
             Exportar
           </Button>
-          <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setImportOpen(true)}
+            className="gap-2"
+          >
             <Upload className="size-4" />
             Importar
           </Button>
         </CardContent>
       </Card>
+
+      <div className="mt-12 flex justify-center md:hidden">
+        <div className="flex items-center gap-2 text-muted-foreground opacity-50">
+          <BadgeDollarSign className="size-8 shrink-0 opacity-80" />
+          <Logo muted />
+        </div>
+      </div>
 
       <Dialog open={exportOpen} onOpenChange={setExportOpen}>
         <DialogContent className="sm:max-w-sm">

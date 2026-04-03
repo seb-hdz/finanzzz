@@ -10,6 +10,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  chartLineTooltipCursor,
+  chartTooltipContentStyle,
+  chartTooltipItemStyle,
+  chartTooltipLabelStyle,
+  chartTooltipWrapperStyle,
+} from "@/components/charts/chart-theme";
 import { format, eachDayOfInterval, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Expense } from "@/lib/types";
@@ -52,14 +59,29 @@ export function SpendingTrend({ expenses }: Props) {
         ) : (
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis dataKey="date" fontSize={11} tickLine={false} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border)"
+                opacity={0.45}
+              />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                tickLine={false}
+                axisLine={{ stroke: "var(--border)" }}
+              />
               <YAxis
                 tickFormatter={(v) => `${CURRENCY_SYMBOL}${v}`}
-                fontSize={11}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
                 tickLine={false}
+                axisLine={{ stroke: "var(--border)" }}
               />
               <Tooltip
+                contentStyle={chartTooltipContentStyle}
+                labelStyle={chartTooltipLabelStyle}
+                itemStyle={chartTooltipItemStyle}
+                wrapperStyle={chartTooltipWrapperStyle}
+                cursor={chartLineTooltipCursor}
                 formatter={(value) => [
                   `${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`,
                   "Gasto",
@@ -68,10 +90,15 @@ export function SpendingTrend({ expenses }: Props) {
               <Line
                 type="monotone"
                 dataKey="amount"
-                stroke="hsl(var(--primary))"
+                stroke="var(--primary)"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4 }}
+                activeDot={{
+                  r: 4,
+                  fill: "var(--primary)",
+                  stroke: "var(--background)",
+                  strokeWidth: 2,
+                }}
               />
             </LineChart>
           </ResponsiveContainer>

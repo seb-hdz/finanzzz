@@ -128,3 +128,82 @@
     @apply font-sans;
   }
 }
+
+/* Main area: stagger top-level sections (page root → space-y-6 → rows/cards). */
+@keyframes page-section-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.625rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter-stagger > * > * {
+  animation: page-section-enter 0.48s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.page-enter-stagger > * > *:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.page-enter-stagger > * > *:nth-child(2) {
+  animation-delay: 0.075s;
+}
+.page-enter-stagger > * > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.page-enter-stagger > * > *:nth-child(4) {
+  animation-delay: 0.165s;
+}
+.page-enter-stagger > * > *:nth-child(5) {
+  animation-delay: 0.21s;
+}
+.page-enter-stagger > * > *:nth-child(6) {
+  animation-delay: 0.255s;
+}
+.page-enter-stagger > * > *:nth-child(7) {
+  animation-delay: 0.3s;
+}
+.page-enter-stagger > * > *:nth-child(8) {
+  animation-delay: 0.345s;
+}
+.page-enter-stagger > * > *:nth-child(9) {
+  animation-delay: 0.39s;
+}
+.page-enter-stagger > * > *:nth-child(10) {
+  animation-delay: 0.435s;
+}
+.page-enter-stagger > * > *:nth-child(11) {
+  animation-delay: 0.48s;
+}
+.page-enter-stagger > * > *:nth-child(12) {
+  animation-delay: 0.525s;
+}
+.page-enter-stagger > * > *:nth-child(13) {
+  animation-delay: 0.57s;
+}
+.page-enter-stagger > * > *:nth-child(14) {
+  animation-delay: 0.615s;
+}
+.page-enter-stagger > * > *:nth-child(15) {
+  animation-delay: 0.66s;
+}
+.page-enter-stagger > * > *:nth-child(16) {
+  animation-delay: 0.705s;
+}
+.page-enter-stagger > * > *:nth-child(17) {
+  animation-delay: 0.75s;
+}
+.page-enter-stagger > * > *:nth-child(18) {
+  animation-delay: 0.795s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-stagger > * > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
