@@ -26,7 +26,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useSources, useTags, useGlobalConfig, addExpense, updateExpense } from "@/lib/db-hooks";
+import {
+  useSources,
+  useTags,
+  useGlobalConfig,
+  addExpense,
+  updateExpense,
+  useSharedSyncState,
+  isSharedSourceLinked,
+} from "@/lib/db-hooks";
 import { computeSpentInInterval, evaluateAlert, getAlertMessage } from "@/lib/limits";
 import { db } from "@/lib/db";
 import type { Expense } from "@/lib/types";
@@ -50,7 +58,15 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(expense?.tagIds ?? []);
   const [date, setDate] = useState<Date>(expense ? new Date(expense.date) : new Date());
 
+  const sharedSync = useSharedSyncState(sourceId || undefined);
+
   const isEditing = !!expense;
+
+  const selectedSource = sources.find((s) => s.id === sourceId);
+  const sharedBlocked =
+    !isEditing &&
+    selectedSource?.type === "shared" &&
+    !isSharedSourceLinked(sharedSync ?? undefined);
 
   function toggleTag(tagId: string) {
     setSelectedTags((prev) =>
@@ -62,6 +78,12 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
     e.preventDefault();
     const parsedAmount = parseFloat(amount);
     if (!parsedAmount || parsedAmount <= 0 || !sourceId) return;
+    if (sharedBlocked) {
+      toast.error(
+        "Vincula la fuente compartida (envía y recibe una actualización) antes de registrar gastos."
+      );
+      return;
+    }
 
     const data = {
       amount: parsedAmount,
@@ -180,12 +202,12 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
               <SelectContent>
                 {sources.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
                       <span
                         className="size-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: s.color }}
                       />
-                      <span className="min-w-0 truncate">{s.name}</span>
+                      <span className="min-w-0 break-words">{s.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -194,6 +216,12 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
             {sources.length === 0 && (
               <p className="text-xs text-destructive">
                 Primero crea una fuente de pago en la sección Fuentes.
+              </p>
+            )}
+            {sharedBlocked && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                Esta fuente compartida aún no está vinculada en este dispositivo. Ve a Fuentes →
+                Fuentes compartidas, sincroniza con la otra persona y vuelve aquí.
               </p>
             )}
           </div>
@@ -254,7 +282,7 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={sources.length === 0}>
+            <Button type="submit" disabled={sources.length === 0 || sharedBlocked}>
               {isEditing ? "Guardar" : "Registrar"}
             </Button>
           </DialogFooter>

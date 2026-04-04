@@ -1,8 +1,15 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "./db";
-import type { Expense, GlobalConfig, LimitInterval, Source, Tag } from "./types";
+import { createDefaultSharedSyncState, db } from "./db";
+import type {
+  Expense,
+  GlobalConfig,
+  LimitInterval,
+  SharedSourceSync,
+  Source,
+  Tag,
+} from "./types";
 import {
   startOfDay,
   endOfDay,
@@ -26,6 +33,43 @@ export function useTags() {
 
 export function useGlobalConfig(): GlobalConfig | undefined {
   return useLiveQuery(() => db.config.get("global"));
+}
+
+export function useSharedSyncState(sourceId: string | undefined) {
+  return useLiveQuery(
+    () => (sourceId ? db.sharedSync.get(sourceId) : undefined),
+    [sourceId]
+  );
+}
+
+export function isSharedSourceLinked(sync: SharedSourceSync | undefined): boolean {
+  return !!sync && sync.emissions.length >= 1 && sync.updates.length >= 1;
+}
+
+/**
+ * Count of local expenses for this shared source not yet included in any successful
+ * outbound sync (`emittedExpenseIds`). Only meaningful when the source is linked.
+ */
+export function useSharedSourcePendingOutboundCount(
+  sourceId: string | undefined,
+  linked: boolean
+) {
+  return (
+    useLiveQuery(async () => {
+      if (!sourceId || !linked) return 0;
+      const sync = await db.sharedSync.get(sourceId);
+      const emitted = new Set(sync?.emittedExpenseIds ?? []);
+      const exps = await db.expenses
+        .where("sourceId")
+        .equals(sourceId)
+        .toArray();
+      let n = 0;
+      for (const e of exps) {
+        if (!emitted.has(e.id)) n += 1;
+      }
+      return n;
+    }, [sourceId, linked]) ?? 0
+  );
 }
 
 function getIntervalRange(interval: LimitInterval, refDate: Date = new Date()) {
@@ -53,7 +97,7 @@ export function useExpenses(filters?: {
 }) {
   return (
     useLiveQuery(() => {
-      let collection = db.expenses.orderBy("date").reverse();
+      const collection = db.expenses.orderBy("date").reverse();
 
       return collection.toArray().then((expenses) => {
         let result = expenses;
@@ -158,15 +202,45 @@ export async function deleteExpense(id: string) {
 
 export async function addSource(source: Omit<Source, "id" | "createdAt">) {
   const { v4: uuid } = await import("uuid");
-  return db.sources.add({
+  const id = uuid();
+  await db.sources.add({
     ...source,
-    id: uuid(),
+    id,
     createdAt: Date.now(),
   });
+  if (source.type === "shared") {
+    await db.sharedSync.put(createDefaultSharedSyncState(id));
+  }
+  return id;
 }
 
 export async function updateSource(id: string, data: Partial<Source>) {
-  return db.sources.update(id, data);
+  const prev = await db.sources.get(id);
+  if (!prev) return;
+
+  const mergedType = data.type ?? prev.type;
+  const sharedPublicId =
+    mergedType === "shared"
+      ? data.sharedPublicId !== undefined
+        ? data.sharedPublicId
+        : prev.sharedPublicId
+      : undefined;
+
+  await db.sources.put({
+    ...prev,
+    ...data,
+    sharedPublicId,
+  });
+
+  if (prev.type === "shared" && mergedType !== "shared") {
+    await db.sharedSync.delete(id);
+  }
+  if (mergedType === "shared" && prev.type !== "shared") {
+    const row = await db.sharedSync.get(id);
+    if (!row) {
+      await db.sharedSync.put(createDefaultSharedSyncState(id));
+    }
+  }
 }
 
 export async function deleteSource(id: string) {
@@ -176,7 +250,22 @@ export async function deleteSource(id: string) {
       `No se puede eliminar: hay ${expenses} gasto(s) asociado(s) a esta fuente.`
     );
   }
+  await db.sharedSync.delete(id);
   return db.sources.delete(id);
+}
+
+export async function setSharedSourceOutboundPassword(
+  sourceId: string,
+  password: string,
+  locked: boolean
+) {
+  const row =
+    (await db.sharedSync.get(sourceId)) ?? createDefaultSharedSyncState(sourceId);
+  await db.sharedSync.put({
+    ...row,
+    outboundPassword: password,
+    outboundPasswordLocked: locked,
+  });
 }
 
 export async function addTag(tag: Omit<Tag, "id">) {

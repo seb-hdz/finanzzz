@@ -176,9 +176,9 @@ export default function ExpensesPage() {
             <SelectItem value="all">Todas las fuentes</SelectItem>
             {sources.map((s) => (
               <SelectItem key={s.id} value={s.id}>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="size-2 rounded-full"
+                <div className="flex items-start gap-2">
+                  <div
+                    className="size-2 rounded-full block"
                     style={{ backgroundColor: s.color }}
                   />
                   {s.name}

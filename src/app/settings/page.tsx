@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Download, Upload, Moon, Sun, BadgeDollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -161,6 +162,26 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <Label>Umbral “sync antigua” (horas)</Label>
+            <Input
+              type="number"
+              min="1"
+              max="8760"
+              defaultValue={config.sharedStaleHours ?? 168}
+              onBlur={(e) => {
+                const val = parseInt(e.target.value, 10) || 168;
+                handleSaveConfig("sharedStaleHours", val);
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              En Fuentes compartidas, avisa si no recibes una actualización del otro dispositivo
+              en este tiempo (por defecto 7 días).
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -184,9 +205,19 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Base de Datos</CardTitle>
+          <CardTitle className="flex flex-wrap items-center gap-2">
+            Base de Datos
+            <Badge
+              variant="outline"
+              className="h-5 border-muted-foreground/35 px-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+            >
+              BETA
+            </Badge>
+          </CardTitle>
           <CardDescription>
-            Exporta o importa tu base de datos para mover entre dispositivos
+            Exporta o importa tu base de datos para mover entre dispositivos. El respaldo
+            incluye fuentes, gastos, etiquetas, ajustes y el estado de sincronización de
+            fuentes compartidas (independiente de los enlaces URL entre pares).
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -221,7 +252,7 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle>Exportar Base de Datos</DialogTitle>
             <DialogDescription>
-              Ingresa una contraseña para encriptar el archivo de respaldo.
+              Ingresa una contraseña para encriptar el archivo de respaldo (formato versión 2).
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">

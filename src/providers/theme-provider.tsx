@@ -13,16 +13,19 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+function readInitialTheme(): Theme {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+  const stored = localStorage.getItem("finanzzz-theme") as Theme | null;
+  const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+  return stored ?? preferred;
+}
 
-  useEffect(() => {
-    const stored = localStorage.getItem("finanzzz-theme") as Theme | null;
-    const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-    setTheme(stored ?? preferred);
-  }, []);
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(readInitialTheme);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

@@ -1,22 +1,5 @@
 import { db } from "./db";
-
-async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(password),
-    "PBKDF2",
-    false,
-    ["deriveKey"]
-  );
-  return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt: salt.buffer as ArrayBuffer, iterations: 100_000, hash: "SHA-256" },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"]
-  );
-}
+import { decryptBinaryWithPassword, encryptBinaryWithPassword } from "./crypto-blob";
 
 export async function exportDatabase(password: string): Promise<Blob> {
   const data = {
@@ -24,51 +7,28 @@ export async function exportDatabase(password: string): Promise<Blob> {
     expenses: await db.expenses.toArray(),
     tags: await db.tags.toArray(),
     config: await db.config.toArray(),
+    sharedSync: await db.sharedSync.toArray(),
     exportedAt: Date.now(),
-    version: 1,
+    version: 2,
   };
 
   const json = JSON.stringify(data);
   const encoder = new TextEncoder();
   const plaintext = encoder.encode(json);
 
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveKey(password, salt);
-
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    plaintext
-  );
-
-  const payload = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
-  payload.set(salt, 0);
-  payload.set(iv, salt.length);
-  payload.set(new Uint8Array(ciphertext), salt.length + iv.length);
-
-  return new Blob([payload], { type: "application/octet-stream" });
+  const payload = await encryptBinaryWithPassword(plaintext, password);
+  return new Blob([payload.slice()], { type: "application/octet-stream" });
 }
 
 export async function importDatabase(file: File, password: string): Promise<void> {
   const buffer = await file.arrayBuffer();
   const payload = new Uint8Array(buffer);
 
-  const salt = payload.slice(0, 16);
-  const iv = payload.slice(16, 28);
-  const ciphertext = payload.slice(28);
-
-  const key = await deriveKey(password, salt);
-
-  let plaintext: ArrayBuffer;
+  let plaintext: Uint8Array;
   try {
-    plaintext = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
-      key,
-      ciphertext
-    );
-  } catch {
-    throw new Error("Contraseña incorrecta o archivo corrupto.");
+    plaintext = await decryptBinaryWithPassword(payload, password);
+  } catch (e) {
+    throw e instanceof Error ? e : new Error("Error al descifrar.");
   }
 
   const decoder = new TextDecoder();
@@ -78,16 +38,29 @@ export async function importDatabase(file: File, password: string): Promise<void
   if (!data.version || !data.sources || !data.expenses || !data.tags || !data.config) {
     throw new Error("Formato de archivo inválido.");
   }
+  if (data.version !== 1 && data.version !== 2) {
+    throw new Error("Versión de respaldo no soportada.");
+  }
 
-  await db.transaction("rw", db.sources, db.expenses, db.tags, db.config, async () => {
-    await db.sources.clear();
-    await db.expenses.clear();
-    await db.tags.clear();
-    await db.config.clear();
+  const sharedSyncRows = Array.isArray(data.sharedSync) ? data.sharedSync : [];
 
-    await db.sources.bulkAdd(data.sources);
-    await db.expenses.bulkAdd(data.expenses);
-    await db.tags.bulkAdd(data.tags);
-    await db.config.bulkAdd(data.config);
-  });
+  await db.transaction(
+    "rw",
+    [db.sources, db.expenses, db.tags, db.config, db.sharedSync],
+    async () => {
+      await db.sources.clear();
+      await db.expenses.clear();
+      await db.tags.clear();
+      await db.config.clear();
+      await db.sharedSync.clear();
+
+      await db.sources.bulkAdd(data.sources);
+      await db.expenses.bulkAdd(data.expenses);
+      await db.tags.bulkAdd(data.tags);
+      await db.config.bulkAdd(data.config);
+      if (sharedSyncRows.length > 0) {
+        await db.sharedSync.bulkAdd(sharedSyncRows);
+      }
+    }
+  );
 }

@@ -2,18 +2,43 @@ export type SourceType =
   | "bank_account"
   | "mobile_payment"
   | "debit_card"
-  | "credit_card";
+  | "credit_card"
+  | "shared";
 
 export interface Source {
   id: string;
   name: string;
   type: SourceType;
+  /** Required when type is `shared`. Normalized to lowercase. */
+  sharedPublicId?: string;
   minLimit: number; // -1 = no limit
   maxLimit: number; // -1 = no limit
   color: string;
   icon: string;
   createdAt: number;
 }
+
+/** Per-device sync state for a shared source (`sourceId` = local Source.id). */
+export interface SharedSourceSync {
+  sourceId: string;
+  emissions: string[];
+  updates: string[];
+  lastReceivedRemoteAt: number | null;
+  /** Password for encrypting outbound sync URLs (set once on this device). */
+  outboundPassword: string | null;
+  outboundPasswordLocked: boolean;
+  /** Saved after successful inbound decrypt if user opts in. */
+  storedInboundPassword: string | null;
+  /** True after we applied a payload where peer sent `isPasswordSaved`. */
+  peerSavedPassword: boolean;
+  /** Expense ids already included in at least one outbound payload from this device. */
+  emittedExpenseIds: string[];
+}
+
+export const SHARED_PUBLIC_ID_MAX_LEN = 30;
+
+/** After trim + lowercase. Letters, digits, `.`, `_`, `-`. */
+export const SHARED_PUBLIC_ID_PATTERN = /^[a-z0-9._-]{1,30}$/;
 
 export interface Expense {
   id: string;
@@ -40,6 +65,8 @@ export interface GlobalConfig {
   limitInterval: LimitInterval;
   warningThreshold: number; // 0-1, e.g. 0.7
   dangerThreshold: number; // 0-1, e.g. 0.9
+  /** Hours without receiving a shared sync before showing stale UI. */
+  sharedStaleHours: number;
 }
 
 export type AlertLevel = "success" | "warning" | "danger";
@@ -49,6 +76,7 @@ export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
   mobile_payment: "Pago Móvil",
   debit_card: "Tarjeta Débito",
   credit_card: "Tarjeta Crédito",
+  shared: "Cuenta Compartida",
 };
 
 export const SOURCE_TYPE_ICONS: Record<SourceType, string> = {
@@ -56,7 +84,16 @@ export const SOURCE_TYPE_ICONS: Record<SourceType, string> = {
   mobile_payment: "Smartphone",
   debit_card: "CreditCard",
   credit_card: "CreditCard",
+  shared: "Users",
 };
+
+export function normalizeSharedPublicId(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+
+export function isValidSharedPublicId(normalized: string): boolean {
+  return SHARED_PUBLIC_ID_PATTERN.test(normalized);
+}
 
 export const PRESET_COLORS = [
   "#ef4444",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Landmark, Smartphone, CreditCard } from "lucide-react";
+import { Landmark, Smartphone, CreditCard, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { SourceType } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
@@ -10,6 +10,7 @@ const ICONS: Record<SourceType, React.ElementType> = {
   mobile_payment: Smartphone,
   debit_card: CreditCard,
   credit_card: CreditCard,
+  shared: Users,
 };
 
 export function SourceBadge({ type }: { type: SourceType }) {

@@ -21,6 +21,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfig = {
   limitInterval: "monthly",
   warningThreshold: 0.7,
   dangerThreshold: 0.9,
+  sharedStaleHours: 168,
 };
 
 export const CURRENCY = "PEN";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Link2, AlertTriangle, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +14,14 @@ interface SourceCardProps {
   config: GlobalConfig | undefined;
   onEdit: (source: Source) => void;
   onDelete: (source: Source) => void;
+  /** Present for shared sources: sync UI on /sources */
+  sharedMeta?: {
+    linked: boolean;
+    stale: boolean;
+    /** Local expenses not yet sent in an outbound update (linked sources only). */
+    pendingOutboundCount?: number;
+    onOpenSync: () => void;
+  };
 }
 
 export function SourceCard({
@@ -22,6 +30,7 @@ export function SourceCard({
   config,
   onEdit,
   onDelete,
+  sharedMeta,
 }: SourceCardProps) {
   const spent = expenses
     .filter((e) => e.sourceId === source.id)
@@ -44,9 +53,46 @@ export function SourceCard({
       <CardHeader className="flex flex-row items-start justify-between pb-2 pl-5">
         <div className="space-y-1">
           <CardTitle className="text-base">{source.name}</CardTitle>
-          <SourceBadge type={source.type} />
+          <div className="flex flex-wrap items-center gap-2">
+            <SourceBadge type={source.type} />
+            {sharedMeta && !sharedMeta.linked && (
+              <span className="text-xs text-amber-600 dark:text-amber-400">
+                Pendiente de vincular
+              </span>
+            )}
+            {sharedMeta && sharedMeta.linked && sharedMeta.stale && (
+              <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                <AlertTriangle className="size-3" />
+                Sync antigua
+              </span>
+            )}
+            {sharedMeta &&
+              sharedMeta.linked &&
+              (sharedMeta.pendingOutboundCount ?? 0) > 0 && (
+                <span
+                  className="inline-flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400"
+                  title="Gastos que aún no van en una actualización enviada al otro dispositivo"
+                >
+                  <Upload className="size-3" />
+                  {sharedMeta.pendingOutboundCount === 1
+                    ? "1 sin enviar"
+                    : `${sharedMeta.pendingOutboundCount} sin enviar`}
+                </span>
+              )}
+          </div>
         </div>
         <div className="flex gap-1">
+          {sharedMeta && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              title="Sincronizar"
+              onClick={() => sharedMeta.onOpenSync()}
+            >
+              <Link2 className="size-3.5" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="size-8" onClick={() => onEdit(source)}>
             <Pencil className="size-3.5" />
           </Button>
