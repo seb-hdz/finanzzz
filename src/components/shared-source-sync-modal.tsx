@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Link2, Copy, Loader2 } from "lucide-react";
+import {
+  Link2,
+  Copy,
+  Loader2,
+  Send,
+  Download,
+  AlertTriangle,
+} from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,10 +27,16 @@ import {
   buildFullSyncUrl,
   buildSharedSyncToken,
   recordSuccessfulSharedEmission,
+  applySharedSyncFromToken,
+  extractTokenFromInput,
 } from "@/lib/shared-sync";
 import { formatPEN } from "@/lib/limits";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useIsStandalone } from "@/lib/use-standalone";
+import { cn } from "@/lib/utils";
+
+type SyncTab = "send" | "receive";
 
 interface SharedSourceSyncModalProps {
   source: Source | null;
@@ -35,10 +49,27 @@ export function SharedSourceSyncModal({
   open,
   onOpenChange,
 }: SharedSourceSyncModalProps) {
+  const router = useRouter();
   const sync = useSharedSyncState(source?.id);
+  const isStandalone = useIsStandalone();
+
+  const [tab, setTab] = useState<SyncTab>("send");
   const [url, setUrl] = useState("");
   const [included, setIncluded] = useState<{ id: string; label: string }[]>([]);
   const [sending, setSending] = useState(false);
+
+  const [pastedInput, setPastedInput] = useState("");
+  const [receivePassword, setReceivePassword] = useState("");
+  const [receiveRemember, setReceiveRemember] = useState(true);
+  const [receiving, setReceiving] = useState(false);
+
+  function resetState() {
+    setUrl("");
+    setIncluded([]);
+    setPastedInput("");
+    setReceivePassword("");
+    setReceiveRemember(true);
+  }
 
   async function handleSendUpdate() {
     if (!source || source.type !== "shared" || !sync?.outboundPassword) {
@@ -53,8 +84,6 @@ export function SharedSourceSyncModal({
         sync.outboundPassword
       );
 
-      // Register clipboard write synchronously with the user gesture so the
-      // browser keeps transient activation while the async work resolves.
       const clipboardItem = new ClipboardItem({
         "text/plain": resultPromise.then(({ token, urlTooLong }) => {
           if (urlTooLong || !token)
@@ -98,6 +127,45 @@ export function SharedSourceSyncModal({
     toast.success("Copiado");
   }
 
+  async function handleReceive() {
+    const token = extractTokenFromInput(pastedInput);
+    if (!token) {
+      toast.error("Pega la URL o el token recibido.");
+      return;
+    }
+
+    const pw = receivePassword || sync?.storedInboundPassword;
+    if (!pw) {
+      toast.error("Introduce la contraseña de enlace.");
+      return;
+    }
+
+    setReceiving(true);
+    try {
+      const result = await applySharedSyncFromToken({
+        token,
+        password: pw,
+        rememberPassword: receiveRemember,
+      });
+      if (result.ok) {
+        toast.success(
+          result.mergedCount > 0
+            ? `Sincronizado: ${result.mergedCount} actualización(es).`
+            : "Sincronizado (sin gastos nuevos en este enlace)."
+        );
+        onOpenChange(false);
+        resetState();
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Error al sincronizar.");
+    } finally {
+      setReceiving(false);
+    }
+  }
+
   if (!source || source.type !== "shared") {
     return null;
   }
@@ -106,10 +174,7 @@ export function SharedSourceSyncModal({
     <Dialog
       open={open}
       onOpenChange={(o) => {
-        if (!o) {
-          setUrl("");
-          setIncluded([]);
-        }
+        if (!o) resetState();
         onOpenChange(o);
       }}
     >
@@ -117,6 +182,7 @@ export function SharedSourceSyncModal({
         <DialogHeader>
           <DialogTitle>Sincronizar fuente compartida</DialogTitle>
         </DialogHeader>
+
         <div className="space-y-4 text-sm">
           <div className="space-y-1">
             <p className="text-muted-foreground">
@@ -130,59 +196,195 @@ export function SharedSourceSyncModal({
               </span>
             </p>
           </div>
-          <p className="text-muted-foreground">
-            El otro usuario debe conocer la contraseña e introducirla al abrir
-            la URL para sincronizar.
-          </p>
 
-          {included.length > 0 && (
-            <div className="space-y-1 rounded-md border p-3">
-              <p className="text-xs font-medium text-muted-foreground">
-                Gastos incluidos en este envío ({included.length})
+          {/* Tab toggle */}
+          <div className="flex rounded-lg border p-0.5">
+            <button
+              type="button"
+              onClick={() => setTab("send")}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                tab === "send"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Send className="size-3.5" />
+              Enviar
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("receive")}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                tab === "receive"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Download className="size-3.5" />
+              Recibir
+            </button>
+          </div>
+
+          {/* ── Send tab ── */}
+          {tab === "send" && (
+            <>
+              <p className="text-muted-foreground">
+                El otro usuario debe conocer la contraseña e introducirla al
+                abrir la URL para sincronizar.
               </p>
-              <ul className="max-h-32 space-y-1 overflow-y-auto text-xs">
-                {included.map((row) => (
-                  <li key={row.id}>{row.label}</li>
-                ))}
-              </ul>
-            </div>
+
+              {isStandalone && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
+                  <AlertTriangle
+                    className="mt-0.5 size-4 shrink-0"
+                    aria-hidden
+                  />
+                  <span>
+                    Estás usando la app instalada. Si el otro usuario también la
+                    usa, deberá pegar el enlace usando{" "}
+                    <strong>&quot;Recibir&quot;</strong> en lugar de abrirlo en
+                    el navegador.
+                  </span>
+                </div>
+              )}
+
+              {included.length > 0 && (
+                <div className="space-y-1 rounded-md border p-3">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Gastos incluidos en este envío ({included.length})
+                  </p>
+                  <ul className="max-h-32 space-y-1 overflow-y-auto text-xs">
+                    {included.map((row) => (
+                      <li key={row.id}>{row.label}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {url && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1">
+                    <Link2 className="size-3.5" />
+                    URL de sincronización
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={url}
+                      className="font-mono text-xs"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={copyAgain}
+                    >
+                      <Copy className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-          {url && (
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Link2 className="size-3.5" />
-                URL de sincronización
-              </Label>
-              <div className="flex gap-2">
-                <Input readOnly value={url} className="font-mono text-xs" />
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  onClick={copyAgain}
-                >
-                  <Copy className="size-4" />
-                </Button>
+
+          {/* ── Receive tab ── */}
+          {tab === "receive" && (
+            <>
+              <p className="text-muted-foreground">
+                Pega la URL o el token que te envió la otra persona para aplicar
+                los cambios directamente.
+              </p>
+
+              {isStandalone && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
+                  <AlertTriangle
+                    className="mt-0.5 size-4 shrink-0"
+                    aria-hidden
+                  />
+                  <span>
+                    Usa esta opción para sincronizar dentro de la app instalada
+                    sin necesidad de abrir URLs en el navegador.
+                  </span>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="paste-token">URL o token</Label>
+                <Input
+                  id="paste-token"
+                  placeholder="Pega aquí la URL o el token"
+                  value={pastedInput}
+                  onChange={(e) => setPastedInput(e.target.value)}
+                  className="font-mono text-xs"
+                  autoComplete="off"
+                />
               </div>
-            </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="receive-pw">Contraseña de enlace</Label>
+                <Input
+                  id="receive-pw"
+                  type="password"
+                  value={receivePassword}
+                  onChange={(e) => setReceivePassword(e.target.value)}
+                  placeholder={
+                    sync?.storedInboundPassword
+                      ? "Guardada — déjala vacía para usar la recordada"
+                      : "Acordada fuera de la app"
+                  }
+                  autoComplete="off"
+                />
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 rounded border-input accent-primary"
+                  checked={receiveRemember}
+                  onChange={(e) => setReceiveRemember(e.target.checked)}
+                />
+                Recordar en este dispositivo
+              </label>
+            </>
           )}
         </div>
+
         <DialogFooter>
-          <Button
-            type="button"
-            className="w-full"
-            onClick={handleSendUpdate}
-            disabled={sending || !sync?.outboundPassword}
-          >
-            {sending ? (
-              <>
-                <Loader2 className="size-4 animate-spin mr-2" />
-                Generando…
-              </>
-            ) : (
-              "Enviar actualización"
-            )}
-          </Button>
+          {tab === "send" ? (
+            <Button
+              type="button"
+              className="w-full"
+              onClick={handleSendUpdate}
+              disabled={sending || !sync?.outboundPassword}
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                  Generando…
+                </>
+              ) : (
+                "Enviar actualización"
+              )}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              className="w-full"
+              onClick={handleReceive}
+              disabled={receiving || !pastedInput.trim()}
+            >
+              {receiving ? (
+                <>
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                  Aplicando…
+                </>
+              ) : (
+                "Confirmar y sincronizar"
+              )}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

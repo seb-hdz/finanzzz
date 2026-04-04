@@ -304,3 +304,19 @@ export function buildFullSyncUrl(token: string): string {
   const path = getSyncSharedPath();
   return `${window.location.origin}${path}?d=${encodeURIComponent(token)}`;
 }
+
+/**
+ * Accepts either a full sync URL (extracts the `d` query param) or a raw
+ * base64url token string. Returns the token ready for `applySharedSyncFromToken`.
+ */
+export function extractTokenFromInput(input: string): string {
+  const trimmed = input.trim();
+  try {
+    const url = new URL(trimmed);
+    const d = url.searchParams.get("d");
+    if (d) return d;
+  } catch {
+    // not a URL — treat the whole input as a raw token
+  }
+  return trimmed;
+}

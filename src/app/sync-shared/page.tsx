@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, MonitorSmartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { applySharedSyncFromToken } from "@/lib/shared-sync";
+import { db } from "@/lib/db";
+import { useIsStandalone } from "@/lib/use-standalone";
 
 export default function SyncSharedPage() {
   const router = useRouter();
+  const isStandalone = useIsStandalone();
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -20,11 +23,38 @@ export default function SyncSharedPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const d = params.get("d");
-    if (d) {
-      setToken(d);
+    if (!d) {
+      setReady(true);
+      return;
     }
-    setReady(true);
-  }, []);
+    setToken(d);
+
+    (async () => {
+      try {
+        const allSync = await db.sharedSync.toArray();
+        for (const s of allSync) {
+          if (!s.storedInboundPassword) continue;
+          const result = await applySharedSyncFromToken({
+            token: d,
+            password: s.storedInboundPassword,
+            rememberPassword: true,
+          });
+          if (result.ok) {
+            toast.success(
+              result.mergedCount > 0
+                ? `Sincronizado: ${result.mergedCount} actualización(es).`
+                : "Sincronizado (sin gastos nuevos en este enlace)."
+            );
+            router.replace("/sources");
+            return;
+          }
+        }
+      } catch {
+        // fall through to manual form
+      }
+      setReady(true);
+    })();
+  }, [router]);
 
   async function handleApply() {
     if (!token.trim() || !password) {
@@ -69,8 +99,18 @@ export default function SyncSharedPage() {
         <h1 className="text-xl font-semibold">Sincronización compartida</h1>
         <p className="text-sm text-muted-foreground">
           Este enlace no contiene datos. Pide a la otra persona un enlace generado desde
-          Fuentes → Sincronizar.
+          Fuentes &rarr; Sincronizar.
         </p>
+        {!isStandalone && (
+          <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
+            <MonitorSmartphone className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              Si tienes Finanzzz instalada como app (PWA), ábrela y usa{" "}
+              <strong>Sincronizar &rarr; Recibir</strong> para pegar el token
+              directamente. Safari y la app instalada no comparten datos.
+            </span>
+          </div>
+        )}
         <Button type="button" variant="outline" onClick={() => router.replace("/sources")}>
           Ir a Fuentes
         </Button>
@@ -105,6 +145,16 @@ export default function SyncSharedPage() {
         />
         Recordar en este dispositivo
       </label>
+      {!isStandalone && (
+        <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
+          <MonitorSmartphone className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            Si tienes Finanzzz instalada como app (PWA), este enlace podría
+            fallar porque Safari no comparte datos con la app instalada. Usa{" "}
+            <strong>Sincronizar &rarr; Recibir</strong> dentro de la app.
+          </span>
+        </div>
+      )}
       <Button type="button" className="w-full" disabled={busy} onClick={handleApply}>
         {busy ? (
           <>

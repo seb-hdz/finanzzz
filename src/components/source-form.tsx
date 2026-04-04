@@ -33,7 +33,8 @@ import {
 } from "@/lib/db-hooks";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { TextInitial } from "lucide-react";
+import { Eye, EyeOff, Info, Regex } from "lucide-react";
+import { ContextHint } from "@/components/ui/context-hint";
 
 interface SourceFormProps {
   open: boolean;
@@ -62,6 +63,7 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
 
   const syncState = useSharedSyncState(source?.id);
   const isEditing = !!source;
+  const [showOutboundPw, setShowOutboundPw] = useState(false);
 
   const needsLinkPassword =
     type === "shared" &&
@@ -173,43 +175,39 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
 
           {type === "shared" && (
             <div className="space-y-2">
-              <div className="space-y-2"></div>
-
-              <Label htmlFor="sharedPublicId">Id compartido</Label>
-              <div className="flex gap-2 items-center">
-                <Input
-                  id="sharedPublicId"
-                  placeholder="ej: casa2024"
-                  value={sharedPublicId}
-                  onChange={(e) =>
-                    setSharedPublicId(
-                      normalizeSharedPublicId(e.target.value).slice(
-                        0,
-                        SHARED_PUBLIC_ID_MAX_LEN
-                      )
-                    )
-                  }
-                  maxLength={SHARED_PUBLIC_ID_MAX_LEN}
-                  required
-                  autoComplete="off"
-                />
-                {/* Solo
-                minúsculas, números, y símbolos:{" "}
-                <span className="font-mono text-foreground bg-muted rounded-md px-0.5 py-0.5">
-                  .
-                </span>
-                ,{" "}
-                <span className="font-mono text-foreground bg-muted rounded-md px-0.5 py-0.5">
-                  _
-                </span>{" "}
-                o{" "}
-                <span className="font-mono text-foreground bg-muted rounded-md px-0.5 py-0.5">
-                  -
-                </span> */}
-                <div title="Solo minúsculas, números, y símbolos: ., _, -">
-                  <TextInitial className="size-3.5" />
-                </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Label htmlFor="sharedPublicId">Id compartido</Label>
+                <ContextHint
+                  mode="expandable-inner"
+                  aria-label="Reglas de formato del id compartido"
+                  trigger={<Info className="size-3.5" />}
+                  triggerClassName="size-5"
+                >
+                  <div className="flex items-start gap-2 text-sm leading-snug">
+                    <Regex
+                      className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                      aria-hidden
+                    />
+                    <span>Solo minúsculas, números, y símbolos</span>
+                  </div>
+                </ContextHint>
               </div>
+              <Input
+                id="sharedPublicId"
+                placeholder="ej: casa2024"
+                value={sharedPublicId}
+                onChange={(e) =>
+                  setSharedPublicId(
+                    normalizeSharedPublicId(e.target.value).slice(
+                      0,
+                      SHARED_PUBLIC_ID_MAX_LEN
+                    )
+                  )
+                }
+                maxLength={SHARED_PUBLIC_ID_MAX_LEN}
+                required
+                autoComplete="off"
+              />
               <p className="text-xs text-muted-foreground">
                 Debe ser el mismo en{" "}
                 <span className="underline">ambos dispositivos</span>.
@@ -229,16 +227,42 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
                   placeholder="Acordada fuera de la app"
                   autoComplete="new-password"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Debe introducirse al sincronizar en el{" "}
+                  <span className="underline">otro dispositivo</span>.
+                </p>
               </div>
             </>
           )}
 
           {type === "shared" && syncState?.outboundPasswordLocked && (
-            <p className="text-xs text-muted-foreground">
-              La contraseña de enlace ya está definida en este dispositivo (solo
-              lectura). Para sincronizar, usa &quot;Enviar actualización&quot;
-              en Fuentes compartidas.
-            </p>
+            <div className="space-y-2">
+              <Label>Contraseña de enlace</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  readOnly
+                  type={showOutboundPw ? "text" : "password"}
+                  value={syncState.outboundPassword ?? ""}
+                  className="font-mono"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowOutboundPw((v) => !v)}
+                >
+                  {showOutboundPw ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Solo lectura. Para sincronizar, usa &quot;Enviar
+                actualización&quot; en Fuentes compartidas.
+              </p>
+            </div>
           )}
 
           <div className="space-y-2">
