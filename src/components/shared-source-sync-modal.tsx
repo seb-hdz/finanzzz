@@ -47,16 +47,28 @@ export function SharedSourceSyncModal({
     }
     setSending(true);
     try {
-      const { token, includedExpenses, urlTooLong } =
-        await buildSharedSyncToken(source, sync, sync.outboundPassword);
-      if (urlTooLong || !token) {
-        toast.error(
-          "El enlace sigue siendo muy largo. Prueba de nuevo tras sincronizar por partes."
-        );
-        return;
-      }
+      const resultPromise = buildSharedSyncToken(
+        source,
+        sync,
+        sync.outboundPassword
+      );
+
+      // Register clipboard write synchronously with the user gesture so the
+      // browser keeps transient activation while the async work resolves.
+      const clipboardItem = new ClipboardItem({
+        "text/plain": resultPromise.then(({ token, urlTooLong }) => {
+          if (urlTooLong || !token)
+            throw new Error(
+              "El enlace sigue siendo muy largo. Prueba de nuevo tras sincronizar por partes."
+            );
+          return new Blob([buildFullSyncUrl(token)], { type: "text/plain" });
+        }),
+      });
+      await navigator.clipboard.write([clipboardItem]);
+
+      const { token, includedExpenses } = await resultPromise;
       const fullUrl = buildFullSyncUrl(token);
-      await navigator.clipboard.writeText(fullUrl);
+
       await recordSuccessfulSharedEmission(
         source.id,
         includedExpenses.map((e) => e.id)
