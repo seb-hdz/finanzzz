@@ -270,11 +270,7 @@ export function SharedSourceSyncModal({
                     URL de sincronización
                   </Label>
                   <div className="flex gap-2">
-                    <Input
-                      readOnly
-                      value={url}
-                      className="font-mono text-xs"
-                    />
+                    <Input readOnly value={url} className="font-mono text-xs" />
                     <Button
                       type="button"
                       size="icon"
@@ -292,11 +288,6 @@ export function SharedSourceSyncModal({
           {/* ── Receive tab ── */}
           {tab === "receive" && (
             <>
-              <p className="text-muted-foreground">
-                Pega la URL o el token que te envió la otra persona para aplicar
-                los cambios directamente.
-              </p>
-
               {isStandalone && (
                 <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
                   <AlertTriangle
@@ -320,6 +311,9 @@ export function SharedSourceSyncModal({
                   className="font-mono text-xs"
                   autoComplete="off"
                 />
+                <p className="text-muted-foreground">
+                  Pega la URL que te envió la otra persona para sincronizar.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -345,7 +339,7 @@ export function SharedSourceSyncModal({
                   checked={receiveRemember}
                   onChange={(e) => setReceiveRemember(e.target.checked)}
                 />
-                Recordar en este dispositivo
+                Recordar contraseña en este dispositivo
               </label>
             </>
           )}

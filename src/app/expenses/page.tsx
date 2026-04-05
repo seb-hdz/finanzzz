@@ -39,7 +39,18 @@ import {
   deleteExpense,
 } from "@/lib/db-hooks";
 import { formatPEN } from "@/lib/limits";
-import type { Expense } from "@/lib/types";
+import type { Expense, SourceType } from "@/lib/types";
+import { SOURCE_TYPE_LABELS } from "@/lib/types";
+
+type SourceTypeFilter = "all" | SourceType;
+
+const SOURCE_TYPES: SourceType[] = [
+  "bank_account",
+  "mobile_payment",
+  "debit_card",
+  "credit_card",
+  "shared",
+];
 
 type Period = "daily" | "weekly" | "monthly";
 
@@ -65,6 +76,8 @@ export default function ExpensesPage() {
   const [period, setPeriod] = useState<Period>("monthly");
   const [search, setSearch] = useState("");
   const [sourceFilter, setSourceFilter] = useState("all");
+  const [sourceTypeFilter, setSourceTypeFilter] =
+    useState<SourceTypeFilter>("all");
   const [tagFilter, setTagFilter] = useState("all");
 
   const [formOpen, setFormOpen] = useState(false);
@@ -81,6 +94,12 @@ export default function ExpensesPage() {
     if (sourceFilter !== "all") {
       result = result.filter((e) => e.sourceId === sourceFilter);
     }
+    if (sourceTypeFilter !== "all") {
+      const ids = new Set(
+        sources.filter((s) => s.type === sourceTypeFilter).map((s) => s.id)
+      );
+      result = result.filter((e) => ids.has(e.sourceId));
+    }
     if (tagFilter !== "all") {
       result = result.filter((e) => e.tagIds.includes(tagFilter));
     }
@@ -93,7 +112,7 @@ export default function ExpensesPage() {
       );
     }
     return result;
-  }, [expenses, sourceFilter, tagFilter, search]);
+  }, [expenses, sourceFilter, sourceTypeFilter, tagFilter, search, sources]);
 
   const total = filtered.reduce((s, e) => s + e.amount, 0);
 
@@ -144,76 +163,104 @@ export default function ExpensesPage() {
         </TabsList>
       </Tabs>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      <div className="space-y-3">
+        <div className="relative w-full">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
           <Input
             placeholder="Buscar por descripción o monto..."
-            className="pl-9"
+            className="w-full pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select
-          value={sourceFilter}
-          onValueChange={(v) => setSourceFilter(v ?? "all")}
-        >
-          <SelectTrigger
-            className="w-full sm:w-44"
-            title={
-              sourceFilter !== "all"
-                ? sources.find((s) => s.id === sourceFilter)?.name
-                : undefined
+        <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
+          <Select
+            value={sourceFilter}
+            onValueChange={(v) => setSourceFilter(v ?? "all")}
+          >
+            <SelectTrigger
+              className="h-auto min-h-9 w-full min-w-0 md:flex-1"
+              title={
+                sourceFilter !== "all"
+                  ? sources.find((s) => s.id === sourceFilter)?.name
+                  : undefined
+              }
+            >
+              <span data-slot="select-value" className="truncate">
+                {sourceFilter === "all"
+                  ? "Todas las fuentes"
+                  : sources.find((s) => s.id === sourceFilter)?.name ??
+                    "Fuente"}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las fuentes</SelectItem>
+              {sources.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  <div className="flex items-start gap-2">
+                    <div
+                      className="size-2 rounded-full block"
+                      style={{ backgroundColor: s.color }}
+                    />
+                    {s.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={sourceTypeFilter}
+            onValueChange={(v) =>
+              setSourceTypeFilter((v ?? "all") as SourceTypeFilter)
             }
           >
-            <span data-slot="select-value">
-              {sourceFilter === "all"
-                ? "Todas las fuentes"
-                : sources.find((s) => s.id === sourceFilter)?.name ?? "Fuente"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las fuentes</SelectItem>
-            {sources.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                <div className="flex items-start gap-2">
-                  <div
-                    className="size-2 rounded-full block"
-                    style={{ backgroundColor: s.color }}
-                  />
-                  {s.name}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={tagFilter}
-          onValueChange={(v) => setTagFilter(v ?? "all")}
-        >
-          <SelectTrigger
-            className="w-full sm:w-40"
-            title={
-              tagFilter !== "all"
-                ? tags.find((t) => t.id === tagFilter)?.name
-                : undefined
-            }
+            <SelectTrigger className="h-auto min-h-9 w-full min-w-0 md:flex-1">
+              <span data-slot="select-value" className="truncate">
+                {sourceTypeFilter === "all"
+                  ? "Todos los tipos"
+                  : SOURCE_TYPE_LABELS[sourceTypeFilter]}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              {SOURCE_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {SOURCE_TYPE_LABELS[t]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={tagFilter}
+            onValueChange={(v) => setTagFilter(v ?? "all")}
           >
-            <span data-slot="select-value">
-              {tagFilter === "all"
-                ? "Todos los tags"
-                : tags.find((t) => t.id === tagFilter)?.name ?? "Tag"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los tags</SelectItem>
-            {tags.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
-                {t.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <SelectTrigger
+              className="h-auto min-h-9 w-full min-w-0 md:flex-1"
+              title={
+                tagFilter !== "all"
+                  ? tags.find((t) => t.id === tagFilter)?.name
+                  : undefined
+              }
+            >
+              <span data-slot="select-value" className="truncate">
+                {tagFilter === "all"
+                  ? "Todos los tags"
+                  : tags.find((t) => t.id === tagFilter)?.name ?? "Tag"}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tags</SelectItem>
+              {tags.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <ExpenseList

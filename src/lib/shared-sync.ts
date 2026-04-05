@@ -1,5 +1,5 @@
 import { createDefaultSharedSyncState, db } from "./db";
-import type { Expense, SharedSourceSync, Source } from "./types";
+import type { Expense, SharedSourceSync, Source, Tag } from "./types";
 import { getSyncSharedPath } from "./site";
 import { decryptBinaryWithPassword, encryptBinaryWithPassword } from "./crypto-blob";
 
@@ -14,8 +14,45 @@ export type SharedSyncPlainV1 = {
   sharedPublicId: string;
   isPasswordSaved?: boolean;
   expenses: Expense[];
+  /** Definitions for tag ids referenced by `expenses` (receiver upserts into local db). */
+  tags?: Tag[];
   emittedAt: number;
 };
+
+async function collectTagsForExpenses(expenses: Expense[]): Promise<Tag[]> {
+  const ids = new Set<string>();
+  for (const e of expenses) {
+    for (const tid of e.tagIds) {
+      if (tid) ids.add(tid);
+    }
+  }
+  if (ids.size === 0) return [];
+  const rows = await db.tags.bulkGet([...ids]);
+  return rows.filter((t): t is Tag => t !== undefined);
+}
+
+function normalizeIncomingTags(raw: unknown): Tag[] {
+  if (!Array.isArray(raw)) return [];
+  const out: Tag[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    if (
+      typeof o.id !== "string" ||
+      typeof o.name !== "string" ||
+      typeof o.color !== "string"
+    ) {
+      continue;
+    }
+    out.push({
+      id: o.id,
+      name: o.name,
+      color: o.color,
+      isPredefined: typeof o.isPredefined === "boolean" ? o.isPredefined : false,
+    });
+  }
+  return out;
+}
 
 function bytesToBase64Url(bytes: Uint8Array): string {
   let s = "";
@@ -115,12 +152,15 @@ export async function buildSharedSyncToken(
 
   for (let attempt = 0; attempt < 12; attempt++) {
     included = selectExpensesForBulk(all, emitted, count);
+    const tagsPayload =
+      included.length > 0 ? await collectTagsForExpenses(included) : [];
     const plain: SharedSyncPlainV1 = {
       v: 1,
       sharedPublicId: source.sharedPublicId,
       isPasswordSaved: !!sync.storedInboundPassword,
       expenses: included,
       emittedAt: Date.now(),
+      ...(tagsPayload.length > 0 ? { tags: tagsPayload } : {}),
     };
     const encoder = new TextEncoder();
     const jsonBytes = encoder.encode(JSON.stringify(plain));
@@ -230,8 +270,14 @@ export async function applySharedSyncFromToken(
   const syncRow =
     (await db.sharedSync.get(target.id)) ?? createDefaultSharedSyncState(target.id);
 
+  const incomingTags = normalizeIncomingTags(plain.tags);
+
   let merged = 0;
-  await db.transaction("rw", db.expenses, db.sharedSync, async () => {
+  await db.transaction("rw", db.expenses, db.sharedSync, db.tags, async () => {
+    for (const t of incomingTags) {
+      await db.tags.put(t);
+    }
+
     for (const inc of plain.expenses) {
       const existing = await db.expenses.get(inc.id);
       const row: Expense = { ...inc, sourceId: target.id };

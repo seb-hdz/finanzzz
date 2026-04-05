@@ -98,8 +98,8 @@ export default function SyncSharedPage() {
       <div className="mx-auto max-w-md space-y-4 py-8">
         <h1 className="text-xl font-semibold">Sincronización compartida</h1>
         <p className="text-sm text-muted-foreground">
-          Este enlace no contiene datos. Pide a la otra persona un enlace generado desde
-          Fuentes &rarr; Sincronizar.
+          Este enlace no contiene datos. Pide a la otra persona un enlace
+          generado desde Fuentes &rarr; Sincronizar.
         </p>
         {!isStandalone && (
           <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
@@ -111,7 +111,11 @@ export default function SyncSharedPage() {
             </span>
           </div>
         )}
-        <Button type="button" variant="outline" onClick={() => router.replace("/sources")}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.replace("/sources")}
+        >
           Ir a Fuentes
         </Button>
       </div>
@@ -121,9 +125,12 @@ export default function SyncSharedPage() {
   return (
     <div className="mx-auto max-w-md space-y-6 py-8">
       <div>
-        <h1 className="text-xl font-semibold">Actualizando fuente compartida</h1>
+        <h1 className="text-xl font-semibold">
+          Actualizando fuente compartida
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Introduce la contraseña acordada con la otra persona para aplicar los cambios.
+          Introduce la contraseña acordada con la otra persona para aplicar los
+          cambios.
         </p>
       </div>
       <div className="space-y-2">
@@ -143,7 +150,7 @@ export default function SyncSharedPage() {
           checked={remember}
           onChange={(e) => setRemember(e.target.checked)}
         />
-        Recordar en este dispositivo
+        Recordar contraseña en este dispositivo
       </label>
       {!isStandalone && (
         <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
@@ -155,7 +162,12 @@ export default function SyncSharedPage() {
           </span>
         </div>
       )}
-      <Button type="button" className="w-full" disabled={busy} onClick={handleApply}>
+      <Button
+        type="button"
+        className="w-full"
+        disabled={busy}
+        onClick={handleApply}
+      >
         {busy ? (
           <>
             <Loader2 className="size-4 animate-spin mr-2" />

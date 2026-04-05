@@ -50,11 +50,35 @@ export function createDefaultSharedSyncState(sourceId: string): SharedSourceSync
   };
 }
 
+async function insertDefaultTagsAndConfig(
+  tagsTable: typeof db.tags,
+  configTable: typeof db.config
+) {
+  const tags = PREDEFINED_TAGS.map((t) => ({ ...t, id: uuid() }));
+  await tagsTable.bulkAdd(tags);
+  await configTable.add(DEFAULT_GLOBAL_CONFIG);
+}
+
+/** Borra fuentes, gastos, etiquetas, ajustes y estado de sync; deja la app como recién instalada. */
+export async function resetLocalDatabase() {
+  await db.transaction(
+    "rw",
+    [db.sources, db.expenses, db.tags, db.config, db.sharedSync],
+    async (tx) => {
+      await tx.table("sources").clear();
+      await tx.table("expenses").clear();
+      await tx.table("tags").clear();
+      await tx.table("config").clear();
+      await tx.table("sharedSync").clear();
+      await insertDefaultTagsAndConfig(tx.table("tags"), tx.table("config"));
+    }
+  );
+}
+
 export async function seedDatabase() {
   const tagCount = await db.tags.count();
   if (tagCount === 0) {
-    const tags = PREDEFINED_TAGS.map((t) => ({ ...t, id: uuid() }));
-    await db.tags.bulkAdd(tags);
+    await insertDefaultTagsAndConfig(db.tags, db.config);
   }
 
   const configExists = await db.config.get("global");

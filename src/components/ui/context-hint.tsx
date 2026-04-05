@@ -70,11 +70,16 @@ function ContextHintPopover({
   ariaLabel?: string;
   rootProps: Omit<PopoverPrimitive.Root.Props, "children">;
 }) {
+  const fineHover = usePrefersFineHover();
+
   return (
     <div className={cn("inline-flex", className)}>
       <PopoverPrimitive.Root {...rootProps}>
         <PopoverPrimitive.Trigger
           type="button"
+          openOnHover={fineHover}
+          delay={200}
+          closeDelay={120}
           className={cn(
             "inline-flex shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
             triggerClassName
