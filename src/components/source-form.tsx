@@ -64,6 +64,7 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
   const syncState = useSharedSyncState(source?.id);
   const isEditing = !!source;
   const [showOutboundPw, setShowOutboundPw] = useState(false);
+  const [showLinkPassword, setShowLinkPassword] = useState(false);
 
   const needsLinkPassword =
     type === "shared" &&
@@ -131,6 +132,7 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
       setColor(PRESET_COLORS[0]);
       setMaxLimit("");
       setMinLimit("");
+      setShowLinkPassword(false);
     }
   }
 
@@ -219,14 +221,34 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
             <>
               <div className="space-y-2">
                 <Label htmlFor="linkPw">Contraseña de enlace</Label>
-                <Input
-                  id="linkPw"
-                  type="password"
-                  value={linkPassword}
-                  onChange={(e) => setLinkPassword(e.target.value)}
-                  placeholder="Acordada fuera de la app"
-                  autoComplete="new-password"
-                />
+                <div className="flex gap-2 items-center">
+                  <Input
+                    id="linkPw"
+                    type={showLinkPassword ? "text" : "password"}
+                    value={linkPassword}
+                    onChange={(e) => setLinkPassword(e.target.value)}
+                    placeholder="Acordada fuera de la app"
+                    autoComplete="new-password"
+                    className="min-w-0"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowLinkPassword((v) => !v)}
+                    aria-label={
+                      showLinkPassword
+                        ? "Ocultar contraseña de enlace"
+                        : "Mostrar contraseña de enlace"
+                    }
+                  >
+                    {showLinkPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Debe introducirse al sincronizar en el{" "}
                   <span className="underline">otro dispositivo</span>.

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, MonitorSmartphone } from "lucide-react";
+import { Eye, EyeOff, Loader2, MonitorSmartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ export default function SyncSharedPage() {
   const isStandalone = useIsStandalone();
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
@@ -135,13 +136,33 @@ export default function SyncSharedPage() {
       </div>
       <div className="space-y-2">
         <Label htmlFor="spw">Contraseña de enlace</Label>
-        <Input
-          id="spw"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="off"
-        />
+        <div className="flex gap-2 items-center">
+          <Input
+            id="spw"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="off"
+            className="min-w-0"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={
+              showPassword
+                ? "Ocultar contraseña de enlace"
+                : "Mostrar contraseña de enlace"
+            }
+          >
+            {showPassword ? (
+              <EyeOff className="size-4" />
+            ) : (
+              <Eye className="size-4" />
+            )}
+          </Button>
+        </div>
       </div>
       <label className="flex cursor-pointer items-center gap-2 text-sm">
         <input

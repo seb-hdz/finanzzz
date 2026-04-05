@@ -8,6 +8,8 @@ import {
   Send,
   Download,
   AlertTriangle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -60,6 +62,7 @@ export function SharedSourceSyncModal({
 
   const [pastedInput, setPastedInput] = useState("");
   const [receivePassword, setReceivePassword] = useState("");
+  const [showReceivePassword, setShowReceivePassword] = useState(false);
   const [receiveRemember, setReceiveRemember] = useState(true);
   const [receiving, setReceiving] = useState(false);
 
@@ -68,6 +71,7 @@ export function SharedSourceSyncModal({
     setIncluded([]);
     setPastedInput("");
     setReceivePassword("");
+    setShowReceivePassword(false);
     setReceiveRemember(true);
   }
 
@@ -130,7 +134,7 @@ export function SharedSourceSyncModal({
   async function handleReceive() {
     const token = extractTokenFromInput(pastedInput);
     if (!token) {
-      toast.error("Pega la URL o el token recibido.");
+      toast.error("Pega la URL recibida.");
       return;
     }
 
@@ -302,10 +306,10 @@ export function SharedSourceSyncModal({
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="paste-token">URL o token</Label>
+                <Label htmlFor="paste-token">URL</Label>
                 <Input
                   id="paste-token"
-                  placeholder="Pega aquí la URL o el token"
+                  placeholder="Pega aquí la URL"
                   value={pastedInput}
                   onChange={(e) => setPastedInput(e.target.value)}
                   className="font-mono text-xs"
@@ -318,18 +322,38 @@ export function SharedSourceSyncModal({
 
               <div className="space-y-2">
                 <Label htmlFor="receive-pw">Contraseña de enlace</Label>
-                <Input
-                  id="receive-pw"
-                  type="password"
-                  value={receivePassword}
-                  onChange={(e) => setReceivePassword(e.target.value)}
-                  placeholder={
-                    sync?.storedInboundPassword
-                      ? "Guardada — déjala vacía para usar la recordada"
-                      : "Acordada fuera de la app"
-                  }
-                  autoComplete="off"
-                />
+                <div className="flex gap-2 items-center">
+                  <Input
+                    id="receive-pw"
+                    type={showReceivePassword ? "text" : "password"}
+                    value={receivePassword}
+                    onChange={(e) => setReceivePassword(e.target.value)}
+                    placeholder={
+                      sync?.storedInboundPassword
+                        ? "Guardada — déjala vacía para usar la recordada"
+                        : "Acordada fuera de la app"
+                    }
+                    autoComplete="off"
+                    className="min-w-0"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowReceivePassword((v) => !v)}
+                    aria-label={
+                      showReceivePassword
+                        ? "Ocultar contraseña de enlace"
+                        : "Mostrar contraseña de enlace"
+                    }
+                  >
+                    {showReceivePassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
 
               <label className="flex cursor-pointer items-center gap-2 text-sm">
