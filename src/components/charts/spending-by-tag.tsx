@@ -11,6 +11,11 @@ import {
 import type { Expense, Tag } from "@/lib/types";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 
+const NONE_BUCKET = "__none__";
+const COLOR_NO_TAG = "#737373";
+/** Distinct from "Sin tag" for unknown tag ids (e.g. not yet synced). */
+const COLOR_UNSYNCED = "#b45309";
+
 interface Props {
   expenses: Expense[];
   tags: Tag[];
@@ -22,7 +27,7 @@ export function SpendingByTag({ expenses, tags }: Props) {
   const totals = new Map<string, number>();
   expenses.forEach((e) => {
     if (e.tagIds.length === 0) {
-      totals.set("__none__", (totals.get("__none__") ?? 0) + e.amount);
+      totals.set(NONE_BUCKET, (totals.get(NONE_BUCKET) ?? 0) + e.amount);
     } else {
       e.tagIds.forEach((id) => {
         totals.set(id, (totals.get(id) ?? 0) + e.amount);
@@ -30,13 +35,28 @@ export function SpendingByTag({ expenses, tags }: Props) {
     }
   });
 
-  const data = Array.from(totals.entries())
-    .map(([id, amount]) => ({
-      name: id === "__none__" ? "Sin tag" : (tagMap.get(id)?.name ?? "—"),
-      amount,
-      color: id === "__none__" ? "#737373" : (tagMap.get(id)?.color ?? "#737373"),
-    }))
-    .sort((a, b) => b.amount - a.amount);
+  let unsyncedTotal = 0;
+  const data: { name: string; amount: number; color: string }[] = [];
+  for (const [id, amount] of totals) {
+    if (id === NONE_BUCKET) {
+      data.push({ name: "Sin tag", amount, color: COLOR_NO_TAG });
+    } else {
+      const tag = tagMap.get(id);
+      if (tag) {
+        data.push({ name: tag.name, amount, color: tag.color });
+      } else {
+        unsyncedTotal += amount;
+      }
+    }
+  }
+  if (unsyncedTotal > 0) {
+    data.push({
+      name: "No sincronizado",
+      amount: unsyncedTotal,
+      color: COLOR_UNSYNCED,
+    });
+  }
+  data.sort((a, b) => b.amount - a.amount);
 
   if (data.length === 0) {
     return (
