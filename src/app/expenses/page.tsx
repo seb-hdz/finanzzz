@@ -16,12 +16,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+import { MultiSelectDropdown } from "@/components/multi-select-dropdown";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,8 +38,6 @@ import {
 import { formatPEN } from "@/lib/limits";
 import type { Expense, SourceType } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
-
-type SourceTypeFilter = "all" | SourceType;
 
 const SOURCE_TYPES: SourceType[] = [
   "bank_account",
@@ -82,10 +75,9 @@ function getRange(period: Period) {
 export default function ExpensesPage() {
   const [period, setPeriod] = useState<Period>("monthly");
   const [search, setSearch] = useState("");
-  const [sourceFilter, setSourceFilter] = useState("all");
-  const [sourceTypeFilter, setSourceTypeFilter] =
-    useState<SourceTypeFilter>("all");
-  const [tagFilter, setTagFilter] = useState("all");
+  const [sourceFilterIds, setSourceFilterIds] = useState<string[]>([]);
+  const [sourceTypeFilterIds, setSourceTypeFilterIds] = useState<string[]>([]);
+  const [tagFilterIds, setTagFilterIds] = useState<string[]>([]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | undefined>();
@@ -96,19 +88,54 @@ export default function ExpensesPage() {
   const sources = useSources();
   const tags = useTags();
 
+  const sourceOptions = useMemo(
+    () =>
+      sources.map((s) => ({
+        value: s.id,
+        text: s.name,
+        label: s.name,
+        swatchColor: s.color,
+      })),
+    [sources]
+  );
+
+  const typeOptions = useMemo(
+    () =>
+      SOURCE_TYPES.map((t) => ({
+        value: t,
+        text: SOURCE_TYPE_LABELS[t],
+        label: SOURCE_TYPE_LABELS[t],
+      })),
+    []
+  );
+
+  const tagOptions = useMemo(
+    () =>
+      tags.map((t) => ({
+        value: t.id,
+        text: t.name,
+        label: t.name,
+        swatchColor: t.color,
+      })),
+    [tags]
+  );
+
   const filtered = useMemo(() => {
     let result = expenses;
-    if (sourceFilter !== "all") {
-      result = result.filter((e) => e.sourceId === sourceFilter);
+    if (sourceFilterIds.length > 0) {
+      const ids = new Set(sourceFilterIds);
+      result = result.filter((e) => ids.has(e.sourceId));
     }
-    if (sourceTypeFilter !== "all") {
+    if (sourceTypeFilterIds.length > 0) {
+      const types = new Set(sourceTypeFilterIds);
       const ids = new Set(
-        sources.filter((s) => s.type === sourceTypeFilter).map((s) => s.id)
+        sources.filter((s) => types.has(s.type)).map((s) => s.id)
       );
       result = result.filter((e) => ids.has(e.sourceId));
     }
-    if (tagFilter !== "all") {
-      result = result.filter((e) => e.tagIds.includes(tagFilter));
+    if (tagFilterIds.length > 0) {
+      const tagSet = new Set(tagFilterIds);
+      result = result.filter((e) => e.tagIds.some((id) => tagSet.has(id)));
     }
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -119,7 +146,14 @@ export default function ExpensesPage() {
       );
     }
     return result;
-  }, [expenses, sourceFilter, sourceTypeFilter, tagFilter, search, sources]);
+  }, [
+    expenses,
+    sourceFilterIds,
+    sourceTypeFilterIds,
+    tagFilterIds,
+    search,
+    sources,
+  ]);
 
   const total = filtered.reduce((s, e) => s + e.amount, 0);
 
@@ -187,89 +221,30 @@ export default function ExpensesPage() {
           />
         </div>
         <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
-          <Select
-            value={sourceFilter}
-            onValueChange={(v) => setSourceFilter(v ?? "all")}
-          >
-            <SelectTrigger
-              className="h-auto min-h-9 w-full min-w-0 md:flex-1"
-              title={
-                sourceFilter !== "all"
-                  ? sources.find((s) => s.id === sourceFilter)?.name
-                  : undefined
-              }
-            >
-              <span data-slot="select-value" className="truncate">
-                {sourceFilter === "all"
-                  ? "Todas las fuentes"
-                  : sources.find((s) => s.id === sourceFilter)?.name ??
-                    "Fuente"}
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las fuentes</SelectItem>
-              {sources.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  <div className="flex items-start gap-2">
-                    <div
-                      className="size-2 rounded-full block"
-                      style={{ backgroundColor: s.color }}
-                    />
-                    {s.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={sourceTypeFilter}
-            onValueChange={(v) =>
-              setSourceTypeFilter((v ?? "all") as SourceTypeFilter)
-            }
-          >
-            <SelectTrigger className="h-auto min-h-9 w-full min-w-0 md:flex-1">
-              <span data-slot="select-value" className="truncate">
-                {sourceTypeFilter === "all"
-                  ? "Todos los tipos"
-                  : SOURCE_TYPE_LABELS[sourceTypeFilter]}
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              {SOURCE_TYPES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {SOURCE_TYPE_LABELS[t]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={tagFilter}
-            onValueChange={(v) => setTagFilter(v ?? "all")}
-          >
-            <SelectTrigger
-              className="h-auto min-h-9 w-full min-w-0 md:flex-1"
-              title={
-                tagFilter !== "all"
-                  ? tags.find((t) => t.id === tagFilter)?.name
-                  : undefined
-              }
-            >
-              <span data-slot="select-value" className="truncate">
-                {tagFilter === "all"
-                  ? "Todos los tags"
-                  : tags.find((t) => t.id === tagFilter)?.name ?? "Tag"}
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tags</SelectItem>
-              {tags.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MultiSelectDropdown
+            className="md:flex-1"
+            emptyLabel="Todas las fuentes"
+            listLabel="Filtrar por fuente"
+            options={sourceOptions}
+            value={sourceFilterIds}
+            onValueChange={setSourceFilterIds}
+          />
+          <MultiSelectDropdown
+            className="md:flex-1"
+            emptyLabel="Todos los tipos"
+            listLabel="Filtrar por tipo de fuente"
+            options={typeOptions}
+            value={sourceTypeFilterIds}
+            onValueChange={setSourceTypeFilterIds}
+          />
+          <MultiSelectDropdown
+            className="md:flex-1"
+            emptyLabel="Todos los tags"
+            listLabel="Filtrar por tag"
+            options={tagOptions}
+            value={tagFilterIds}
+            onValueChange={setTagFilterIds}
+          />
         </div>
       </div>
 

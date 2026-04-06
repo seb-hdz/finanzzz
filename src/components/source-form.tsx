@@ -220,14 +220,14 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
           {type === "shared" && needsLinkPassword && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="linkPw">Contraseña de enlace</Label>
+                <Label htmlFor="linkPw">Contraseña</Label>
                 <div className="flex gap-2 items-center">
                   <Input
                     id="linkPw"
                     type={showLinkPassword ? "text" : "password"}
                     value={linkPassword}
                     onChange={(e) => setLinkPassword(e.target.value)}
-                    placeholder="Acordada fuera de la app"
+                    placeholder="Contraseña para proteger la URL compartida"
                     autoComplete="new-password"
                     className="min-w-0"
                   />

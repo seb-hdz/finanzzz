@@ -9,7 +9,7 @@ export function AppVersionCard() {
   if (info.buildTimeIso) detailParts.push(info.buildTimeIso);
 
   return (
-    <div className="space-y-2 text-sm">
+    <div className="space-y-2 text-sm px-4">
       <div className="flex justify-between gap-2">
         <p className="font-medium">Versión de la aplicación</p>
         <p className="font-medium tabular-nums">
