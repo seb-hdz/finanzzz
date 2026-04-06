@@ -47,6 +47,7 @@ import { exportDatabase, importDatabase } from "@/lib/export-import";
 import { resetLocalDatabase } from "@/lib/db";
 import { useTheme } from "@/providers/theme-provider";
 import { Logo } from "@/components/logo";
+import { AppVersionCard } from "@/components/app-version-card";
 
 const DevSeedFakeDataButton = dynamic(
   () => import("@/components/dev-seed-fake-data-button"),
@@ -287,11 +288,13 @@ export default function SettingsPage() {
             Eliminar todos los datos
           </CardTitle>
           <CardDescription>
-            Elimina de forma permanente todos los datos guardados en este
-            dispositivo: fuentes, gastos, etiquetas personalizadas, ajustes de
-            la app y el estado de sincronización de fuentes compartidas. Se
-            restaurarán solo las etiquetas y valores por defecto. Exporta un
-            respaldo antes si quieres conservar algo.
+            Elimina de forma permanente:{" "}
+            <span className="text-foreground">
+              fuentes, gastos, etiquetas personalizadas, ajustes de la app y el
+              estado de sincronización de fuentes compartidas
+            </span>{" "}
+            en este dispositivo. Se restaurarán solo las etiquetas y valores por
+            defecto. Exporta un respaldo antes si quieres conservar algo.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -301,13 +304,15 @@ export default function SettingsPage() {
             onClick={() => setDeleteOpen(true)}
           >
             <Trash2 className="size-4" />
-            Eliminar todos los datos
+            Limpiar datos y restablecer
           </Button>
         </CardContent>
       </Card>
 
+      <AppVersionCard />
+
       <div className="mt-12 flex justify-center md:hidden">
-        <div className="flex items-center gap-2 text-muted-foreground opacity-50">
+        <div className="flex items-center gap-2 text-muted-foreground">
           <BadgeDollarSign className="size-8 shrink-0 opacity-80" />
           <Logo muted />
         </div>
