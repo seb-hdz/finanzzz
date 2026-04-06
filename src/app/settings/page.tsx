@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import {
@@ -46,6 +47,11 @@ import { exportDatabase, importDatabase } from "@/lib/export-import";
 import { resetLocalDatabase } from "@/lib/db";
 import { useTheme } from "@/providers/theme-provider";
 import { Logo } from "@/components/logo";
+
+const DevSeedFakeDataButton = dynamic(
+  () => import("@/components/dev-seed-fake-data-button"),
+  { ssr: false }
+);
 
 export default function SettingsPage() {
   const config = useGlobalConfig();
@@ -130,7 +136,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Límites de Gasto</CardTitle>
           <CardDescription>
-            Configura el límite global y los umbrales de alerta
+            Configura el límite global y los avisos de límite de gasto
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -163,7 +169,7 @@ export default function SettingsPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Umbral de advertencia (%)</Label>
+              <Label>Aviso de advertencia de límite de gasto (%)</Label>
               <Input
                 type="number"
                 min="0"
@@ -175,11 +181,11 @@ export default function SettingsPage() {
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                Se muestra alerta amarilla al alcanzar este %
+                Se mostrará una alerta de advertencia al alcanzar este %
               </p>
             </div>
             <div className="space-y-2">
-              <Label>Umbral de peligro (%)</Label>
+              <Label>Aviso de peligro de límite de gasto (%)</Label>
               <Input
                 type="number"
                 min="0"
@@ -191,7 +197,7 @@ export default function SettingsPage() {
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                Se muestra alerta roja al alcanzar este %
+                Se mostrará una alerta de peligro al alcanzar este %
               </p>
             </div>
           </div>
@@ -199,20 +205,21 @@ export default function SettingsPage() {
           <Separator />
 
           <div className="space-y-2">
-            <Label>Umbral “sync antigua” (horas)</Label>
+            <Label>Aviso de sincronización de fuentes compartidas (días)</Label>
             <Input
               type="number"
               min="1"
-              max="8760"
-              defaultValue={config.sharedStaleHours ?? 168}
+              max="365"
+              defaultValue={Math.round((config.sharedStaleHours ?? 168) / 24)}
               onBlur={(e) => {
-                const val = parseInt(e.target.value, 10) || 168;
-                handleSaveConfig("sharedStaleHours", val);
+                const days = parseInt(e.target.value, 10) || 7;
+                const clamped = Math.min(365, Math.max(1, days));
+                handleSaveConfig("sharedStaleHours", clamped * 24);
               }}
             />
             <p className="text-xs text-muted-foreground">
-              En Fuentes compartidas, avisa si no recibes una actualización del
-              otro dispositivo en este tiempo (por defecto 7 días).
+              En Fuentes compartidas, se mostrará un indicador si no recibes una
+              actualización del otro dispositivo en este número de días.
             </p>
           </div>
         </CardContent>
@@ -250,8 +257,7 @@ export default function SettingsPage() {
           <CardDescription>
             Exporta o importa tu base de datos para mover entre dispositivos. El
             respaldo incluye fuentes, gastos, etiquetas, ajustes y el estado de
-            sincronización de fuentes compartidas (independiente de los enlaces
-            URL entre pares).
+            sincronización actual de fuentes compartidas.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -271,6 +277,7 @@ export default function SettingsPage() {
             <Upload className="size-4" />
             Importar
           </Button>
+          {process.env.NODE_ENV === "development" && <DevSeedFakeDataButton />}
         </CardContent>
       </Card>
 
@@ -311,8 +318,7 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle>Exportar Base de Datos</DialogTitle>
             <DialogDescription>
-              Ingresa una contraseña para encriptar el archivo de respaldo
-              (formato versión 2).
+              Ingresa una contraseña para encriptar el archivo de respaldo.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">

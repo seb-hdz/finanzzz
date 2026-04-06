@@ -8,6 +8,8 @@ import {
   endOfWeek,
   startOfMonth,
   endOfMonth,
+  startOfYear,
+  endOfYear,
 } from "date-fns";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -52,7 +54,7 @@ const SOURCE_TYPES: SourceType[] = [
   "shared",
 ];
 
-type Period = "daily" | "weekly" | "monthly";
+type Period = "daily" | "weekly" | "monthly" | "yearly";
 
 function getRange(period: Period) {
   const now = new Date();
@@ -68,6 +70,11 @@ function getRange(period: Period) {
       return {
         start: startOfMonth(now).getTime(),
         end: endOfMonth(now).getTime(),
+      };
+    case "yearly":
+      return {
+        start: startOfYear(now).getTime(),
+        end: endOfYear(now).getTime(),
       };
   }
 }
@@ -159,6 +166,9 @@ export default function ExpensesPage() {
           </TabsTrigger>
           <TabsTrigger value="monthly" className="flex-1 sm:flex-none">
             Mes
+          </TabsTrigger>
+          <TabsTrigger value="yearly" className="flex-1 sm:flex-none">
+            Año
           </TabsTrigger>
         </TabsList>
       </Tabs>

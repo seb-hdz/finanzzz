@@ -73,7 +73,7 @@ export type AlertLevel = "success" | "warning" | "danger";
 
 export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
   bank_account: "Cuenta Bancaria",
-  mobile_payment: "Pago Móvil",
+  mobile_payment: "Monedero Digital",
   debit_card: "Tarjeta Débito",
   credit_card: "Tarjeta Crédito",
   shared: "Cuenta Compartida",

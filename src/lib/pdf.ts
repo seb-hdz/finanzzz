@@ -5,6 +5,39 @@ import { es } from "date-fns/locale";
 import type { Expense, Source, Tag } from "./types";
 import { CURRENCY_SYMBOL } from "./constants";
 
+/**
+ * Helvetica en jsPDF solo cubre bien WinAnsi (~Latin-1). Emoji, pictos y muchos
+ * Unicode corrompen el texto y hacen fallar el cálculo de anchos en autotable.
+ * Para emoji “real” en PDF habría que embeber una TTF (p. ej. Noto Sans + Noto Color Emoji).
+ */
+export function sanitizeTextForPdf(text: string): string {
+  let s = String(text).normalize("NFKC");
+  s = s.replace(/\p{Extended_Pictographic}/gu, "");
+  s = s.replace(/\uFE0F/g, "");
+  s = s.replace(/[\u200B-\u200F\u2028\u2029\uFEFF]/g, "");
+  s = s.replace(/\u00A0/g, " ");
+  const typographic: Record<string, string> = {
+    "\u2018": "'",
+    "\u2019": "'",
+    "\u201C": '"',
+    "\u201D": '"',
+    "\u2013": "-",
+    "\u2014": "-",
+    "\u2026": "...",
+  };
+  s = s.replace(
+    /[\u2018\u2019\u201C\u201D\u2013\u2014\u2026]/g,
+    (c) => typographic[c] ?? c
+  );
+  const folded = Array.from(s, (ch) => {
+    const cp = ch.codePointAt(0)!;
+    if (cp >= 0x20 && cp <= 0x7e) return ch;
+    if (cp >= 0xa0 && cp <= 0xff) return ch;
+    return "";
+  }).join("");
+  return folded.replace(/\s+/g, " ").trim();
+}
+
 interface ReportData {
   expenses: Expense[];
   sources: Source[];
@@ -21,11 +54,13 @@ export function generateExpenseReport(data: ReportData): jsPDF {
   const sourceMap = new Map(sources.map((s) => [s.id, s]));
   const tagMap = new Map(tags.map((t) => [t.id, t]));
 
-  const rangeLabel = `${format(startDate, "dd MMM yyyy", { locale: es })} - ${format(endDate, "dd MMM yyyy", { locale: es })}`;
+  const rangeLabel = `${format(startDate, "dd MMM yyyy", {
+    locale: es,
+  })} - ${format(endDate, "dd MMM yyyy", { locale: es })}`;
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   doc.setFontSize(18);
-  doc.text(title || "Reporte de Gastos - Finanzzz", 14, 22);
+  doc.text(sanitizeTextForPdf(title || "Reporte de Gastos - Finanzzz"), 14, 22);
 
   doc.setFontSize(11);
   doc.setTextColor(100);
@@ -37,15 +72,20 @@ export function generateExpenseReport(data: ReportData): jsPDF {
     .sort((a, b) => a.date - b.date)
     .map((e) => [
       format(e.date, "dd/MM/yyyy"),
-      e.description,
-      sourceMap.get(e.sourceId)?.name ?? "—",
-      e.tagIds.map((id) => tagMap.get(id)?.name ?? "").filter(Boolean).join(", ") || "—",
-      `${CURRENCY_SYMBOL} ${e.amount.toFixed(2)}`,
+      sanitizeTextForPdf(e.description),
+      sanitizeTextForPdf(sourceMap.get(e.sourceId)?.name ?? "—"),
+      sanitizeTextForPdf(
+        e.tagIds
+          .map((id) => tagMap.get(id)?.name ?? "")
+          .filter(Boolean)
+          .join(", ") || "—"
+      ),
+      e.amount.toFixed(2),
     ]);
 
   autoTable(doc, {
     startY: 54,
-    head: [["Fecha", "Descripción", "Fuente", "Tags", "Monto"]],
+    head: [["Fecha", "Descripción", "Fuente", "Tags", "Monto (S/.)"]],
     body: tableData,
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 30, 30] },
@@ -73,15 +113,17 @@ export function generateExpenseReport(data: ReportData): jsPDF {
   doc.text("Resumen por Fuente", 14, y);
   y += 8;
 
-  const summaryData = Array.from(bySource.entries()).map(([sourceId, amount]) => [
-    sourceMap.get(sourceId)?.name ?? "—",
-    `${CURRENCY_SYMBOL} ${amount.toFixed(2)}`,
-    total > 0 ? `${((amount / total) * 100).toFixed(1)}%` : "0%",
-  ]);
+  const summaryData = Array.from(bySource.entries()).map(
+    ([sourceId, amount]) => [
+      sanitizeTextForPdf(sourceMap.get(sourceId)?.name ?? "—"),
+      amount.toFixed(2),
+      total > 0 ? `${((amount / total) * 100).toFixed(1)}%` : "0%",
+    ]
+  );
 
   autoTable(doc, {
     startY: y,
-    head: [["Fuente", "Monto", "% del Total"]],
+    head: [["Fuente", "Monto (S/.)", "% del Total"]],
     body: summaryData,
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 30, 30] },
