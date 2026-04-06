@@ -53,6 +53,7 @@ export function MultiSelectDropdown({
   contentClassName,
   align = "start",
 }: MultiSelectDropdownProps) {
+  const hasOptions = options.length > 0;
   const summary = summaryLabel(options, value, emptyLabel);
   const selected = React.useMemo(() => new Set(value), [value]);
 
@@ -69,11 +70,12 @@ export function MultiSelectDropdown({
   return (
     <Popover>
       <PopoverTrigger
+        disabled={!hasOptions}
         className={cn(
           "flex h-auto min-h-9 w-full min-w-0 items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm font-normal transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-expanded:bg-muted/40 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-expanded:bg-input/50",
           className
         )}
-        aria-controls={listId}
+        aria-controls={hasOptions ? listId : undefined}
       >
         <span className="min-w-0 flex-1 truncate text-left">{summary}</span>
         <ChevronDownIcon className="pointer-events-none size-4 shrink-0 text-muted-foreground" />
@@ -101,7 +103,7 @@ export function MultiSelectDropdown({
                 role="option"
                 aria-selected={isOn}
                 className={cn(
-                  "flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none select-none transition-colors",
+                  "group flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none select-none transition-colors",
                   isOn
                     ? "bg-accent/60 text-accent-foreground"
                     : "hover:bg-muted/70"
@@ -111,7 +113,7 @@ export function MultiSelectDropdown({
                 <span
                   aria-hidden
                   className={cn(
-                    "flex size-4 shrink-0 items-center justify-center rounded border border-input bg-background shadow-sm dark:bg-input/30",
+                    "flex size-4 shrink-0 items-center justify-center rounded border border-input bg-background shadow-none transition-shadow group-hover:shadow-sm group-focus-visible:shadow-sm dark:bg-input/30",
                     isOn &&
                       "border-primary bg-primary text-primary-foreground dark:bg-primary"
                   )}

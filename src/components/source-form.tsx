@@ -162,8 +162,13 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
               value={type}
               onValueChange={(v) => v && setType(v as SourceType)}
             >
-              <SelectTrigger>
-                <span data-slot="select-value">{SOURCE_TYPE_LABELS[type]}</span>
+              <SelectTrigger className="w-full min-w-0">
+                <span
+                  data-slot="select-value"
+                  className="min-w-0 flex-1 text-left"
+                >
+                  {SOURCE_TYPE_LABELS[type]}
+                </span>
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(SOURCE_TYPE_LABELS).map(([value, label]) => (

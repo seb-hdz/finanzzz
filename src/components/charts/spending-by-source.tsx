@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -21,13 +22,76 @@ import {
 import type { Expense, Source } from "@/lib/types";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 
+/** Viewport >= lg (Tailwind): más filas; por debajo, menos para que quepa en móvil. */
+const MEDIA_LG_UP = "(min-width: 1024px)";
+/** Evita barras demasiado finas y etiquetas superpuestas; el resto se agrupa en "Otras fuentes". */
+const MAX_SOURCES_IN_CHART_LG = 10;
+const MAX_SOURCES_IN_CHART_COMPACT = 5;
+const OTHERS_LABEL = "Otras fuentes";
+const OTHERS_COLOR = "#737373";
+/** ~ancho del eje Y en px; el texto largo se trunca a una línea (nombre completo en hover). */
+const Y_AXIS_WIDTH = 132;
+const Y_TICK_MAX_CHARS = 24;
+
 interface Props {
   expenses: Expense[];
   sources: Source[];
 }
 
+type ChartRow = { name: string; amount: number; color: string };
+
+function ChartSourceYTick(props: {
+  x?: string | number;
+  y?: string | number;
+  payload?: { value?: string };
+}) {
+  const { payload } = props;
+  const x = Number(props.x ?? 0);
+  const y = Number(props.y ?? 0);
+  const raw = String(payload?.value ?? "");
+  const label =
+    raw.length > Y_TICK_MAX_CHARS
+      ? `${raw.slice(0, Y_TICK_MAX_CHARS - 1)}…`
+      : raw;
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <title>{raw}</title>
+      <text
+        dx={-4}
+        dy={3}
+        textAnchor="end"
+        fill="var(--muted-foreground)"
+        fontSize={11}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+function buildChartData(rows: ChartRow[], maxShown: number): ChartRow[] {
+  if (rows.length <= maxShown) return rows;
+  const top = rows.slice(0, maxShown - 1);
+  const restSum = rows
+    .slice(maxShown - 1)
+    .reduce((s, d) => s + d.amount, 0);
+  return [...top, { name: OTHERS_LABEL, amount: restSum, color: OTHERS_COLOR }];
+}
+
 export function SpendingBySource({ expenses, sources }: Props) {
-  const data = sources
+  const [maxSources, setMaxSources] = useState(MAX_SOURCES_IN_CHART_LG);
+
+  useEffect(() => {
+    const mq = window.matchMedia(MEDIA_LG_UP);
+    const apply = () =>
+      setMaxSources(mq.matches ? MAX_SOURCES_IN_CHART_LG : MAX_SOURCES_IN_CHART_COMPACT);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const rawData: ChartRow[] = sources
     .map((s) => ({
       name: s.name,
       amount: expenses
@@ -38,11 +102,15 @@ export function SpendingBySource({ expenses, sources }: Props) {
     .filter((d) => d.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  if (data.length === 0) {
+  const data = buildChartData(rawData, maxSources);
+
+  if (rawData.length === 0) {
     return (
-      <Card>
+      <Card className="flex h-full min-h-0 flex-col">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Gasto por Fuente</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Gasto por Fuente
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-8">
@@ -54,47 +122,56 @@ export function SpendingBySource({ expenses, sources }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="flex h-full min-h-0 flex-col">
       <CardHeader>
         <CardTitle className="text-sm font-medium">Gasto por Fuente</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="var(--border)"
-              opacity={0.45}
-            />
-            <XAxis
-              type="number"
-              tickFormatter={(v) => `${CURRENCY_SYMBOL}${v}`}
-              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-              axisLine={{ stroke: "var(--border)" }}
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              width={100}
-              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-              tickLine={false}
-              axisLine={{ stroke: "var(--border)" }}
-            />
-            <Tooltip
-              contentStyle={chartTooltipContentStyle}
-              labelStyle={chartTooltipLabelStyle}
-              itemStyle={chartTooltipItemStyle}
-              wrapperStyle={chartTooltipWrapperStyle}
-              cursor={chartBarCursor}
-              formatter={(value) => [`${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`, "Monto"]}
-            />
-            <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
-              {data.map((entry, i) => (
-                <Cell key={i} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <CardContent className="flex min-h-0 flex-1 flex-col">
+        <div className="w-full min-h-[250px] flex-1">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ left: 20, right: 8, top: 6, bottom: 6 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border)"
+                opacity={0.45}
+              />
+              <XAxis
+                type="number"
+                tickFormatter={(v) => `${CURRENCY_SYMBOL}${v}`}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={Y_AXIS_WIDTH}
+                tick={ChartSourceYTick}
+                tickLine={false}
+                axisLine={{ stroke: "var(--border)" }}
+              />
+              <Tooltip
+                contentStyle={chartTooltipContentStyle}
+                labelStyle={chartTooltipLabelStyle}
+                itemStyle={chartTooltipItemStyle}
+                wrapperStyle={chartTooltipWrapperStyle}
+                cursor={chartBarCursor}
+                formatter={(value) => [
+                  `${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`,
+                  "Monto",
+                ]}
+              />
+              <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
+                {data.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
