@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
@@ -12,7 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
 } from "@/components/ui/select";
 import {
@@ -45,7 +48,18 @@ import {
   getAlertMessage,
 } from "@/lib/limits";
 import { db } from "@/lib/db";
-import type { Expense } from "@/lib/types";
+import type { Expense, SourceType } from "@/lib/types";
+
+/** Agrupación solo para el select de fuente en este formulario. */
+const PAYMENT_SOURCE_SECTIONS: {
+  label: string;
+  types: readonly SourceType[];
+}[] = [
+  { label: "Cuentas Bancarias", types: ["bank_account"] },
+  { label: "Tarjetas", types: ["debit_card", "credit_card"] },
+  { label: "Monederos digitales", types: ["mobile_payment"] },
+  { label: "Cuentas compartidas", types: ["shared"] },
+];
 import Link from "next/link";
 
 interface ExpenseFormProps {
@@ -56,6 +70,10 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
   const sources = useSources();
+  const sourceSections = PAYMENT_SOURCE_SECTIONS.map((section) => ({
+    label: section.label,
+    sources: sources.filter((s) => section.types.includes(s.type)),
+  })).filter((s) => s.sources.length > 0);
   const tags = useTags();
   const config = useGlobalConfig();
 
@@ -243,17 +261,35 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
                     : "Seleccionar fuente"}
                 </span>
               </SelectTrigger>
-              <SelectContent>
-                {sources.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span
-                        className="size-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: s.color }}
-                      />
-                      <span className="min-w-0 break-words">{s.name}</span>
-                    </div>
-                  </SelectItem>
+              <SelectContent className="py-2">
+                {sourceSections.map((section, index) => (
+                  <Fragment key={section.label}>
+                    {index > 0 && (
+                      <SelectSeparator className="mx-1 my-0.5 shrink-0" />
+                    )}
+                    <SelectGroup className="scroll-my-1 p-0 px-1 py-0">
+                      <SelectLabel className="px-1.5 py-0.5">
+                        {section.label}
+                      </SelectLabel>
+                      {section.sources.map((s) => (
+                        <SelectItem
+                          key={s.id}
+                          value={s.id}
+                          className="py-0.5 pr-8 pl-1.5"
+                        >
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span
+                              className="size-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: s.color }}
+                            />
+                            <span className="min-w-0 wrap-break-word">
+                              {s.name}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </Fragment>
                 ))}
               </SelectContent>
             </Select>
