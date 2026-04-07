@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
 import { MainContentEnter } from "./main-content-enter";
+import { OfflineInfoModal } from "@/components/offline-info-modal";
 import { StandaloneInfoModal } from "@/components/standalone-info-modal";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -17,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
       <MobileNav />
       <StandaloneInfoModal />
+      <OfflineInfoModal />
     </div>
   );
 }

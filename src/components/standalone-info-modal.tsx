@@ -15,7 +15,8 @@ import { useIsStandalone } from "@/lib/use-standalone";
 import { Logo } from "./logo";
 import { ContextHint } from "./ui/context-hint";
 
-const DISMISSED_KEY = "finanzzz:standalone-info-dismissed";
+export const STANDALONE_INFO_DISMISSED_KEY =
+  "finanzzz:standalone-info-dismissed";
 
 function subscribe() {
   return () => {};
@@ -23,7 +24,7 @@ function subscribe() {
 
 function getPersistedDismissed(): boolean {
   try {
-    return localStorage.getItem(DISMISSED_KEY) === "1";
+    return localStorage.getItem(STANDALONE_INFO_DISMISSED_KEY) === "1";
   } catch {
     return true;
   }
@@ -45,8 +46,9 @@ export function StandaloneInfoModal() {
   function handleDismiss() {
     setJustDismissed(true);
     try {
-      localStorage.setItem(DISMISSED_KEY, "1");
+      localStorage.setItem(STANDALONE_INFO_DISMISSED_KEY, "1");
     } catch {}
+    window.dispatchEvent(new Event("finanzzz:standalone-info-dismissed"));
   }
 
   if (!isStandalone) return null;

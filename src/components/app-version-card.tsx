@@ -1,8 +1,12 @@
 import { getAppVersionInfo } from "@/lib/app-version";
+import { useIsStandalone } from "@/lib/use-standalone";
 
 export function AppVersionCard() {
   const info = getAppVersionInfo();
+  const isStandalone = useIsStandalone();
+
   const label = info.environment === "development" ? "-DEV" : "";
+  const isStandaloneLabel = isStandalone ? "(Instalada)" : "";
 
   const detailParts: string[] = [];
   if (info.buildId) detailParts.push(`build ${info.buildId}`);
@@ -19,7 +23,7 @@ export function AppVersionCard() {
       </div>
       {info.showBuildDetails && detailParts.length > 0 ? (
         <p className="break-all text-xs text-muted-foreground">
-          {detailParts.join(" · ")}
+          {detailParts.join(" · ")} {isStandaloneLabel}
         </p>
       ) : info.environment === "development" ? (
         <p className="text-sm text-muted-foreground">
