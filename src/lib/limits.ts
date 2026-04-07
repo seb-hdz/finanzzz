@@ -1,4 +1,11 @@
-import type { AlertLevel, GlobalConfig, Source, Expense, LimitInterval } from "./types";
+import { CURRENCY_SYMBOL } from "./constants";
+import type {
+  AlertLevel,
+  GlobalConfig,
+  Source,
+  Expense,
+  LimitInterval,
+} from "./types";
 import {
   startOfDay,
   endOfDay,
@@ -8,17 +15,26 @@ import {
   endOfMonth,
 } from "date-fns";
 
-export function getIntervalRange(interval: LimitInterval, refDate: Date = new Date()) {
+export function getIntervalRange(
+  interval: LimitInterval,
+  refDate: Date = new Date()
+) {
   switch (interval) {
     case "daily":
-      return { start: startOfDay(refDate).getTime(), end: endOfDay(refDate).getTime() };
+      return {
+        start: startOfDay(refDate).getTime(),
+        end: endOfDay(refDate).getTime(),
+      };
     case "weekly":
       return {
         start: startOfWeek(refDate, { weekStartsOn: 1 }).getTime(),
         end: endOfWeek(refDate, { weekStartsOn: 1 }).getTime(),
       };
     case "monthly":
-      return { start: startOfMonth(refDate).getTime(), end: endOfMonth(refDate).getTime() };
+      return {
+        start: startOfMonth(refDate).getTime(),
+        end: endOfMonth(refDate).getTime(),
+      };
   }
 }
 
@@ -56,7 +72,11 @@ export function evaluateSourceAlert(
   config: GlobalConfig
 ): AlertLevel {
   if (source.maxLimit <= 0) return "success";
-  const spent = computeSpentInInterval(expenses, config.limitInterval, source.id);
+  const spent = computeSpentInInterval(
+    expenses,
+    config.limitInterval,
+    source.id
+  );
   return evaluateAlert(spent, source.maxLimit, config);
 }
 
@@ -70,17 +90,27 @@ export function evaluateGlobalAlert(
 }
 
 export function formatPEN(amount: number): string {
-  return `S/ ${amount.toFixed(2)}`;
+  return `${CURRENCY_SYMBOL} ${amount.toFixed(2)}`;
 }
 
-export function getAlertMessage(level: AlertLevel, spent: number, limit: number): string {
+export function getAlertMessage(
+  level: AlertLevel,
+  spent: number,
+  limit: number
+): string {
   const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0;
   switch (level) {
     case "danger":
-      return `Has alcanzado el ${pct}% de tu límite (${formatPEN(spent)} / ${formatPEN(limit)})`;
+      return `Has alcanzado el ${pct}% de tu límite (${formatPEN(
+        spent
+      )} de ${formatPEN(limit)})`;
     case "warning":
-      return `Vas en el ${pct}% de tu límite (${formatPEN(spent)} / ${formatPEN(limit)})`;
+      return `Vas en el ${pct}% de tu límite (${formatPEN(
+        spent
+      )} de ${formatPEN(limit)})`;
     case "success":
-      return `Gasto registrado. Llevas ${formatPEN(spent)}${limit > 0 ? ` de ${formatPEN(limit)}` : ""}`;
+      return `Gasto registrado. Llevas ${formatPEN(spent)}${
+        limit > 0 ? ` de ${formatPEN(limit)}` : ""
+      }`;
   }
 }

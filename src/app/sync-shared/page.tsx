@@ -107,8 +107,9 @@ export default function SyncSharedPage() {
             <MonitorSmartphone className="mt-0.5 size-4 shrink-0" aria-hidden />
             <span>
               Si tienes Finanzzz instalada como app (PWA), ábrela y usa{" "}
-              <strong>Sincronizar &rarr; Recibir</strong> para pegar el token
-              directamente. Safari y la app instalada no comparten datos.
+              <strong>Sincronizar &rarr; Recibir</strong> en tu fuente
+              compartida para pegar la URL directamente. Safari y la app
+              instalada no comparten datos.
             </span>
           </div>
         )}

@@ -84,7 +84,7 @@ export function SourceCard({
         <div className="flex gap-1">
           {sharedMeta && (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="icon"
               className="size-8"
               title="Sincronizar"
@@ -93,7 +93,12 @@ export function SourceCard({
               <Link2 className="size-3.5" />
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => onEdit(source)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => onEdit(source)}
+          >
             <Pencil className="size-3.5" />
           </Button>
           <Button
@@ -113,7 +118,8 @@ export function SourceCard({
             {formatPEN(spent)}
             {hasMax && (
               <span className="text-muted-foreground font-normal">
-                {" "}/ {formatPEN(source.maxLimit)}
+                {" "}
+                / {formatPEN(source.maxLimit)}
               </span>
             )}
           </span>
@@ -125,8 +131,8 @@ export function SourceCard({
               isDanger
                 ? "[&>div]:bg-red-500"
                 : isWarning
-                  ? "[&>div]:bg-yellow-500"
-                  : "[&>div]:bg-green-500"
+                ? "[&>div]:bg-yellow-500"
+                : "[&>div]:bg-green-500"
             }
           />
         )}

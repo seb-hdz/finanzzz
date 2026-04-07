@@ -3,7 +3,15 @@
 import dynamic from "next/dynamic";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-import { Download, Upload, Moon, Sun, Trash2 } from "lucide-react";
+import {
+  Download,
+  Eye,
+  EyeOff,
+  Moon,
+  Sun,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +64,8 @@ export default function SettingsPage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [password, setPassword] = useState("");
+  const [showExportPassword, setShowExportPassword] = useState(false);
+  const [showImportPassword, setShowImportPassword] = useState(false);
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -319,7 +329,13 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+      <Dialog
+        open={exportOpen}
+        onOpenChange={(open) => {
+          setExportOpen(open);
+          if (!open) setShowExportPassword(false);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Exportar Base de Datos</DialogTitle>
@@ -329,13 +345,34 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-3">
             <Label htmlFor="export-pw">Contraseña</Label>
-            <Input
-              id="export-pw"
-              type="password"
-              placeholder="Contraseña de encriptación"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                id="export-pw"
+                type={showExportPassword ? "text" : "password"}
+                placeholder="Contraseña de encriptación"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="off"
+                className="min-w-0"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setShowExportPassword((v) => !v)}
+                aria-label={
+                  showExportPassword
+                    ? "Ocultar contraseña de encriptación"
+                    : "Mostrar contraseña de encriptación"
+                }
+              >
+                {showExportPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </Button>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setExportOpen(false)}>
@@ -348,7 +385,13 @@ export default function SettingsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+      <Dialog
+        open={importOpen}
+        onOpenChange={(open) => {
+          setImportOpen(open);
+          if (!open) setShowImportPassword(false);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Importar Base de Datos</DialogTitle>
@@ -369,13 +412,34 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="import-pw">Contraseña</Label>
-              <Input
-                id="import-pw"
-                type="password"
-                placeholder="Contraseña de desencriptación"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  id="import-pw"
+                  type={showImportPassword ? "text" : "password"}
+                  placeholder="Contraseña de desencriptación"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="off"
+                  className="min-w-0"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowImportPassword((v) => !v)}
+                  aria-label={
+                    showImportPassword
+                      ? "Ocultar contraseña de desencriptación"
+                      : "Mostrar contraseña de desencriptación"
+                  }
+                >
+                  {showImportPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
           <DialogFooter>

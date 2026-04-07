@@ -119,7 +119,7 @@ export default function SourcesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Fuentes de Pago</h1>
           <p className="text-sm text-muted-foreground">

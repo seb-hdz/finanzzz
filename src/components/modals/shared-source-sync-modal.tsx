@@ -330,8 +330,8 @@ export function SharedSourceSyncModal({
                     onChange={(e) => setReceivePassword(e.target.value)}
                     placeholder={
                       sync?.storedInboundPassword
-                        ? "Guardada — déjala vacía para usar la recordada"
-                        : "Acordada fuera de la app"
+                        ? "Vacía para usar la guardada"
+                        : "Introduce la contraseña de la URL"
                     }
                     autoComplete="off"
                     className="min-w-0"

@@ -25,4 +25,4 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfig = {
 };
 
 export const CURRENCY = "PEN";
-export const CURRENCY_SYMBOL = "S/";
+export const CURRENCY_SYMBOL = "S/.";

@@ -22,7 +22,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -35,9 +39,14 @@ import {
   useSharedSyncState,
   isSharedSourceLinked,
 } from "@/lib/db-hooks";
-import { computeSpentInInterval, evaluateAlert, getAlertMessage } from "@/lib/limits";
+import {
+  computeSpentInInterval,
+  evaluateAlert,
+  getAlertMessage,
+} from "@/lib/limits";
 import { db } from "@/lib/db";
 import type { Expense } from "@/lib/types";
+import Link from "next/link";
 
 interface ExpenseFormProps {
   open: boolean;
@@ -55,8 +64,12 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
   );
   const [description, setDescription] = useState(expense?.description ?? "");
   const [sourceId, setSourceId] = useState(expense?.sourceId ?? "");
-  const [selectedTags, setSelectedTags] = useState<string[]>(expense?.tagIds ?? []);
-  const [date, setDate] = useState<Date>(expense ? new Date(expense.date) : new Date());
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    expense?.tagIds ?? []
+  );
+  const [date, setDate] = useState<Date>(
+    expense ? new Date(expense.date) : new Date()
+  );
 
   const sharedSync = useSharedSyncState(sourceId || undefined);
 
@@ -70,7 +83,9 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
 
   function toggleTag(tagId: string) {
     setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId]
     );
   }
 
@@ -116,25 +131,48 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
     const source = sources.find((s) => s.id === sid);
 
     if (source && source.maxLimit > 0) {
-      const spent = computeSpentInInterval(allExpenses, config.limitInterval, sid);
+      const spent = computeSpentInInterval(
+        allExpenses,
+        config.limitInterval,
+        sid
+      );
       const level = evaluateAlert(spent, source.maxLimit, config);
       const msg = getAlertMessage(level, spent, source.maxLimit);
-      if (level === "danger") toast.error(`${source.name}: ${msg}`);
-      else if (level === "warning") toast.warning(`${source.name}: ${msg}`);
-      else toast.success(msg);
+      if (level === "danger")
+        toast.error(`${source.name}`, { description: msg });
+      else if (level === "warning")
+        toast.warning(`${source.name}`, { description: msg });
+      else toast.success(source.name, { description: msg });
     }
 
     if (config.totalMaxLimit > 0) {
-      const totalSpent = computeSpentInInterval(allExpenses, config.limitInterval);
-      const globalLevel = evaluateAlert(totalSpent, config.totalMaxLimit, config);
-      const globalMsg = getAlertMessage(globalLevel, totalSpent, config.totalMaxLimit);
-      if (globalLevel === "danger") toast.error(`Global: ${globalMsg}`);
-      else if (globalLevel === "warning") toast.warning(`Global: ${globalMsg}`);
+      const totalSpent = computeSpentInInterval(
+        allExpenses,
+        config.limitInterval
+      );
+      const globalLevel = evaluateAlert(
+        totalSpent,
+        config.totalMaxLimit,
+        config
+      );
+      const globalMsg = getAlertMessage(
+        globalLevel,
+        totalSpent,
+        config.totalMaxLimit
+      );
+      if (globalLevel === "danger")
+        toast.error(`Global`, { description: globalMsg });
+      else if (globalLevel === "warning")
+        toast.warning(`Global`, { description: globalMsg });
     }
 
     if (!source || source.maxLimit <= 0) {
       if (config.totalMaxLimit <= 0) {
-        toast.success("Gasto registrado");
+        if (source) {
+          toast.success(source.name, { description: "Gasto registrado" });
+        } else {
+          toast.success("Gasto registrado");
+        }
       }
     }
   }
@@ -143,7 +181,9 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar Gasto" : "Nuevo Gasto"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Editar Gasto" : "Nuevo Gasto"}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -185,7 +225,11 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
             >
               <SelectTrigger
                 className="w-full min-w-0"
-                title={sourceId ? sources.find((s) => s.id === sourceId)?.name : undefined}
+                title={
+                  sourceId
+                    ? sources.find((s) => s.id === sourceId)?.name
+                    : undefined
+                }
               >
                 <span
                   data-slot="select-value"
@@ -215,13 +259,22 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
             </Select>
             {sources.length === 0 && (
               <p className="text-xs text-destructive">
-                Primero crea una fuente de pago en la sección Fuentes.
+                Primero crea una fuente de pago en la sección{" "}
+                <Link href="/sources" className="underline">
+                  Fuentes
+                </Link>
+                .
               </p>
             )}
             {sharedBlocked && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                Esta fuente compartida aún no está vinculada en este dispositivo. Ve a Fuentes →
-                Fuentes compartidas, sincroniza con la otra persona y vuelve aquí.
+                Esta fuente compartida aún no está vinculada en este
+                dispositivo. Ve a{" "}
+                <Link href="/sources" className="underline">
+                  Fuentes
+                </Link>{" "}
+                → Fuentes compartidas, sincroniza con la otra persona y vuelve
+                aquí.
               </p>
             )}
           </div>
@@ -241,7 +294,9 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
                 }
               >
                 <CalendarIcon className="mr-2 size-4" />
-                {date ? format(date, "PPP", { locale: es }) : "Seleccionar fecha"}
+                {date
+                  ? format(date, "PPP", { locale: es })
+                  : "Seleccionar fecha"}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -260,7 +315,9 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
               {tags.map((tag) => (
                 <Badge
                   key={tag.id}
-                  variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+                  variant={
+                    selectedTags.includes(tag.id) ? "default" : "outline"
+                  }
                   className={cn(
                     "cursor-pointer transition-colors",
                     selectedTags.includes(tag.id) && "text-white"
@@ -279,10 +336,17 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={sources.length === 0 || sharedBlocked}>
+            <Button
+              type="submit"
+              disabled={sources.length === 0 || sharedBlocked}
+            >
               {isEditing ? "Guardar" : "Registrar"}
             </Button>
           </DialogFooter>

@@ -102,7 +102,8 @@ export function ExpenseList({
               <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {format(expense.date, "dd MMM yyyy", { locale: es })}
-                </span>
+                </span>{" "}
+                &middot;
                 {source && (
                   <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
                     {source.name}

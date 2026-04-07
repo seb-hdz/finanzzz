@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ExpenseList } from "@/components/expense-list";
 import { ExpenseForm } from "@/components/expense-form";
+import { SourceBadge } from "@/components/source-badge";
 import {
   useSources,
   useTags,
@@ -157,6 +158,10 @@ export default function ExpensesPage() {
 
   const total = filtered.reduce((s, e) => s + e.amount, 0);
 
+  const deletingSource = useMemo(() => {
+    return sources.find((s) => s.id === deleting?.sourceId);
+  }, [deleting, sources]);
+
   function handleNew() {
     setEditing(undefined);
     setFormOpen(true);
@@ -176,7 +181,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gastos</h1>
           <p className="text-sm text-muted-foreground">
@@ -267,17 +272,66 @@ export default function ExpensesPage() {
         open={!!deleting}
         onOpenChange={() => setDeleting(undefined)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar gasto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminará el gasto de {deleting && formatPEN(deleting.amount)}.
-              Esta acción no se puede deshacer.
+              Se eliminará permanentemente el gasto mostrado. Esta acción no se
+              puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleting && (
+            <div
+              className="space-y-3 rounded-lg border bg-muted/40 p-3 text-left text-foreground"
+              aria-label="Resumen del gasto a eliminar"
+            >
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Monto
+                </p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums tracking-tight">
+                  {formatPEN(deleting.amount)}
+                </p>
+              </div>
+              {!!deleting.description.trim().length ? (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Descripción
+                  </p>
+                  <p className="mt-0.5 text-sm font-medium wrap-break-word">
+                    {deleting.description}
+                  </p>
+                </div>
+              ) : null}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Fuente
+                </p>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  {deletingSource ? (
+                    <>
+                      <span
+                        className="size-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: deletingSource.color }}
+                        aria-hidden
+                      />
+                      <span className="min-w-0 text-sm font-medium">
+                        {deletingSource.name}
+                      </span>
+                      <SourceBadge type={deletingSource.type} />
+                    </>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      Fuente no encontrada (pudo haberse eliminado)
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction variant="destructive" onClick={handleDelete}>
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
