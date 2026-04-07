@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   title: "Finanzzz",
   description: "Control de gastos personales",
   icons: {
+    icon: `${appBasePath}/favicon.ico`,
     apple: [
       {
         url: `${appBasePath}/icons/icon-192.png`,

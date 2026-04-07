@@ -17,7 +17,7 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-56 lg:w-64 flex-col border-r bg-card h-screen sticky top-0">
-      <div className="flex items-center gap-2 px-5 py-5 border-b">
+      <div className="flex items-center gap-2 px-5 py-3 border-b">
         <Image
           src={logoMark}
           alt=""
@@ -25,7 +25,7 @@ export function Sidebar() {
           height={48}
           className="shrink-0 object-contain"
         />
-        <Logo />
+        <Logo className="mt-2" />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -50,7 +50,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t">
+      <div className="px-3 py-4 border-t hover:bg-accent transition-colors">
         <Button
           variant="ghost"
           size="sm"

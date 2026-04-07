@@ -70,12 +70,21 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
     type === "shared" &&
     (!syncState?.outboundPasswordLocked || !syncState?.outboundPassword);
 
+  const sharedPublicIdLocked =
+    type === "shared" &&
+    isEditing &&
+    isValidSharedPublicId(
+      normalizeSharedPublicId(source?.sharedPublicId ?? "")
+    );
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
 
     if (type === "shared") {
-      const sid = normalizeSharedPublicId(sharedPublicId);
+      const sid = sharedPublicIdLocked
+        ? normalizeSharedPublicId(source!.sharedPublicId ?? "")
+        : normalizeSharedPublicId(sharedPublicId);
       if (!isValidSharedPublicId(sid)) {
         toast.error(
           `Id compartido: 1–${SHARED_PUBLIC_ID_MAX_LEN} caracteres (letras minúsculas, números, . _ -).`
@@ -100,7 +109,11 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
       maxLimit: maxLimit ? parseFloat(maxLimit) : -1,
       minLimit: minLimit ? parseFloat(minLimit) : -1,
       sharedPublicId:
-        type === "shared" ? normalizeSharedPublicId(sharedPublicId) : undefined,
+        type === "shared"
+          ? sharedPublicIdLocked
+            ? normalizeSharedPublicId(source!.sharedPublicId ?? "")
+            : normalizeSharedPublicId(sharedPublicId)
+          : undefined,
     };
 
     try {
@@ -203,21 +216,30 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
                 id="sharedPublicId"
                 placeholder="ej: casa2024"
                 value={sharedPublicId}
-                onChange={(e) =>
+                readOnly={sharedPublicIdLocked}
+                onChange={(e) => {
+                  if (sharedPublicIdLocked) return;
                   setSharedPublicId(
                     normalizeSharedPublicId(e.target.value).slice(
                       0,
                       SHARED_PUBLIC_ID_MAX_LEN
                     )
-                  )
-                }
+                  );
+                }}
                 maxLength={SHARED_PUBLIC_ID_MAX_LEN}
                 required
                 autoComplete="off"
+                className={cn(sharedPublicIdLocked && "bg-muted/50")}
               />
               <p className="text-xs text-muted-foreground">
-                Debe ser el mismo en{" "}
-                <span className="underline">ambos dispositivos</span>.
+                {sharedPublicIdLocked ? (
+                  <>Solo lectura. El id compartido no se puede cambiar.</>
+                ) : (
+                  <>
+                    Debe ser el mismo en{" "}
+                    <span className="underline">ambos dispositivos</span>.
+                  </>
+                )}
               </p>
             </div>
           )}
