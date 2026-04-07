@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
 import { MainContentEnter } from "./main-content-enter";
-import { OfflineInfoModal } from "@/components/offline-info-modal";
-import { StandaloneInfoModal } from "@/components/standalone-info-modal";
+import { OfflineInfoModal } from "@/components/modals/offline-info-modal";
+import { StandaloneInfoModal } from "@/components/modals/standalone-info-modal";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (

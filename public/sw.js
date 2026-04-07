@@ -1,18 +1,20 @@
 const CACHE_NAME = "finanzzz-v1";
-const BASE = "/finanzzz";
 
-const PRECACHE_URLS = [
-  `${BASE}/`,
-  `${BASE}/expenses`,
-  `${BASE}/sources`,
-  `${BASE}/tags`,
-  `${BASE}/settings`,
-  `${BASE}/reports`,
-];
+const APP_PATHS = ["/", "/expenses", "/sources", "/tags", "/settings", "/reports"];
+
+function scopeBasePrefix() {
+  const path = new URL(self.registration.scope).pathname.replace(/\/$/, "");
+  return path;
+}
+
+function precacheUrls() {
+  const base = scopeBasePrefix();
+  return APP_PATHS.map((p) => (base === "" ? p : `${base}${p}`));
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(precacheUrls()))
   );
   self.skipWaiting();
 });

@@ -12,8 +12,8 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { useIsStandalone } from "@/lib/use-standalone";
-import { Logo } from "./logo";
-import { ContextHint } from "./ui/context-hint";
+import { Logo } from "@/components/logo";
+import { ContextHint } from "@/components/ui/context-hint";
 
 export const STANDALONE_INFO_DISMISSED_KEY =
   "finanzzz:standalone-info-dismissed";

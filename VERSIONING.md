@@ -1,6 +1,6 @@
 # Commits y versionado
 
-Guía breve para este repo. El despliegue a GitHub Pages se dispara con cada push a `main`; la versión que ve el usuario en producción sale de `package.json` + datos que inyecta CI (run, SHA, fecha).
+Se despliega automáticamente a **GitHub Pages** con cada push a `main`; la versión que ve el usuario en producción se obtiene desde `package.json` + datos que inyecta CI sobre la build.
 
 ## Convención de commits
 
@@ -26,7 +26,7 @@ feat(global): fix typo in markdown files extensions
 ## Versionado (`package.json`)
 
 - El **semver** de la app es el campo `"version"` en [`package.json`](package.json) (ej. `0.1.0`).
-- **patch** (0.1.**1**): correcciones pequeñas, sin cambio de comportamiento relevante para la usuaria.
+- **patch** (0.1.**1**): correcciones pequeñas, sin cambio de comportamiento relevante.
 - **minor** (0.**2**.0): funcionalidad nueva compatible con lo anterior.
 - **major** (**1**.0.0): cambios que rompen expectativas guardadas, datos o flujos (cuando aplique).
 
@@ -42,11 +42,11 @@ Varios commits en `main` pueden compartir la misma versión; para soporte y depu
 ### Si usas `develop` (u otra rama de integración)
 
 1. Integra trabajo en `develop` con commits que sigan la convención de arriba.
-2. Para **soltar** una versión: sube el `version` en la rama que vaya a fusionarse a `main` (suele ser el PR de `develop` → `main`, o un commit en `main` justo después del merge).
-3. Merge a `main` y push; el deploy usa el `package.json` ya actualizado.
+2. Para **lanzar** una versión: sube el `version` en la rama que vaya a unirse a `main`.
+3. Merge a `main` y push; el deploy usará el `package.json` ya actualizado.
 
-Regla práctica: **lo que esté en `package.json` en el commit que despliega Pages es la versión semver que debe mostrar la app**; no hace falta tag git para este flujo, salvo que quieras usarlos por costumbre.
+> Regla práctica: **lo que esté en `package.json` en el commit que despliega Pages es la versión semver que mostrará la app**.
 
 ## Override de versión en CI (excepcional)
 
-En GitHub: **Actions** → workflow **Deploy to GitHub Pages** → **Run workflow**. El campo **app_version_override** pisa el semver mostrado en la app sin editar `package.json`. Déjalo vacío en el día a día; la fuente habitual debe ser `package.json`.
+En **GitHub Actions** el workflow de **Despliegue a GitHub Pages** tiene el campo **app_version_override** para sobreescribir el semver mostrado la app por encima del `package.json`. Solo se recomienda para casos excepcionales (la fuente de verdad debe ser `package.json`).

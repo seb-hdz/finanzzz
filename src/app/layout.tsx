@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans, Geist_Mono } from "next/font/google";
+import { appBasePath } from "@/lib/app-base-path";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SonnerToaster } from "@/components/sonner-toaster";
@@ -22,7 +23,30 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Finanzzz",
   description: "Control de gastos personales",
-  manifest: "/manifest.json",
+  icons: {
+    apple: [
+      {
+        url: `${appBasePath}/icons/icon-192.png`,
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: `${appBasePath}/icons/icon-512.png`,
+        sizes: "512x512",
+        type: "image/png",
+      },
+      {
+        url: `${appBasePath}/icons/icon-192.svg`,
+        sizes: "192x192",
+        type: "image/svg+xml",
+      },
+      {
+        url: `${appBasePath}/icons/icon-512.svg`,
+        sizes: "512x512",
+        type: "image/svg+xml",
+      },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

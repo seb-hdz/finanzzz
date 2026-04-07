@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      app_version_override:
+      app_version_override: # 0.1.0
         description: "Opcional — semver mostrado en la app (vacío = package.json)"
         required: false
         default: ""

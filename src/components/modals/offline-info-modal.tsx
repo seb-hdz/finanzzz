@@ -12,7 +12,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { useIsStandalone } from "@/lib/use-standalone";
-import { STANDALONE_INFO_DISMISSED_KEY } from "@/components/standalone-info-modal";
+import { STANDALONE_INFO_DISMISSED_KEY } from "@/components/modals/standalone-info-modal";
 
 function subscribeOnline(onStoreChange: () => void) {
   window.addEventListener("online", onStoreChange);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { DbLoadingScreen } from "@/components/db-loading-screen";
 import { seedDatabase } from "@/lib/db";
 
 export function DbProvider({ children }: { children: ReactNode }) {
@@ -10,12 +11,8 @@ export function DbProvider({ children }: { children: ReactNode }) {
     seedDatabase().then(() => setReady(true));
   }, []);
 
-  if (!ready) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Cargando...</div>
-      </div>
-    );
+  if (ready) {
+    return <DbLoadingScreen />;
   }
 
   return <>{children}</>;

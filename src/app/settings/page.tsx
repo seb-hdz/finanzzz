@@ -3,14 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-import {
-  Download,
-  Upload,
-  Moon,
-  Sun,
-  BadgeDollarSign,
-  Trash2,
-} from "lucide-react";
+import { Download, Upload, Moon, Sun, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +41,8 @@ import { resetLocalDatabase } from "@/lib/db";
 import { useTheme } from "@/providers/theme-provider";
 import { Logo } from "@/components/logo";
 import { AppVersionCard } from "@/components/app-version-card";
+import logoMark from "@/assets/logo.svg";
+import Image from "next/image";
 
 const DevSeedFakeDataButton = dynamic(
   () => import("@/components/dev-seed-fake-data-button"),
@@ -313,7 +308,13 @@ export default function SettingsPage() {
 
       <div className="mt-12 flex justify-center md:hidden">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <BadgeDollarSign className="size-8 shrink-0 opacity-80" />
+          <Image
+            src={logoMark}
+            alt=""
+            width={48}
+            height={48}
+            className="shrink-0 object-contain"
+          />
           <Logo muted />
         </div>
       </div>

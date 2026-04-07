@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SourceCard } from "@/components/source-card";
 import { SourceForm } from "@/components/source-form";
-import { SharedSourceSyncModal } from "@/components/shared-source-sync-modal";
+import { SharedSourceSyncModal } from "@/components/modals/shared-source-sync-modal";
 import {
   useSources,
   useExpensesInInterval,

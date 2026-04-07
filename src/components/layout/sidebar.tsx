@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, BadgeDollarSign } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { NAV_ITEMS } from "./nav-config";
+import logoMark from "@/assets/logo.svg";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -16,7 +18,13 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-56 lg:w-64 flex-col border-r bg-card h-screen sticky top-0">
       <div className="flex items-center gap-2 px-5 py-5 border-b">
-        <BadgeDollarSign className="size-8 text-blue-500" />
+        <Image
+          src={logoMark}
+          alt=""
+          width={48}
+          height={48}
+          className="shrink-0 object-contain"
+        />
         <Logo />
       </div>
 
