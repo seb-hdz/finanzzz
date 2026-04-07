@@ -3,7 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import type { GlobalConfig, Expense } from "@/lib/types";
-import { formatPEN } from "@/lib/limits";
+import {
+  formatPEN,
+  limitProgressIndicatorClassName,
+  limitProgressTrackClassName,
+} from "@/lib/limits";
 
 interface Props {
   expenses: Expense[];
@@ -20,15 +24,19 @@ export function GlobalLimitGauge({ expenses, config }: Props) {
   const isWarning = hasLimit && config && spent / limit >= config.warningThreshold;
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Límite Global</CardTitle>
+    <Card className="h-full min-h-0 lg:flex lg:flex-col">
+      <CardHeader className="pb-2 lg:pb-3">
+        <CardTitle className="text-sm font-medium lg:text-base">
+          Límite Global
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-baseline justify-between">
-          <span className="text-3xl font-bold">{formatPEN(spent)}</span>
+      <CardContent className="space-y-3 lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:space-y-4">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-3xl font-bold lg:text-4xl">
+            {formatPEN(spent)}
+          </span>
           {hasLimit && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground lg:text-base">
               de {formatPEN(limit)}
             </span>
           )}
@@ -37,15 +45,13 @@ export function GlobalLimitGauge({ expenses, config }: Props) {
           <>
             <Progress
               value={pct}
-              className={
-                isDanger
-                  ? "[&>div]:bg-red-500"
-                  : isWarning
-                    ? "[&>div]:bg-yellow-500"
-                    : "[&>div]:bg-green-500"
-              }
+              trackClassName={limitProgressTrackClassName()}
+              indicatorClassName={limitProgressIndicatorClassName(
+                isDanger,
+                isWarning
+              )}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground lg:text-sm">
               {Math.round(pct)}% utilizado &middot;{" "}
               {spent < limit
                 ? `Restante: ${formatPEN(limit - spent)}`
@@ -53,7 +59,7 @@ export function GlobalLimitGauge({ expenses, config }: Props) {
             </p>
           </>
         ) : (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground lg:text-sm">
             Sin límite global configurado
           </p>
         )}

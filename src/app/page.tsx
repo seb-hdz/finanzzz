@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import { toast } from "sonner";
+import { useMemo, useState } from "react";
 import { TrendingUp, Receipt, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LimitIntervalSelect } from "@/components/limit-interval-select";
@@ -10,17 +9,21 @@ import {
   useTags,
   useExpensesInInterval,
   useGlobalConfig,
-  updateGlobalConfig,
 } from "@/lib/db-hooks";
 import { formatPEN } from "@/lib/limits";
 import { GlobalLimitGauge } from "@/components/charts/global-limit-gauge";
 import { SpendingBySource } from "@/components/charts/spending-by-source";
 import { SpendingByTag } from "@/components/charts/spending-by-tag";
 import { SpendingTrend } from "@/components/charts/spending-trend";
+import type { LimitInterval } from "@/lib/types";
 
 export default function DashboardPage() {
   const config = useGlobalConfig();
-  const interval = config?.limitInterval ?? "monthly";
+  const [viewInterval, setViewInterval] = useState<LimitInterval | undefined>(
+    undefined
+  );
+  const interval =
+    viewInterval ?? config?.limitInterval ?? "monthly";
   const expenses = useExpensesInInterval(interval);
   const sources = useSources();
   const tags = useTags();
@@ -58,25 +61,22 @@ export default function DashboardPage() {
           <LimitIntervalSelect
             variant="inline"
             value={interval}
-            disabled={!config}
-            onValueChange={async (v) => {
-              if (!config) return;
-              await updateGlobalConfig({ limitInterval: v });
-              toast.success("Configuración guardada");
-            }}
+            onValueChange={(v) => setViewInterval(v)}
           />
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <GlobalLimitGauge expenses={expenses} config={config} />
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:grid-rows-2 lg:items-stretch">
+        <div className="max-lg:order-1 lg:min-h-0 lg:h-full">
+          <GlobalLimitGauge expenses={expenses} config={config} />
+        </div>
 
-        <Card>
+        <Card className="flex h-full min-h-0 max-lg:order-3 flex-col lg:min-h-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Transacciones</CardTitle>
             <Receipt className="size-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-1 flex-col justify-center">
             <div className="text-3xl font-bold">{stats.count}</div>
             <p className="text-xs text-muted-foreground">
               Promedio: {formatPEN(stats.avgPerExpense)}
@@ -84,29 +84,31 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Top Fuente</CardTitle>
-            <Wallet className="size-4 text-muted-foreground" />
+        <Card className="flex h-full min-h-0 max-lg:order-2 flex-col lg:min-h-0">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 lg:pb-3">
+            <CardTitle className="text-sm font-medium lg:text-base">
+              Top Fuente
+            </CardTitle>
+            <Wallet className="size-4 text-muted-foreground lg:size-5" />
           </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold truncate">
+          <CardContent className="flex flex-1 flex-col justify-center">
+            <div className="text-lg font-bold truncate lg:text-2xl">
               {stats.topSource?.name ?? "—"}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground lg:text-sm">
               {stats.topAmount > 0 ? formatPEN(stats.topAmount) : "Sin gastos"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex h-full min-h-0 max-lg:order-4 flex-col lg:min-h-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Fuentes Activas
             </CardTitle>
             <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-1 flex-col justify-center">
             <div className="text-3xl font-bold">
               {new Set(expenses.map((e) => e.sourceId)).size}
             </div>

@@ -8,13 +8,19 @@ import {
 } from "@/components/ui/select";
 import type { LimitInterval } from "@/lib/types";
 
-const LIMIT_INTERVALS: LimitInterval[] = ["daily", "weekly", "monthly"];
+const LIMIT_INTERVALS: LimitInterval[] = [
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+];
 
 /** Etiquetas para formularios (p. ej. Ajustes). */
 export const LIMIT_INTERVAL_LABELS_FIELD: Record<LimitInterval, string> = {
   daily: "Diario",
   weekly: "Semanal",
   monthly: "Mensual",
+  yearly: "Anual",
 };
 
 /** Etiquetas en frase (p. ej. “Resumen de gastos …”). */
@@ -22,6 +28,7 @@ export const LIMIT_INTERVAL_LABELS_PHRASE: Record<LimitInterval, string> = {
   daily: "hoy",
   weekly: "esta semana",
   monthly: "este mes",
+  yearly: "este año",
 };
 
 type LimitIntervalSelectProps = {

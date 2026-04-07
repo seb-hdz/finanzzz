@@ -57,7 +57,7 @@ export interface Tag {
   isPredefined: boolean;
 }
 
-export type LimitInterval = "daily" | "weekly" | "monthly";
+export type LimitInterval = "daily" | "weekly" | "monthly" | "yearly";
 
 export interface GlobalConfig {
   id: string; // always "global"

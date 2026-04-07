@@ -10,10 +10,13 @@ import { Label } from "@/components/ui/label";
 import { applySharedSyncFromToken } from "@/lib/shared-sync";
 import { db } from "@/lib/db";
 import { useIsStandalone } from "@/lib/use-standalone";
+import { useApplePlatformKind } from "@/lib/use-apple-platform";
 
 export default function SyncSharedPage() {
   const router = useRouter();
   const isStandalone = useIsStandalone();
+  const { ready: appleReady, kind: appleKind } = useApplePlatformKind();
+  const isApplePlatform = appleReady && appleKind !== null;
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -108,8 +111,14 @@ export default function SyncSharedPage() {
             <span>
               Si tienes Finanzzz instalada como app (PWA), ábrela y usa{" "}
               <strong>Sincronizar &rarr; Recibir</strong> en tu fuente
-              compartida para pegar la URL directamente. Safari y la app
-              instalada no comparten datos.
+              compartida para pegar la URL directamente.{" "}
+              {isApplePlatform ? (
+                <>Safari y la app instalada no comparten datos.</>
+              ) : (
+                <>
+                  El navegador y la app instalada pueden no compartir datos.
+                </>
+              )}
             </span>
           </div>
         )}
@@ -179,8 +188,15 @@ export default function SyncSharedPage() {
           <MonitorSmartphone className="mt-0.5 size-4 shrink-0" aria-hidden />
           <span>
             Si tienes Finanzzz instalada como app (PWA), este enlace podría
-            fallar porque Safari no comparte datos con la app instalada. Usa{" "}
-            <strong>Sincronizar &rarr; Recibir</strong> dentro de la app.
+            fallar porque{" "}
+            {isApplePlatform ? (
+              <>Safari no comparte datos con la app instalada.</>
+            ) : (
+              <>
+                el navegador puede no compartir datos con la app instalada.
+              </>
+            )}{" "}
+            Usa <strong>Sincronizar &rarr; Recibir</strong> dentro de la app.
           </span>
         </div>
       )}

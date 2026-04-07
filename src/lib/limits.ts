@@ -1,4 +1,5 @@
 import { CURRENCY_SYMBOL } from "./constants";
+import { cn } from "./utils";
 import type {
   AlertLevel,
   GlobalConfig,
@@ -6,6 +7,14 @@ import type {
   Expense,
   LimitInterval,
 } from "./types";
+
+/** Etiqueta junto al monto gastado en tarjetas de fuente (intervalo global). */
+export const LIMIT_INTERVAL_SPENT_LABELS: Record<LimitInterval, string> = {
+  daily: "Gastado este día",
+  weekly: "Gastado esta semana",
+  monthly: "Gastado este mes",
+  yearly: "Gastado este año",
+};
 import {
   startOfDay,
   endOfDay,
@@ -13,6 +22,8 @@ import {
   endOfWeek,
   startOfMonth,
   endOfMonth,
+  startOfYear,
+  endOfYear,
 } from "date-fns";
 
 export function getIntervalRange(
@@ -34,6 +45,11 @@ export function getIntervalRange(
       return {
         start: startOfMonth(refDate).getTime(),
         end: endOfMonth(refDate).getTime(),
+      };
+    case "yearly":
+      return {
+        start: startOfYear(refDate).getTime(),
+        end: endOfYear(refDate).getTime(),
       };
   }
 }
@@ -113,4 +129,24 @@ export function getAlertMessage(
         limit > 0 ? ` de ${formatPEN(limit)}` : ""
       }`;
   }
+}
+
+/** Pista del Progress de límites: gris relativo a la card (light/dark). */
+export function limitProgressTrackClassName() {
+  return cn(
+    "lg:h-3",
+    "bg-[color-mix(in_oklch,var(--card)_88%,black)]",
+    "dark:bg-[color-mix(in_oklch,var(--card)_72%,white)]"
+  );
+}
+
+export function limitProgressIndicatorClassName(
+  isDanger: boolean | undefined,
+  isWarning: boolean | undefined
+): string {
+  return isDanger
+    ? "bg-red-500"
+    : isWarning
+      ? "bg-yellow-500"
+      : "bg-emerald-500";
 }

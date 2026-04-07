@@ -10,14 +10,7 @@ import type {
   Source,
   Tag,
 } from "./types";
-import {
-  startOfDay,
-  endOfDay,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-} from "date-fns";
+import { getIntervalRange } from "./limits";
 
 export function useSources() {
   return useLiveQuery(() => db.sources.orderBy("createdAt").toArray()) ?? [];
@@ -70,20 +63,6 @@ export function useSharedSourcePendingOutboundCount(
       return n;
     }, [sourceId, linked]) ?? 0
   );
-}
-
-function getIntervalRange(interval: LimitInterval, refDate: Date = new Date()) {
-  switch (interval) {
-    case "daily":
-      return { start: startOfDay(refDate).getTime(), end: endOfDay(refDate).getTime() };
-    case "weekly":
-      return {
-        start: startOfWeek(refDate, { weekStartsOn: 1 }).getTime(),
-        end: endOfWeek(refDate, { weekStartsOn: 1 }).getTime(),
-      };
-    case "monthly":
-      return { start: startOfMonth(refDate).getTime(), end: endOfMonth(refDate).getTime() };
-  }
 }
 
 export function useExpenses(filters?: {

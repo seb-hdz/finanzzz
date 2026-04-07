@@ -6,7 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { SourceBadge } from "./source-badge";
 import type { Source, Expense, GlobalConfig } from "@/lib/types";
-import { formatPEN } from "@/lib/limits";
+import {
+  formatPEN,
+  LIMIT_INTERVAL_SPENT_LABELS,
+  limitProgressIndicatorClassName,
+  limitProgressTrackClassName,
+} from "@/lib/limits";
 
 interface SourceCardProps {
   source: Source;
@@ -43,6 +48,10 @@ export function SourceCard({
     hasMax && config && spent / source.maxLimit >= config.dangerThreshold;
   const isWarning =
     hasMax && config && spent / source.maxLimit >= config.warningThreshold;
+
+  const spentLabel = config
+    ? LIMIT_INTERVAL_SPENT_LABELS[config.limitInterval]
+    : "Gastado";
 
   return (
     <Card className="relative overflow-hidden">
@@ -113,7 +122,7 @@ export function SourceCard({
       </CardHeader>
       <CardContent className="pl-5 space-y-2">
         <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted-foreground">Gastado</span>
+          <span className="text-muted-foreground">{spentLabel}</span>
           <span className="font-semibold">
             {formatPEN(spent)}
             {hasMax && (
@@ -127,13 +136,11 @@ export function SourceCard({
         {hasMax && (
           <Progress
             value={pct}
-            className={
-              isDanger
-                ? "[&>div]:bg-red-500"
-                : isWarning
-                ? "[&>div]:bg-yellow-500"
-                : "[&>div]:bg-green-500"
-            }
+            trackClassName={limitProgressTrackClassName()}
+            indicatorClassName={limitProgressIndicatorClassName(
+              isDanger,
+              isWarning
+            )}
           />
         )}
         {source.minLimit > 0 && (

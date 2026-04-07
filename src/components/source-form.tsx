@@ -198,7 +198,8 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
               <div className="flex flex-wrap items-center gap-1.5">
                 <Label htmlFor="sharedPublicId">Id compartido</Label>
                 <ContextHint
-                  mode="expandable-inner"
+                  mode="popover"
+                  side="bottom"
                   aria-label="Reglas de formato del id compartido"
                   trigger={<Info className="size-3.5" />}
                   triggerClassName="size-5"
@@ -336,7 +337,21 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="minLimit">Límite mínimo (S/)</Label>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Label htmlFor="minLimit">Límite mínimo (S/)</Label>
+                <ContextHint
+                  mode="popover"
+                  side="bottom"
+                  aria-label="Qué es el límite mínimo"
+                  trigger={<Info className="size-3.5" />}
+                  triggerClassName="size-5"
+                >
+                  <p className="text-sm leading-snug">
+                    Para pagos mínimo de tarjetas de crédito, cuotas de
+                    mantenimiento u otro monto fijo que debas cubrir.
+                  </p>
+                </ContextHint>
+              </div>
               <Input
                 id="minLimit"
                 type="number"
@@ -347,7 +362,21 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxLimit">Límite máximo (S/)</Label>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Label htmlFor="maxLimit">Límite máximo (S/)</Label>
+                <ContextHint
+                  mode="popover"
+                  side="bottom"
+                  aria-label="Qué es el límite máximo"
+                  trigger={<Info className="size-3.5" />}
+                  triggerClassName="size-5"
+                >
+                  <p className="text-sm leading-snug">
+                    Puede ser el máximo real de la fuente (saldo, crédito o lo
+                    que tengas disponible) o uno que elijas.
+                  </p>
+                </ContextHint>
+              </div>
               <Input
                 id="maxLimit"
                 type="number"

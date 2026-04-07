@@ -12,6 +12,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { useIsStandalone } from "@/lib/use-standalone";
+import { useApplePlatformKind } from "@/lib/use-apple-platform";
 import { Logo } from "@/components/logo";
 import { ContextHint } from "@/components/ui/context-hint";
 
@@ -32,6 +33,7 @@ function getPersistedDismissed(): boolean {
 
 export function StandaloneInfoModal() {
   const isStandalone = useIsStandalone();
+  const { ready: appleReady, kind: appleKind } = useApplePlatformKind();
   const [justDismissed, setJustDismissed] = useState(false);
 
   const persistedDismissed = useSyncExternalStore(
@@ -86,12 +88,35 @@ export function StandaloneInfoModal() {
               .
             </AlertDialogDescription>
             <AlertDialogDescription className="text-justify md:text-left">
-              En iOS, la app instalada tiene un almacenamiento separado de
-              Safari, por lo que{" "}
-              <strong className="text-foreground">
-                las cuentas compartidas vía URL pueden no funcionar
-              </strong>{" "}
-              si la otra persona abre el enlace en Safari.
+              {appleReady && appleKind === "ios" ? (
+                <>
+                  En iOS, la app instalada tiene un almacenamiento separado de
+                  Safari, por lo que{" "}
+                  <strong className="text-foreground">
+                    las cuentas compartidas vía URL pueden no funcionar
+                  </strong>{" "}
+                  si la otra persona abre el enlace en Safari.
+                </>
+              ) : appleReady && appleKind === "mac" ? (
+                <>
+                  En Safari, la app instalada puede usar almacenamiento
+                  separado del navegador, por lo que{" "}
+                  <strong className="text-foreground">
+                    las cuentas compartidas vía URL pueden no funcionar
+                  </strong>{" "}
+                  si la otra persona abre el enlace solo en el navegador.
+                </>
+              ) : (
+                <>
+                  La app instalada puede usar almacenamiento distinto al del
+                  navegador, por lo que{" "}
+                  <strong className="text-foreground">
+                    las cuentas compartidas vía URL pueden no funcionar
+                  </strong>{" "}
+                  si la otra persona abre el enlace en otro contexto (por
+                  ejemplo solo en el navegador y no en la app).
+                </>
+              )}
             </AlertDialogDescription>
             <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-left text-sm leading-snug text-amber-600 dark:text-amber-400">
               <ArrowRightLeft className="mt-0.5 size-4 shrink-0" aria-hidden />

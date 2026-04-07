@@ -7,6 +7,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  Info,
   Moon,
   Sun,
   Trash2,
@@ -42,6 +43,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
+import { ContextHint } from "@/components/ui/context-hint";
 import { LimitIntervalSelect } from "@/components/limit-interval-select";
 import { useGlobalConfig, updateGlobalConfig } from "@/lib/db-hooks";
 import { exportDatabase, importDatabase } from "@/lib/export-import";
@@ -148,7 +150,23 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Límite máximo total (S/)</Label>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Label>Límite máximo total (S/)</Label>
+                <ContextHint
+                  mode="popover"
+                  side="bottom"
+                  align="start"
+                  aria-label="Cómo funciona el límite global"
+                  trigger={<Info className="size-3.5" />}
+                  triggerClassName="size-5"
+                  contentClassName="max-w-sm"
+                >
+                  <p className="text-sm leading-snug">
+                    Es el valor máximo para la suma de gastos de{" "}
+                    <span className="font-medium">todas las fuentes</span>.
+                  </p>
+                </ContextHint>
+              </div>
               <Input
                 type="number"
                 step="0.01"
@@ -163,7 +181,23 @@ export default function SettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Intervalo del límite</Label>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Label>Intervalo del límite</Label>
+                <ContextHint
+                  mode="popover"
+                  side="bottom"
+                  align="start"
+                  aria-label="Cómo funciona el intervalo del límite"
+                  trigger={<Info className="size-3.5" />}
+                  triggerClassName="size-5"
+                  contentClassName="max-w-sm"
+                >
+                  <p className="text-sm leading-snug">
+                    Solo considera los gastos que coincidan con ese período
+                    según su fecha.
+                  </p>
+                </ContextHint>
+              </div>
               <LimitIntervalSelect
                 value={config.limitInterval}
                 onValueChange={(v) => handleSaveConfig("limitInterval", v)}
