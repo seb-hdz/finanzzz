@@ -279,15 +279,52 @@
 }
 
 .db-loading-mesh-a {
-  animation: db-loading-mesh-drift-a 22s ease-in-out infinite;
+  animation: db-loading-mesh-drift-a 15s ease-in-out infinite;
 }
 
 .db-loading-mesh-b {
-  animation: db-loading-mesh-drift-b 18s ease-in-out infinite;
+  animation: db-loading-mesh-drift-b 20s ease-in-out infinite;
   animation-delay: -6s;
 }
 
+@keyframes db-loading-typing-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.db-loading-typing-dot {
+  display: inline-block;
+  width: 0.2rem;
+  height: 0.22rem;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.9;
+  animation: db-loading-typing-bounce 0.9s ease-in-out infinite;
+}
+
+.db-loading-typing-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.db-loading-typing-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.db-loading-typing-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .db-loading-typing-dot {
+    animation: none;
+    transform: none;
+  }
+
   .db-loading-logo-float,
   .db-loading-mesh-a,
   .db-loading-mesh-b {
@@ -298,5 +335,75 @@
   .db-loading-mesh-b {
     opacity: 0.85;
     transform: none;
+  }
+}
+
+/* Db loading: hasta hidratar no hay tema en <html>; intercala light/dark */
+@keyframes db-loading-theme-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes db-loading-theme-pulse-inverse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes db-loading-pending-muted-color {
+  0%,
+  100% {
+    color: oklch(0.556 0 0);
+  }
+  50% {
+    color: oklch(0.708 0 0);
+  }
+}
+
+.db-loading-pending-bg-light {
+  animation: db-loading-theme-pulse 2.8s ease-in-out infinite;
+}
+
+.db-loading-pending-bg-dark {
+  animation: db-loading-theme-pulse-inverse 2.8s ease-in-out infinite;
+}
+
+.db-loading-pending-mesh-group-light {
+  animation: db-loading-theme-pulse 2.8s ease-in-out infinite;
+}
+
+.db-loading-pending-mesh-group-dark {
+  animation: db-loading-theme-pulse-inverse 2.8s ease-in-out infinite;
+}
+
+.db-loading-pending-muted {
+  animation: db-loading-pending-muted-color 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-loading-pending-bg-light,
+  .db-loading-pending-bg-dark {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .db-loading-pending-mesh-group-light,
+  .db-loading-pending-mesh-group-dark {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .db-loading-pending-muted {
+    animation: none;
+    color: oklch(0.63 0 0);
   }
 }

@@ -12,19 +12,16 @@ import logoMark from "@/assets/logo.svg";
 import { cn } from "@/lib/utils";
 
 const LOADING_PHRASES = [
-  "Preparándolo todo…",
-  "Configurando tu base de datos local…",
-  "Cargando la interfaz de registro de gastos…",
-  "Sincronizando categorías y etiquetas…",
-  "Puliendo los gráficos de reportes…",
-  "Despertando al axolotl contable…",
-  "Comprobando que los números cuadren…",
-  "Abriendo el cajón de los recibos…",
-  "Enseñandole a Finanzzz dónde van los datos…",
-  "Casi listo: últimos retoques…",
-  "Calentando motores del panel de fuentes…",
-  "Recordando cuánto gastaste en café…",
-  "Alineando estrellas del presupuesto…",
+  "Configurando tu base de datos",
+  "Cargando la interfaz de registro de gastos",
+  "Sincronizando categorías y etiquetas",
+  "Puliendo los gráficos de reportes",
+  "Despertando al cerdito contable",
+  "Comprobando que los números cuadren",
+  "Abriendo el cajón de los recibos",
+  "Enseñandole a Finanzzz dónde van los datos",
+  "Recordando cuánto gastaste en café",
+  "Alineando estrellas del presupuesto",
 ];
 
 function randomPhraseIndex(exclude: number): number {
@@ -40,12 +37,17 @@ export function DbLoadingScreen() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const [enterSnap, setEnterSnap] = useState(false);
+  const [themeReady, setThemeReady] = useState(false);
   const reducedMotion = useRef(false);
 
   useEffect(() => {
     reducedMotion.current = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+  }, []);
+
+  useEffect(() => {
+    queueMicrotask(() => setThemeReady(true));
   }, []);
 
   const scheduleNext = useCallback(() => {
@@ -78,23 +80,76 @@ export function DbLoadingScreen() {
   const phrase = LOADING_PHRASES[phraseIndex];
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
-      <div
-        className={cn(
-          "pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/35 via-cyan-200/25 to-sky-200/20 blur-3xl transition-colors duration-1000 ease-out dark:from-teal-600/25 dark:via-cyan-900/20 dark:to-sky-950/25",
-          "db-loading-mesh-a"
-        )}
-        aria-hidden
-      />
-      <div
-        className={cn(
-          "pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/30 via-sky-200/20 to-teal-200/25 blur-3xl transition-colors duration-1000 ease-out dark:from-indigo-900/30 dark:via-sky-900/20 dark:to-teal-900/25",
-          "db-loading-mesh-b"
-        )}
-        aria-hidden
-      />
+    <div
+      className={cn(
+        "relative flex min-h-screen flex-col items-center justify-center overflow-hidden",
+        themeReady && "bg-background transition-colors duration-500 ease-out"
+      )}
+    >
+      {!themeReady && (
+        <>
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-[oklch(1_0_0)] db-loading-pending-bg-light"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute inset-0 z-[1] bg-[oklch(0.145_0_0)] db-loading-pending-bg-dark"
+            aria-hidden
+          />
+        </>
+      )}
 
-      <div className="relative z-10 flex flex-col items-center gap-6 px-6">
+      {themeReady ? (
+        <>
+          <div
+            className={cn(
+              "pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/35 via-cyan-200/25 to-sky-200/20 blur-3xl transition-colors duration-1000 ease-out dark:from-teal-600/25 dark:via-cyan-900/20 dark:to-sky-950/25",
+              "db-loading-mesh-a"
+            )}
+            aria-hidden
+          />
+          <div
+            className={cn(
+              "pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/30 via-sky-200/20 to-teal-200/25 blur-3xl transition-colors duration-1000 ease-out dark:from-indigo-900/30 dark:via-sky-900/20 dark:to-teal-900/25",
+              "db-loading-mesh-b"
+            )}
+            aria-hidden
+          />
+        </>
+      ) : (
+        <div
+          className="pointer-events-none absolute inset-0 z-[2] overflow-hidden"
+          aria-hidden
+        >
+          <div className="absolute inset-0 db-loading-pending-mesh-group-light">
+            <div className="pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/35 via-cyan-200/25 to-sky-200/20 blur-3xl db-loading-mesh-a" />
+            <div className="pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/30 via-sky-200/20 to-teal-200/25 blur-3xl db-loading-mesh-b" />
+          </div>
+          <div className="absolute inset-0 db-loading-pending-mesh-group-dark">
+            <div className="pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-600/25 via-cyan-900/20 to-sky-950/25 blur-3xl db-loading-mesh-a" />
+            <div className="pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-indigo-900/30 via-sky-900/20 to-teal-900/25 blur-3xl db-loading-mesh-b" />
+          </div>
+        </div>
+      )}
+
+      <div className="relative z-10 flex flex-col items-center px-6">
+        <div
+          className={cn(
+            "transition-opacity duration-300 ease-out motion-reduce:transition-none mb-8",
+            themeReady ? "text-muted-foreground" : "db-loading-pending-muted",
+            leaving && "opacity-0 motion-reduce:opacity-100",
+            enterSnap && "opacity-0 duration-0! motion-reduce:opacity-100",
+            !leaving && !enterSnap && "opacity-100"
+          )}
+          aria-hidden
+        >
+          <span className="db-loading-typing inline-flex h-4 items-end gap-1">
+            <span className="db-loading-typing-dot" />
+            <span className="db-loading-typing-dot" />
+            <span className="db-loading-typing-dot" />
+          </span>
+        </div>
+
         <div className="db-loading-logo-float">
           <Image
             src={logoMark}
@@ -107,14 +162,15 @@ export function DbLoadingScreen() {
         </div>
 
         <div
-          className="flex min-h-13 w-full max-w-md items-center justify-center overflow-hidden text-center"
+          className="flex min-h-17 w-full max-w-md flex-col items-center justify-center gap-2 overflow-hidden text-center"
           role="status"
           aria-live="polite"
           aria-atomic="true"
         >
           <p
             className={cn(
-              "text-sm leading-snug text-muted-foreground transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+              "text-sm leading-snug transition-all duration-300 ease-out motion-reduce:transition-none",
+              themeReady ? "text-muted-foreground" : "db-loading-pending-muted",
               leaving &&
                 "-translate-y-3 opacity-0 motion-reduce:translate-y-0 motion-reduce:opacity-100",
               enterSnap &&

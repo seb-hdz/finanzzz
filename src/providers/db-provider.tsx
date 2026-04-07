@@ -11,9 +11,7 @@ export function DbProvider({ children }: { children: ReactNode }) {
     seedDatabase().then(() => setReady(true));
   }, []);
 
-  if (!ready) {
-    return <DbLoadingScreen />;
-  }
+  if (!ready) return <DbLoadingScreen />;
 
   return <>{children}</>;
 }
