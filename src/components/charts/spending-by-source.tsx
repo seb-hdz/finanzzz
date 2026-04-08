@@ -73,9 +73,7 @@ function ChartSourceYTick(props: {
 function buildChartData(rows: ChartRow[], maxShown: number): ChartRow[] {
   if (rows.length <= maxShown) return rows;
   const top = rows.slice(0, maxShown - 1);
-  const restSum = rows
-    .slice(maxShown - 1)
-    .reduce((s, d) => s + d.amount, 0);
+  const restSum = rows.slice(maxShown - 1).reduce((s, d) => s + d.amount, 0);
   return [...top, { name: OTHERS_LABEL, amount: restSum, color: OTHERS_COLOR }];
 }
 
@@ -85,7 +83,9 @@ export function SpendingBySource({ expenses, sources }: Props) {
   useEffect(() => {
     const mq = window.matchMedia(MEDIA_LG_UP);
     const apply = () =>
-      setMaxSources(mq.matches ? MAX_SOURCES_IN_CHART_LG : MAX_SOURCES_IN_CHART_COMPACT);
+      setMaxSources(
+        mq.matches ? MAX_SOURCES_IN_CHART_LG : MAX_SOURCES_IN_CHART_COMPACT
+      );
     apply();
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
@@ -101,6 +101,8 @@ export function SpendingBySource({ expenses, sources }: Props) {
     }))
     .filter((d) => d.amount > 0)
     .sort((a, b) => b.amount - a.amount);
+
+  const totalBySource = rawData.reduce((sum, r) => sum + r.amount, 0);
 
   const data = buildChartData(rawData, maxSources);
 
@@ -159,10 +161,27 @@ export function SpendingBySource({ expenses, sources }: Props) {
                 itemStyle={chartTooltipItemStyle}
                 wrapperStyle={chartTooltipWrapperStyle}
                 cursor={chartBarCursor}
-                formatter={(value) => [
-                  `${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`,
-                  "Monto",
-                ]}
+                labelFormatter={(_, payload) => {
+                  const v = payload?.[0]?.value;
+                  if (v === undefined || v === null) return "";
+                  return `${CURRENCY_SYMBOL} ${Number(v).toFixed(2)}`;
+                }}
+                formatter={(value) => {
+                  if (
+                    totalBySource <= 0 ||
+                    value === undefined ||
+                    value === null
+                  ) {
+                    return null;
+                  }
+                  const pct = (Number(value) / totalBySource) * 100;
+                  return [
+                    `${pct.toLocaleString("es", {
+                      maximumFractionDigits: 1,
+                    })}% del gasto total`,
+                    null,
+                  ] as const;
+                }}
               />
               <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
                 {data.map((entry, i) => (

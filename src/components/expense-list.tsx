@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -57,7 +57,6 @@ interface ExpenseListProps {
   sources: Source[];
   tags: Tag[];
   onEdit?: (expense: Expense) => void;
-  onDelete?: (expense: Expense) => void;
 }
 
 export function ExpenseList({
@@ -65,7 +64,6 @@ export function ExpenseList({
   sources,
   tags,
   onEdit,
-  onDelete,
 }: ExpenseListProps) {
   const sourceMap = new Map(sources.map((s) => [s.id, s]));
   const tagMap = new Map(tags.map((t) => [t.id, t]));
@@ -89,43 +87,45 @@ export function ExpenseList({
         return (
           <div
             key={expense.id}
-            className="flex min-w-0 items-start gap-3 overflow-hidden rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
+            className="flex min-w-0 items-center gap-3 overflow-hidden rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
           >
-            {source && (
-              <div
-                className="size-2.5 shrink-0 rounded-full mt-1.5"
-                style={{ backgroundColor: source.color }}
-              />
-            )}
-            <div className="min-w-0 flex-1">
-              <ClampedText text={expense.description || "Sin descripción"} />
-              <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {format(expense.date, "dd MMM yyyy", { locale: es })}
-                </span>{" "}
-                &middot;
-                {source && (
-                  <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
-                    {source.name}
-                  </span>
-                )}
-                {expenseTags.map((tag) => (
-                  <Badge
-                    key={tag!.id}
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 h-4 text-white"
-                    style={{ backgroundColor: tag!.color }}
-                  >
-                    {tag!.name}
-                  </Badge>
-                ))}
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              {source && (
+                <div
+                  className="size-2.5 shrink-0 rounded-full mt-1.5"
+                  style={{ backgroundColor: source.color }}
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <ClampedText text={expense.description || "Sin descripción"} />
+                <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {format(expense.date, "dd MMM yyyy", { locale: es })}
+                  </span>{" "}
+                  &middot;
+                  {source && (
+                    <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
+                      {source.name}
+                    </span>
+                  )}
+                  {expenseTags.map((tag) => (
+                    <Badge
+                      key={tag!.id}
+                      variant="secondary"
+                      className="text-[10px] px-1.5 py-0 h-4 text-white"
+                      style={{ backgroundColor: tag!.color }}
+                    >
+                      {tag!.name}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
-            <span className="font-semibold text-sm whitespace-nowrap">
-              {formatPEN(expense.amount)}
-            </span>
-            {onEdit && onDelete ? (
-              <div className="flex gap-0.5 shrink-0">
+            <div className="flex shrink-0 items-center gap-1 pl-1">
+              <span className="font-semibold text-sm whitespace-nowrap tabular-nums">
+                {formatPEN(expense.amount)}
+              </span>
+              {onEdit ? (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -134,16 +134,8 @@ export function ExpenseList({
                 >
                   <Pencil className="size-3" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-destructive"
-                  onClick={() => onDelete(expense)}
-                >
-                  <Trash2 className="size-3" />
-                </Button>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
         );
       })}

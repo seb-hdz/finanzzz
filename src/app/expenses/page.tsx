@@ -258,7 +258,6 @@ export default function ExpensesPage() {
         sources={sources}
         tags={tags}
         onEdit={handleEdit}
-        onDelete={setDeleting}
       />
 
       <ExpenseForm
@@ -266,6 +265,7 @@ export default function ExpensesPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         expense={editing}
+        onDeleteRequest={setDeleting}
       />
 
       <AlertDialog

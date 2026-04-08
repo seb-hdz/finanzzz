@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import type { TooltipPayload } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   chartLineTooltipCursor,
@@ -21,35 +22,89 @@ import { format, eachDayOfInterval, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Expense } from "@/lib/types";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { formatPEN } from "@/lib/limits";
+import { Separator } from "../ui/separator";
+
+type TrendPoint = {
+  date: string;
+  dateLabel: string;
+  amount: number;
+  cumulative: number;
+};
+
+function SpendingTrendTooltip({
+  active,
+  payload,
+  globalLimit,
+}: {
+  active?: boolean;
+  payload?: TooltipPayload;
+  globalLimit: number | undefined;
+}) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0]?.payload as TrendPoint | undefined;
+  if (!row) return null;
+
+  const showConsumed = globalLimit !== undefined && globalLimit > 0;
+  const consumedPct = showConsumed
+    ? Math.round((row.cumulative / globalLimit) * 100)
+    : null;
+
+  return (
+    <div
+      style={{
+        ...chartTooltipContentStyle,
+        whiteSpace: "normal",
+      }}
+    >
+      <p style={chartTooltipLabelStyle}>{row.dateLabel}</p>
+      <Separator className="mt-2 mb-3" />
+      <div style={{ ...chartTooltipItemStyle, paddingTop: 0 }}>
+        <p> Gasto: {formatPEN(row.amount)}</p>
+        {consumedPct !== null ? <p>Consumido: {consumedPct}%</p> : null}
+      </div>
+    </div>
+  );
+}
 
 interface Props {
   expenses: Expense[];
+  /** Límite global (S/). Si es positivo, el tooltip muestra el % acumulado del mes respecto al límite. */
+  globalLimit?: number;
 }
 
-export function SpendingTrend({ expenses }: Props) {
+export function SpendingTrend({ expenses, globalLimit }: Props) {
   const now = new Date();
   const days = eachDayOfInterval({
     start: startOfMonth(now),
     end: now > endOfMonth(now) ? endOfMonth(now) : now,
   });
 
-  const data = days.map((day) => {
+  const data: TrendPoint[] = days.reduce((acc, day) => {
     const dayStart = day.getTime();
     const dayEnd = dayStart + 86_400_000 - 1;
     const amount = expenses
       .filter((e) => e.date >= dayStart && e.date <= dayEnd)
       .reduce((sum, e) => sum + e.amount, 0);
+    const rounded = Math.round(amount * 100) / 100;
+    const prevCumulative = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
+    const cumulative = Math.round((prevCumulative + rounded) * 100) / 100;
 
-    return {
+    acc.push({
       date: format(day, "dd", { locale: es }),
-      amount: Math.round(amount * 100) / 100,
-    };
-  });
+      dateLabel: format(day, "dd 'de' MMMM", { locale: es }),
+      amount: rounded,
+      cumulative,
+    });
+    return acc;
+  }, [] as TrendPoint[]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium">Tendencia Diaria (Mes Actual)</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          Tendencia Diaria (Mes Actual)
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {expenses.length === 0 ? (
@@ -77,15 +132,15 @@ export function SpendingTrend({ expenses }: Props) {
                 axisLine={{ stroke: "var(--border)" }}
               />
               <Tooltip
-                contentStyle={chartTooltipContentStyle}
-                labelStyle={chartTooltipLabelStyle}
-                itemStyle={chartTooltipItemStyle}
+                content={({ active, payload }) => (
+                  <SpendingTrendTooltip
+                    active={active}
+                    payload={payload}
+                    globalLimit={globalLimit}
+                  />
+                )}
                 wrapperStyle={chartTooltipWrapperStyle}
                 cursor={chartLineTooltipCursor}
-                formatter={(value) => [
-                  `${CURRENCY_SYMBOL} ${Number(value).toFixed(2)}`,
-                  "Gasto",
-                ]}
               />
               <Line
                 type="monotone"

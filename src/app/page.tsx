@@ -124,7 +124,12 @@ export default function DashboardPage() {
         <SpendingByTag expenses={expenses} tags={tags} />
       </div>
 
-      <SpendingTrend expenses={expenses} />
+      <SpendingTrend
+        expenses={expenses}
+        globalLimit={
+          config && config.totalMaxLimit > 0 ? config.totalMaxLimit : undefined
+        }
+      />
     </div>
   );
 }

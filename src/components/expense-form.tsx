@@ -3,7 +3,7 @@
 import { Fragment, useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import {
   Popover,
   PopoverContent,
@@ -66,9 +67,16 @@ interface ExpenseFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   expense?: Expense;
+  /** Al editar: abre el flujo de confirmación de borrado (p. ej. AlertDialog en la página). */
+  onDeleteRequest?: (expense: Expense) => void;
 }
 
-export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
+export function ExpenseForm({
+  open,
+  onOpenChange,
+  expense,
+  onDeleteRequest,
+}: ExpenseFormProps) {
   const sources = useSources();
   const sourceSections = PAYMENT_SOURCE_SECTIONS.map((section) => ({
     label: section.label,
@@ -370,6 +378,31 @@ export function ExpenseForm({ open, onOpenChange, expense }: ExpenseFormProps) {
               ))}
             </div>
           </div>
+
+          {isEditing && onDeleteRequest && expense ? (
+            <div className="">
+              <Separator className="mb-4" />
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full border-destructive bg-destructive/20 text-destructive",
+                  "hover:border-destructive hover:bg-destructive/30 hover:text-destructive",
+                  "dark:bg-destructive/35 dark:hover:bg-destructive/45"
+                )}
+                onClick={() => {
+                  onDeleteRequest(expense);
+                  onOpenChange(false);
+                }}
+              >
+                <Trash2 className="size-3.5" />
+                Eliminar gasto
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Esta acción no se puede deshacer.
+              </p>
+            </div>
+          ) : null}
 
           <DialogFooter>
             <Button
