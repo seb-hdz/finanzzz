@@ -11,7 +11,7 @@ import {
   startOfYear,
   endOfYear,
 } from "date-fns";
-import { Plus, Search } from "lucide-react";
+import { Landmark, Layers, Plus, Search, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -233,6 +233,7 @@ export default function ExpensesPage() {
             options={sourceOptions}
             value={sourceFilterIds}
             onValueChange={setSourceFilterIds}
+            triggerIcon={<Landmark />}
           />
           <MultiSelectDropdown
             className="md:flex-1"
@@ -241,6 +242,7 @@ export default function ExpensesPage() {
             options={typeOptions}
             value={sourceTypeFilterIds}
             onValueChange={setSourceTypeFilterIds}
+            triggerIcon={<Layers />}
           />
           <MultiSelectDropdown
             className="md:flex-1"
@@ -249,6 +251,7 @@ export default function ExpensesPage() {
             options={tagOptions}
             value={tagFilterIds}
             onValueChange={setTagFilterIds}
+            triggerIcon={<Tag />}
           />
         </div>
       </div>

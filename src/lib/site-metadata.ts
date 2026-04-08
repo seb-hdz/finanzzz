@@ -17,12 +17,13 @@ export const metadataBase = new URL(
 );
 
 export const defaultSiteDescription =
-  "Control de gastos personales en tu dispositivo: fuentes, tags, reportes y PWA offline. Sin servidor: los datos viven en tu navegador (IndexedDB).";
+  "Gestiona tus finanzas personales fácilmente desde tu dispositivo y genera reportes detallados sin necesidad de conexión a Internet.";
 
 const ogImagePath = `${appBasePath}/icons/icon-512.png`.replace(/\/{2,}/g, "/");
 
 /** Absolute OG image URL (social crawlers need a full URL). */
-const ogImageUrl = new URL(ogImagePath.replace(/^\//, ""), `${siteOrigin}/`).href;
+const ogImageUrl = new URL(ogImagePath.replace(/^\//, ""), `${siteOrigin}/`)
+  .href;
 
 const ogImage = {
   url: ogImageUrl,
@@ -50,8 +51,7 @@ export const siteTitleTemplate = "Finanzzz | %s" as const;
  * Título de la raíz (`/`) y previews sociales de inicio. No usa la plantilla: las rutas
  * hijas siguen con `Finanzzz | <sección>`.
  */
-export const homeDocumentTitle =
-  "Finanzzz | Registra y controla tus gastos";
+export const homeDocumentTitle = "Finanzzz | Inicio";
 
 /** Absolute URL for a route path (e.g. `/expenses`, `/`). */
 export function absolutePageUrl(pathname: string): string {

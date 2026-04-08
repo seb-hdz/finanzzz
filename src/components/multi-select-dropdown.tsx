@@ -38,6 +38,8 @@ export type MultiSelectDropdownProps = {
   emptyLabel: string;
   /** Accessible name for the options list */
   listLabel: string;
+  /** Optional icon before the summary (e.g. filter affordance on small screens). */
+  triggerIcon?: React.ReactNode;
   className?: string;
   contentClassName?: string;
   align?: "start" | "center" | "end";
@@ -49,6 +51,7 @@ export function MultiSelectDropdown({
   options,
   emptyLabel,
   listLabel,
+  triggerIcon,
   className,
   contentClassName,
   align = "start",
@@ -77,6 +80,14 @@ export function MultiSelectDropdown({
         )}
         aria-controls={hasOptions ? listId : undefined}
       >
+        {triggerIcon ? (
+          <span
+            className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
+            aria-hidden
+          >
+            {triggerIcon}
+          </span>
+        ) : null}
         <span className="min-w-0 flex-1 truncate text-left">{summary}</span>
         <ChevronDownIcon className="pointer-events-none size-4 shrink-0 text-muted-foreground" />
       </PopoverTrigger>

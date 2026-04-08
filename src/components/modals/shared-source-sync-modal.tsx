@@ -188,19 +188,34 @@ export function SharedSourceSyncModal({
         sync.outboundPassword
       );
 
-      const clipboardItem = new ClipboardItem({
-        "text/plain": resultPromise.then(({ token, urlTooLong }) => {
-          if (urlTooLong || !token)
-            throw new Error(
-              "El enlace sigue siendo muy largo. Prueba de nuevo tras sincronizar por partes."
-            );
-          return new Blob([buildFullSyncUrl(token)], { type: "text/plain" });
-        }),
-      });
-      await navigator.clipboard.write([clipboardItem]);
+      const canAsyncClipboardWrite =
+        typeof ClipboardItem !== "undefined" &&
+        typeof navigator.clipboard?.write === "function";
 
-      const { token, includedExpenses } = await resultPromise;
+      if (canAsyncClipboardWrite) {
+        const clipboardItem = new ClipboardItem({
+          "text/plain": resultPromise.then(({ token, urlTooLong }) => {
+            if (urlTooLong || !token)
+              throw new Error(
+                "El enlace sigue siendo muy largo. Prueba de nuevo tras sincronizar por partes."
+              );
+            return new Blob([buildFullSyncUrl(token)], { type: "text/plain" });
+          }),
+        });
+        await navigator.clipboard.write([clipboardItem]);
+      }
+
+      const { token, includedExpenses, urlTooLong } = await resultPromise;
       const fullUrl = buildFullSyncUrl(token);
+
+      if (!canAsyncClipboardWrite) {
+        if (urlTooLong || !token) {
+          throw new Error(
+            "El enlace sigue siendo muy largo. Prueba de nuevo tras sincronizar por partes."
+          );
+        }
+        await navigator.clipboard.writeText(fullUrl);
+      }
 
       await recordSuccessfulSharedEmission(
         source.id,
@@ -290,6 +305,7 @@ export function SharedSourceSyncModal({
   return (
     <Dialog
       open={open}
+      disablePointerDismissal
       onOpenChange={(o) => {
         if (!o) resetState();
         onOpenChange(o);
@@ -535,12 +551,12 @@ export function SharedSourceSyncModal({
                       />
                       <Button
                         type="button"
-                        variant="secondary"
+                        variant="destructive"
                         size="sm"
                         className="w-full"
                         onClick={() => setScannerOpen(false)}
                       >
-                        Cancelar escaneo
+                        Cancelar
                       </Button>
                     </div>
                   ) : null}

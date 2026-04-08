@@ -5,20 +5,23 @@ import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
 import { MainContentEnter } from "./main-content-enter";
 import { OfflineInfoModal } from "@/components/modals/offline-info-modal";
+import { ReportProblemModalProvider } from "@/components/modals/report-problem-modal";
 import { StandaloneInfoModal } from "@/components/modals/standalone-info-modal";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="min-w-0 flex-1 pb-20 md:pb-0">
-        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-          <MainContentEnter>{children}</MainContentEnter>
-        </div>
-      </main>
-      <MobileNav />
-      <StandaloneInfoModal />
-      <OfflineInfoModal />
-    </div>
+    <ReportProblemModalProvider>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <main className="min-w-0 flex-1 pb-20 md:pb-0">
+          <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+            <MainContentEnter>{children}</MainContentEnter>
+          </div>
+        </main>
+        <MobileNav />
+        <StandaloneInfoModal />
+        <OfflineInfoModal />
+      </div>
+    </ReportProblemModalProvider>
   );
 }

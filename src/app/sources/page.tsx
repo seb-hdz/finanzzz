@@ -2,7 +2,7 @@
 
 import type { ReactNode, RefObject } from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { ArrowUpDown, Plus, Search, X } from "lucide-react";
+import { ArrowUpDown, Layers, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -127,13 +127,15 @@ function SortOrderSelect<T extends string>({
     >
       <SelectTrigger size="sm" className={SOURCE_FILTER_SELECT_TRIGGER_CLASS}>
         <span
+          className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
+          aria-hidden
+        >
+          <ArrowUpDown />
+        </span>
+        <span
           data-slot="select-value"
           className="min-w-0 flex-1 truncate text-left"
         >
-          <ArrowUpDown
-            className="mb-0.5 inline-block size-4 align-middle"
-            aria-hidden
-          />{" "}
           {labels[value]}
         </span>
       </SelectTrigger>
@@ -164,6 +166,12 @@ function NonSharedTypeFilterSelect({
       }}
     >
       <SelectTrigger size="sm" className={SOURCE_FILTER_SELECT_TRIGGER_CLASS}>
+        <span
+          className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
+          aria-hidden
+        >
+          <Layers />
+        </span>
         <span
           data-slot="select-value"
           className="min-w-0 flex-1 truncate text-left"

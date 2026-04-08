@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarIcon, Trash2 } from "lucide-react";
@@ -49,7 +49,8 @@ import {
   getAlertMessage,
 } from "@/lib/limits";
 import { db } from "@/lib/db";
-import type { Expense, SourceType } from "@/lib/types";
+import type { Expense, Source, SourceType } from "@/lib/types";
+import Link from "next/link";
 
 /** Agrupación solo para el select de fuente en este formulario. */
 const PAYMENT_SOURCE_SECTIONS: {
@@ -61,7 +62,13 @@ const PAYMENT_SOURCE_SECTIONS: {
   { label: "Monederos digitales", types: ["mobile_payment"] },
   { label: "Cuentas compartidas", types: ["shared"] },
 ];
-import Link from "next/link";
+
+function defaultPaymentSourceId(sources: Source[]): string {
+  const sections = PAYMENT_SOURCE_SECTIONS.map((section) =>
+    sources.filter((s) => section.types.includes(s.type))
+  ).filter((list) => list.length > 0);
+  return sections[0]?.[0]?.id ?? "";
+}
 
 interface ExpenseFormProps {
   open: boolean;
@@ -97,11 +104,21 @@ export function ExpenseForm({
     expense ? new Date(expense.date) : new Date()
   );
 
-  const sharedSync = useSharedSyncState(sourceId || undefined);
-
   const isEditing = !!expense;
 
-  const selectedSource = sources.find((s) => s.id === sourceId);
+  const defaultNewSourceId = useMemo(
+    () => (sources.length === 0 ? "" : defaultPaymentSourceId(sources)),
+    [sources]
+  );
+
+  /** Nuevo gasto: si el usuario no eligió otra, usar la primera fuente del orden del formulario. */
+  const resolvedSourceId = isEditing
+    ? sourceId
+    : sourceId || defaultNewSourceId;
+
+  const sharedSync = useSharedSyncState(resolvedSourceId || undefined);
+
+  const selectedSource = sources.find((s) => s.id === resolvedSourceId);
   const sharedBlocked =
     !isEditing &&
     selectedSource?.type === "shared" &&
@@ -118,7 +135,7 @@ export function ExpenseForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const parsedAmount = parseFloat(amount);
-    if (!parsedAmount || parsedAmount <= 0 || !sourceId) return;
+    if (!parsedAmount || parsedAmount <= 0 || !resolvedSourceId) return;
     if (sharedBlocked) {
       toast.error(
         "Vincula la fuente compartida (envía y recibe una actualización) antes de registrar gastos."
@@ -129,7 +146,7 @@ export function ExpenseForm({
     const data = {
       amount: parsedAmount,
       description: description.trim(),
-      sourceId,
+      sourceId: resolvedSourceId,
       tagIds: selectedTags,
       date: date.getTime(),
     };
@@ -139,7 +156,7 @@ export function ExpenseForm({
       toast.success("Gasto actualizado");
     } else {
       await addExpense(data);
-      await showAlerts(sourceId);
+      await showAlerts(resolvedSourceId);
     }
 
     onOpenChange(false);
@@ -204,7 +221,11 @@ export function ExpenseForm({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      disablePointerDismissal
+    >
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -245,15 +266,15 @@ export function ExpenseForm({
           <div className="space-y-2">
             <Label>Fuente de pago</Label>
             <Select
-              value={sourceId}
+              value={resolvedSourceId}
               onValueChange={(v) => v && setSourceId(v)}
               disabled={sources.length === 0}
             >
               <SelectTrigger
                 className="w-full min-w-0"
                 title={
-                  sourceId
-                    ? sources.find((s) => s.id === sourceId)?.name
+                  resolvedSourceId
+                    ? sources.find((s) => s.id === resolvedSourceId)?.name
                     : undefined
                 }
               >
@@ -261,11 +282,12 @@ export function ExpenseForm({
                   data-slot="select-value"
                   className={cn(
                     "min-w-0 flex-1 text-left",
-                    !sourceId && "text-muted-foreground"
+                    !resolvedSourceId && "text-muted-foreground"
                   )}
                 >
-                  {sourceId
-                    ? sources.find((s) => s.id === sourceId)?.name ?? "Fuente"
+                  {resolvedSourceId
+                    ? sources.find((s) => s.id === resolvedSourceId)?.name ??
+                      "Fuente"
                     : "Seleccionar fuente"}
                 </span>
               </SelectTrigger>

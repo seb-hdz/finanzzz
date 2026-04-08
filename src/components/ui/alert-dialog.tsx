@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog"
+import * as React from "react";
+import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
 }
 
 function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props) {
   return (
     <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
-  )
+  );
 }
 
 function AlertDialogPortal({ ...props }: AlertDialogPrimitive.Portal.Props) {
   return (
     <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
-  )
+  );
 }
 
 function AlertDialogOverlay({
@@ -35,7 +35,7 @@ function AlertDialogOverlay({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogContent({
@@ -43,7 +43,7 @@ function AlertDialogContent({
   size = "default",
   ...props
 }: AlertDialogPrimitive.Popup.Props & {
-  size?: "default" | "sm"
+  size?: "default" | "sm";
 }) {
   return (
     <AlertDialogPortal>
@@ -58,7 +58,7 @@ function AlertDialogContent({
         {...props}
       />
     </AlertDialogPortal>
-  )
+  );
 }
 
 function AlertDialogHeader({
@@ -74,7 +74,7 @@ function AlertDialogHeader({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogFooter({
@@ -86,11 +86,12 @@ function AlertDialogFooter({
       data-slot="alert-dialog-footer"
       className={cn(
         "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+        "[&_button]:min-h-[2.475rem] [&_button]:px-[0.9rem] [&_button]:text-[0.9rem] sm:[&_button]:min-h-9 sm:[&_button]:px-3 sm:[&_button]:text-sm",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogMedia({
@@ -106,7 +107,7 @@ function AlertDialogMedia({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogTitle({
@@ -122,7 +123,7 @@ function AlertDialogTitle({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogDescription({
@@ -138,7 +139,7 @@ function AlertDialogDescription({
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogAction({
@@ -151,7 +152,7 @@ function AlertDialogAction({
       className={cn(className)}
       {...props}
     />
-  )
+  );
 }
 
 function AlertDialogCancel({
@@ -168,7 +169,7 @@ function AlertDialogCancel({
       render={<Button variant={variant} size={size} />}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -184,4 +185,4 @@ export {
   AlertDialogPortal,
   AlertDialogTitle,
   AlertDialogTrigger,
-}
+};

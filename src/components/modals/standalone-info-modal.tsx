@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useSyncExternalStore } from "react";
-import { MonitorSmartphone, ArrowRightLeft } from "lucide-react";
+import { MonitorSmartphone, ArrowRightLeft, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useIsStandalone } from "@/lib/use-standalone";
 import { useApplePlatformKind } from "@/lib/use-apple-platform";
-import { Logo } from "@/components/logo";
 import { ContextHint } from "@/components/ui/context-hint";
 
 export const STANDALONE_INFO_DISMISSED_KEY =
@@ -36,6 +35,27 @@ export function StandaloneInfoModal() {
   const { ready: appleReady, kind: appleKind } = useApplePlatformKind();
   const [justDismissed, setJustDismissed] = useState(false);
   const dismissButtonRef = useRef<HTMLButtonElement>(null);
+
+  const renderDescription = () => {
+    if (!appleReady || !appleKind) {
+      return (
+        <>
+          La app instalada puede funcionar
+          <strong className="text-foreground">separada</strong> del navegador.
+        </>
+      );
+    }
+
+    const applePlatform = appleKind === "ios" ? "iOS" : "Safari";
+
+    return (
+      <p className="">
+        En <strong className="text-foreground">{applePlatform}</strong>, el uso
+        de URLs para sincronizar cuentas compartidas{" "}
+        <strong className="text-foreground">es distinto</strong> a Safari.
+      </p>
+    );
+  };
 
   const persistedDismissed = useSyncExternalStore(
     subscribe,
@@ -72,14 +92,14 @@ export function StandaloneInfoModal() {
           </div>
           <div className="w-full space-y-3 text-left">
             <AlertDialogTitle className="text-center">
-              App instalada detectada
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-left">
-              Estás usando <Logo muted /> como{" "}
               <ContextHint
                 mode="popover"
                 side="bottom"
-                trigger={<span className="underline">app instalada</span>}
+                trigger={
+                  <span className="inline-flex items-center gap-1.5">
+                    Estás usando la app instalada <Info className="size-3.5" />{" "}
+                  </span>
+                }
                 triggerClassName="hover:bg-transparent active:bg-transparent focus-visible:bg-transparent"
               >
                 <p className="text-xs">
@@ -87,49 +107,20 @@ export function StandaloneInfoModal() {
                   como una app en el dispositivo.
                 </p>
               </ContextHint>
-              .
-            </AlertDialogDescription>
-            <AlertDialogDescription className="text-justify md:text-left">
-              {appleReady && appleKind === "ios" ? (
-                <>
-                  En iOS, la app instalada tiene un almacenamiento separado de
-                  Safari, por lo que{" "}
-                  <strong className="text-foreground">
-                    las cuentas compartidas vía URL pueden no funcionar
-                  </strong>{" "}
-                  si la otra persona abre el enlace en Safari.
-                </>
-              ) : appleReady && appleKind === "mac" ? (
-                <>
-                  En Safari, la app instalada puede usar almacenamiento
-                  separado del navegador, por lo que{" "}
-                  <strong className="text-foreground">
-                    las cuentas compartidas vía URL pueden no funcionar
-                  </strong>{" "}
-                  si la otra persona abre el enlace solo en el navegador.
-                </>
-              ) : (
-                <>
-                  La app instalada puede usar almacenamiento distinto al del
-                  navegador, por lo que{" "}
-                  <strong className="text-foreground">
-                    las cuentas compartidas vía URL pueden no funcionar
-                  </strong>{" "}
-                  si la otra persona abre el enlace en otro contexto (por
-                  ejemplo solo en el navegador y no en la app).
-                </>
-              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {renderDescription()}
             </AlertDialogDescription>
             <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-left text-sm leading-snug text-amber-600 dark:text-amber-400">
               <ArrowRightLeft className="mt-0.5 size-4 shrink-0" aria-hidden />
               <span>
-                Usa la opción <strong>&quot;Recibir actualización&quot;</strong>{" "}
-                en el modal de sincronización y pega la URL recibida.
+                Ve a <strong>&quot;Recibir actualización&quot;</strong> en el
+                modal de cuentas compartidas.
               </span>
             </div>
           </div>
         </div>
-        <AlertDialogFooter className="justify-center sm:justify-center">
+        <AlertDialogFooter className="justify-center md:justify-end">
           <AlertDialogCancel
             ref={dismissButtonRef}
             render={<Button />}

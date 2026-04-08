@@ -22,7 +22,7 @@ const LOADING_PHRASES = [
   "Enseñandole a Finanzzz dónde van los datos",
   "Recordando cuánto gastaste en café",
   "Alineando estrellas del presupuesto",
-];
+] as const;
 
 function randomPhraseIndex(exclude: number): number {
   if (LOADING_PHRASES.length <= 1) return 0;
@@ -40,15 +40,7 @@ export function DbLoadingScreen() {
   const [themeReady, setThemeReady] = useState(false);
   const reducedMotion = useRef(false);
 
-  useEffect(() => {
-    reducedMotion.current = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-  }, []);
-
-  useEffect(() => {
-    queueMicrotask(() => setThemeReady(true));
-  }, []);
+  const phrase = LOADING_PHRASES[phraseIndex];
 
   const scheduleNext = useCallback(() => {
     const delay = 2000 + Math.random() * 1000;
@@ -62,8 +54,18 @@ export function DbLoadingScreen() {
   }, []);
 
   useEffect(() => {
-    const id = scheduleNext();
-    return () => clearTimeout(id);
+    reducedMotion.current = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+  }, []);
+
+  useEffect(() => {
+    queueMicrotask(() => setThemeReady(true));
+  }, []);
+
+  useEffect(() => {
+    const scheduled = scheduleNext();
+    return () => clearTimeout(scheduled);
   }, [phraseIndex, scheduleNext]);
 
   const onPhraseTransitionEnd = (e: TransitionEvent<HTMLParagraphElement>) => {
@@ -76,8 +78,6 @@ export function DbLoadingScreen() {
       requestAnimationFrame(() => setEnterSnap(false));
     });
   };
-
-  const phrase = LOADING_PHRASES[phraseIndex];
 
   return (
     <div

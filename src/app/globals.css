@@ -411,6 +411,24 @@
   animation: db-loading-pending-muted-color 10s ease-in-out infinite;
 }
 
+/* Theme bootstrap sets .dark on <html> before paint; avoid light-first keyframe frame. */
+.dark .db-loading-pending-bg-light,
+.dark .db-loading-pending-mesh-group-light {
+  opacity: 0;
+  animation: none;
+}
+
+.dark .db-loading-pending-bg-dark,
+.dark .db-loading-pending-mesh-group-dark {
+  opacity: 1;
+  animation: none;
+}
+
+.dark .db-loading-pending-muted {
+  animation: none;
+  color: var(--muted-foreground);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .db-loading-pending-bg-light,
   .db-loading-pending-bg-dark {

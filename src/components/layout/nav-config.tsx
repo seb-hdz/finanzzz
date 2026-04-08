@@ -14,6 +14,8 @@ export type NavItemConfig = {
   icon: LucideIcon;
   /** Primary bottom tabs; everything else opens from "Más". */
   mobile: "tab" | "more";
+  /** Opens in a new browser tab (e.g. GitHub). */
+  external?: boolean;
 };
 
 export const NAV_ITEMS: NavItemConfig[] = [

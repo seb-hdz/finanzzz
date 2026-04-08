@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import {
+  Bug,
   Download,
   Eye,
   EyeOff,
@@ -50,6 +51,7 @@ import { exportDatabase, importDatabase } from "@/lib/export-import";
 import { resetLocalDatabase } from "@/lib/db";
 import { useTheme } from "@/providers/theme-provider";
 import { Logo } from "@/components/logo";
+import { useReportProblemModal } from "@/components/modals/report-problem-modal";
 import { AppVersionCard } from "@/components/app-version-card";
 import logoMark from "@/assets/logo.svg";
 import Image from "next/image";
@@ -62,6 +64,7 @@ const DevSeedFakeDataButton = dynamic(
 export default function SettingsPage() {
   const config = useGlobalConfig();
   const { theme, toggle } = useTheme();
+  const { openReportProblemModal } = useReportProblemModal();
 
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -349,6 +352,18 @@ export default function SettingsPage() {
       </Card>
 
       <AppVersionCard />
+
+      <div className="flex justify-start -mt-3 ml-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="gap-2"
+          onClick={() => openReportProblemModal()}
+        >
+          <Bug className="size-4" />
+          Reporta un problema
+        </Button>
+      </div>
 
       <div className="mt-12 flex justify-center md:hidden">
         <div className="flex items-center gap-2 text-muted-foreground">

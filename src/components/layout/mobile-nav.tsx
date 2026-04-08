@@ -23,7 +23,6 @@ function isActivePath(pathname: string, href: string) {
 export function MobileNav() {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
-
   const moreActive = MOBILE_MORE_ITEMS.some((item) =>
     isActivePath(pathname, item.href)
   );
@@ -70,23 +69,37 @@ export function MobileNav() {
             <SheetTitle className="text-base">Más</SheetTitle>
           </SheetHeader>
           <ul className="border-t px-2 py-2">
-            {MOBILE_MORE_ITEMS.map(({ href, label, icon: Icon }) => {
-              const active = isActivePath(pathname, href);
+            {MOBILE_MORE_ITEMS.map(({ href, label, icon: Icon, external }) => {
+              const active = external ? false : isActivePath(pathname, href);
+              const rowClass = cn(
+                "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors",
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "text-foreground hover:bg-accent"
+              );
               return (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={() => setMoreOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Icon className="size-5 shrink-0" />
-                    {label}
-                  </Link>
+                  {external ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMoreOpen(false)}
+                      className={rowClass}
+                    >
+                      <Icon className="size-5 shrink-0" />
+                      {label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={href}
+                      onClick={() => setMoreOpen(false)}
+                      className={rowClass}
+                    >
+                      <Icon className="size-5 shrink-0" />
+                      {label}
+                    </Link>
+                  )}
                 </li>
               );
             })}

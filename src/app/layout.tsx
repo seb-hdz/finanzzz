@@ -18,6 +18,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { DbProvider } from "@/providers/db-provider";
 import { AppShell } from "@/components/layout/app-shell";
 import { ServiceWorkerProvider } from "@/providers/sw-provider";
+import { getThemeBootstrapScript } from "@/lib/theme-storage";
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
@@ -91,6 +92,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+const themeBootstrapScript = getThemeBootstrapScript();
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -102,6 +105,12 @@ export default function RootLayout({
       className={`${nunitoSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          // Apply stored/system theme before first paint (static export has no per-user HTML).
+          dangerouslySetInnerHTML={{ __html: themeBootstrapScript }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <TooltipProvider>

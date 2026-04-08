@@ -13,7 +13,12 @@ export function Logo({
 }) {
   return (
     <div className="flex flex-col">
-      <span className={cn(muted && "text-muted-foreground", className)}>
+      <span
+        className={cn(
+          muted && "text-muted-foreground inline-flex items-center flex-nowrap",
+          className
+        )}
+      >
         <span className="font-bold text-lg tracking-tight">Finan</span>
         <span className="relative inline-flex gap-x-0.5 items-end font-bold">
           {muted ? (
