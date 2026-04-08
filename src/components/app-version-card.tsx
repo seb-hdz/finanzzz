@@ -10,7 +10,7 @@ export function AppVersionCard() {
 
   const detailParts: string[] = [];
   if (info.buildId) detailParts.push(`build ${info.buildId}`);
-  if (info.buildTimeIso) detailParts.push(info.buildTimeIso);
+  if (info.buildTimeIso) detailParts.push(`${Date.parse(info.buildTimeIso)}`);
 
   return (
     <div className="space-y-2 text-sm px-4">

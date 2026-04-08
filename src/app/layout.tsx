@@ -1,6 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans, Geist_Mono } from "next/font/google";
 import { appBasePath } from "@/lib/app-base-path";
+import {
+  absolutePageUrl,
+  canonicalAlternates,
+  defaultSiteDescription,
+  homeDocumentTitle,
+  metadataBase,
+  sharedOpenGraph,
+  sharedTwitter,
+  siteTitleTemplate,
+} from "@/lib/site-metadata";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SonnerToaster } from "@/components/sonner-toaster";
@@ -20,9 +30,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const homeCanonical = absolutePageUrl("/");
+
 export const metadata: Metadata = {
-  title: "Finanzzz",
-  description: "Control de gastos personales",
+  metadataBase,
+  title: {
+    default: homeDocumentTitle,
+    template: siteTitleTemplate,
+  },
+  description: defaultSiteDescription,
+  alternates: canonicalAlternates("/"),
+  openGraph: {
+    ...sharedOpenGraph,
+    title: homeDocumentTitle,
+    description: defaultSiteDescription,
+    url: homeCanonical,
+    locale: "es_ES",
+  },
+  twitter: {
+    ...sharedTwitter,
+    title: homeDocumentTitle,
+    description: defaultSiteDescription,
+  },
   icons: {
     icon: `${appBasePath}/favicon.ico`,
     apple: [
