@@ -359,7 +359,7 @@ export default function SettingsPage() {
             height={48}
             className="shrink-0 object-contain"
           />
-          <Logo muted />
+          <Logo muted showAuthor />
         </div>
       </div>
 

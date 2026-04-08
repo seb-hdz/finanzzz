@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import type { Source, SourceType } from "@/lib/types";
 import {
   SOURCE_TYPE_LABELS,
@@ -33,16 +34,23 @@ import {
 } from "@/lib/db-hooks";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Eye, EyeOff, Info, Regex } from "lucide-react";
+import { Eye, EyeOff, Info, Regex, Trash2 } from "lucide-react";
 import { ContextHint } from "@/components/ui/context-hint";
 
 interface SourceFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   source?: Source;
+  /** Al editar: abre el flujo de confirmación de borrado (p. ej. AlertDialog en la página). */
+  onDeleteRequest?: (source: Source) => void;
 }
 
-export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
+export function SourceForm({
+  open,
+  onOpenChange,
+  source,
+  onDeleteRequest,
+}: SourceFormProps) {
   const [name, setName] = useState(source?.name ?? "");
   const [type, setType] = useState<SourceType>(source?.type ?? "bank_account");
   const [sharedPublicId, setSharedPublicId] = useState(
@@ -387,6 +395,31 @@ export function SourceForm({ open, onOpenChange, source }: SourceFormProps) {
               />
             </div>
           </div>
+
+          {isEditing && onDeleteRequest && source ? (
+            <div className="">
+              <Separator className="mb-4" />
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full border-destructive bg-destructive/20 text-destructive",
+                  "hover:border-destructive hover:bg-destructive/30 hover:text-destructive",
+                  "dark:bg-destructive/35 dark:hover:bg-destructive/45"
+                )}
+                onClick={() => {
+                  onDeleteRequest(source);
+                  onOpenChange(false);
+                }}
+              >
+                <Trash2 className="size-3.5" />
+                Eliminar fuente
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Solo se puede eliminar si no hay gastos asociados a la fuente.
+              </p>
+            </div>
+          ) : null}
 
           <DialogFooter>
             <Button

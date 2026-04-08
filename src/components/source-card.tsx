@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, Link2, AlertTriangle, Upload } from "lucide-react";
+import { Pencil, Link2, AlertTriangle, Upload, Link2Off } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -18,7 +18,6 @@ interface SourceCardProps {
   expenses: Expense[];
   config: GlobalConfig | undefined;
   onEdit: (source: Source) => void;
-  onDelete: (source: Source) => void;
   /** Present for shared sources: sync UI on /sources */
   sharedMeta?: {
     linked: boolean;
@@ -34,9 +33,9 @@ export function SourceCard({
   expenses,
   config,
   onEdit,
-  onDelete,
   sharedMeta,
 }: SourceCardProps) {
+  const staleHours = config?.sharedStaleHours ?? 168;
   const spent = expenses
     .filter((e) => e.sourceId === source.id)
     .reduce((s, e) => s + e.amount, 0);
@@ -62,17 +61,18 @@ export function SourceCard({
       <CardHeader className="flex flex-row items-start justify-between pb-2 pl-5">
         <div className="space-y-1">
           <CardTitle className="text-base">{source.name}</CardTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            <SourceBadge type={source.type} />
+          <SourceBadge type={source.type} className="-ml-1" />
+          <div className="pt-1">
             {sharedMeta && !sharedMeta.linked && (
-              <span className="text-xs text-amber-600 dark:text-amber-400">
-                Pendiente de vincular
+              <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                <Link2Off className="size-3" />
+                No sincronizada
               </span>
             )}
             {sharedMeta && sharedMeta.linked && sharedMeta.stale && (
               <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
                 <AlertTriangle className="size-3" />
-                Sync antigua
+                No has sincronizado en {Math.round(staleHours / 24)} días
               </span>
             )}
             {sharedMeta &&
@@ -109,14 +109,6 @@ export function SourceCard({
             onClick={() => onEdit(source)}
           >
             <Pencil className="size-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-destructive"
-            onClick={() => onDelete(source)}
-          >
-            <Trash2 className="size-3.5" />
           </Button>
         </div>
       </CardHeader>
