@@ -242,35 +242,38 @@
   }
 }
 
+/* Motion occupies ~75% of the timeline; last ~25% holds rest (pause between cycles). */
 @keyframes db-loading-mesh-drift-a {
   0%,
+  75%,
   100% {
     transform: translate(0, 0) scale(1);
-    opacity: 0.85;
+    opacity: 0.92;
   }
-  33% {
+  24.75% {
     transform: translate(4%, 3%) scale(1.04);
     opacity: 1;
   }
-  66% {
+  49.5% {
     transform: translate(-3%, 5%) scale(0.97);
-    opacity: 0.9;
+    opacity: 0.95;
   }
 }
 
 @keyframes db-loading-mesh-drift-b {
   0%,
+  75%,
   100% {
     transform: translate(0, 0) scale(1);
-    opacity: 0.8;
-  }
-  40% {
-    transform: translate(-5%, -4%) scale(1.05);
-    opacity: 0.95;
-  }
-  70% {
-    transform: translate(4%, -3%) scale(0.96);
     opacity: 0.88;
+  }
+  30% {
+    transform: translate(-5%, -4%) scale(1.05);
+    opacity: 1;
+  }
+  52.5% {
+    transform: translate(4%, -3%) scale(0.96);
+    opacity: 0.93;
   }
 }
 
@@ -279,12 +282,12 @@
 }
 
 .db-loading-mesh-a {
-  animation: db-loading-mesh-drift-a 15s ease-in-out infinite;
+  animation: db-loading-mesh-drift-a 38s ease-in-out infinite;
 }
 
 .db-loading-mesh-b {
-  animation: db-loading-mesh-drift-b 20s ease-in-out infinite;
-  animation-delay: -6s;
+  animation: db-loading-mesh-drift-b 54s ease-in-out infinite;
+  animation-delay: -16.2s;
 }
 
 @keyframes db-loading-typing-bounce {
@@ -333,19 +336,26 @@
 
   .db-loading-mesh-a,
   .db-loading-mesh-b {
-    opacity: 0.85;
+    opacity: 0.92;
     transform: none;
   }
 }
 
-/* Db loading: hasta hidratar no hay tema en <html>; intercala light/dark */
+/* Db loading: hasta hidratar no hay tema en <html>; intercala light/dark.
+   Ciclo 10s: fundidos 3s, 2s en oscuro, solo 2s en claro al final. */
 @keyframes db-loading-theme-pulse {
   0%,
   100% {
     opacity: 1;
   }
+  30% {
+    opacity: 0;
+  }
   50% {
     opacity: 0;
+  }
+  80% {
+    opacity: 1;
   }
 }
 
@@ -354,8 +364,14 @@
   100% {
     opacity: 0;
   }
+  30% {
+    opacity: 1;
+  }
   50% {
     opacity: 1;
+  }
+  80% {
+    opacity: 0;
   }
 }
 
@@ -364,29 +380,35 @@
   100% {
     color: oklch(0.556 0 0);
   }
+  30% {
+    color: oklch(0.708 0 0);
+  }
   50% {
     color: oklch(0.708 0 0);
+  }
+  80% {
+    color: oklch(0.556 0 0);
   }
 }
 
 .db-loading-pending-bg-light {
-  animation: db-loading-theme-pulse 2.8s ease-in-out infinite;
+  animation: db-loading-theme-pulse 10s ease-in-out infinite;
 }
 
 .db-loading-pending-bg-dark {
-  animation: db-loading-theme-pulse-inverse 2.8s ease-in-out infinite;
+  animation: db-loading-theme-pulse-inverse 10s ease-in-out infinite;
 }
 
 .db-loading-pending-mesh-group-light {
-  animation: db-loading-theme-pulse 2.8s ease-in-out infinite;
+  animation: db-loading-theme-pulse 10s ease-in-out infinite;
 }
 
 .db-loading-pending-mesh-group-dark {
-  animation: db-loading-theme-pulse-inverse 2.8s ease-in-out infinite;
+  animation: db-loading-theme-pulse-inverse 10s ease-in-out infinite;
 }
 
 .db-loading-pending-muted {
-  animation: db-loading-pending-muted-color 2.8s ease-in-out infinite;
+  animation: db-loading-pending-muted-color 10s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -115,9 +115,7 @@ export default function SyncSharedPage() {
               {isApplePlatform ? (
                 <>Safari y la app instalada no comparten datos.</>
               ) : (
-                <>
-                  El navegador y la app instalada pueden no compartir datos.
-                </>
+                <>El navegador y la app instalada pueden no compartir datos.</>
               )}
             </span>
           </div>
@@ -192,11 +190,9 @@ export default function SyncSharedPage() {
             {isApplePlatform ? (
               <>Safari no comparte datos con la app instalada.</>
             ) : (
-              <>
-                el navegador puede no compartir datos con la app instalada.
-              </>
+              <>el navegador puede no compartir datos con la app instalada.</>
             )}{" "}
-            Usa <strong>Sincronizar &rarr; Recibir</strong> dentro de la app.
+            Usa <strong>Sincronizar &rarr; Recibir</strong> en la app instalada.
           </span>
         </div>
       )}

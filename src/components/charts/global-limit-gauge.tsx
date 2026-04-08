@@ -20,14 +20,16 @@ export function GlobalLimitGauge({ expenses, config }: Props) {
   const hasLimit = limit > 0;
   const pct = hasLimit ? Math.min((spent / limit) * 100, 100) : 0;
 
-  const isDanger = hasLimit && config && spent / limit >= config.dangerThreshold;
-  const isWarning = hasLimit && config && spent / limit >= config.warningThreshold;
+  const isDanger =
+    hasLimit && config && spent / limit >= config.dangerThreshold;
+  const isWarning =
+    hasLimit && config && spent / limit >= config.warningThreshold;
 
   return (
     <Card className="h-full min-h-0 lg:flex lg:flex-col">
       <CardHeader className="pb-2 lg:pb-3">
         <CardTitle className="text-sm font-medium lg:text-base">
-          Límite Global
+          Gastos globales
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:space-y-4">

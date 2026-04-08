@@ -93,7 +93,7 @@ export function DbLoadingScreen() {
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute inset-0 z-[1] bg-[oklch(0.145_0_0)] db-loading-pending-bg-dark"
+            className="pointer-events-none absolute inset-0 z-1 bg-[oklch(0.145_0_0)] db-loading-pending-bg-dark"
             aria-hidden
           />
         </>
@@ -103,14 +103,14 @@ export function DbLoadingScreen() {
         <>
           <div
             className={cn(
-              "pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/35 via-cyan-200/25 to-sky-200/20 blur-3xl transition-colors duration-1000 ease-out dark:from-teal-600/25 dark:via-cyan-900/20 dark:to-sky-950/25",
+              "pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/45 via-cyan-200/35 to-sky-200/28 blur-3xl transition-colors duration-1000 ease-out dark:from-teal-600/35 dark:via-cyan-900/28 dark:to-sky-950/32",
               "db-loading-mesh-a"
             )}
             aria-hidden
           />
           <div
             className={cn(
-              "pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/30 via-sky-200/20 to-teal-200/25 blur-3xl transition-colors duration-1000 ease-out dark:from-indigo-900/30 dark:via-sky-900/20 dark:to-teal-900/25",
+              "pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/42 via-sky-200/32 to-teal-200/36 blur-3xl transition-colors duration-1000 ease-out dark:from-indigo-900/40 dark:via-sky-900/30 dark:to-teal-900/34",
               "db-loading-mesh-b"
             )}
             aria-hidden
@@ -118,16 +118,16 @@ export function DbLoadingScreen() {
         </>
       ) : (
         <div
-          className="pointer-events-none absolute inset-0 z-[2] overflow-hidden"
+          className="pointer-events-none absolute inset-0 z-2 overflow-hidden"
           aria-hidden
         >
           <div className="absolute inset-0 db-loading-pending-mesh-group-light">
-            <div className="pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/35 via-cyan-200/25 to-sky-200/20 blur-3xl db-loading-mesh-a" />
-            <div className="pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/30 via-sky-200/20 to-teal-200/25 blur-3xl db-loading-mesh-b" />
+            <div className="pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/45 via-cyan-200/35 to-sky-200/28 blur-3xl db-loading-mesh-a" />
+            <div className="pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/42 via-sky-200/32 to-teal-200/36 blur-3xl db-loading-mesh-b" />
           </div>
           <div className="absolute inset-0 db-loading-pending-mesh-group-dark">
-            <div className="pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-600/25 via-cyan-900/20 to-sky-950/25 blur-3xl db-loading-mesh-a" />
-            <div className="pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-indigo-900/30 via-sky-900/20 to-teal-900/25 blur-3xl db-loading-mesh-b" />
+            <div className="pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-600/35 via-cyan-900/28 to-sky-950/32 blur-3xl db-loading-mesh-a" />
+            <div className="pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-indigo-900/40 via-sky-900/30 to-teal-900/34 blur-3xl db-loading-mesh-b" />
           </div>
         </div>
       )}

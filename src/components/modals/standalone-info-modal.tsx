@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { MonitorSmartphone, ArrowRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,7 @@ export function StandaloneInfoModal() {
   const isStandalone = useIsStandalone();
   const { ready: appleReady, kind: appleKind } = useApplePlatformKind();
   const [justDismissed, setJustDismissed] = useState(false);
+  const dismissButtonRef = useRef<HTMLButtonElement>(null);
 
   const persistedDismissed = useSyncExternalStore(
     subscribe,
@@ -60,6 +61,7 @@ export function StandaloneInfoModal() {
       <AlertDialogContent
         size="default"
         className="max-w-[min(100%-2rem,22rem)] gap-4 sm:max-w-md md:max-w-lg"
+        initialFocus={dismissButtonRef}
       >
         <div className="flex flex-col items-center gap-3">
           <div
@@ -128,7 +130,11 @@ export function StandaloneInfoModal() {
           </div>
         </div>
         <AlertDialogFooter className="justify-center sm:justify-center">
-          <AlertDialogCancel render={<Button />} onClick={handleDismiss}>
+          <AlertDialogCancel
+            ref={dismissButtonRef}
+            render={<Button />}
+            onClick={handleDismiss}
+          >
             Entendido
           </AlertDialogCancel>
         </AlertDialogFooter>

@@ -325,8 +325,8 @@ export function SharedSourceSyncModal({
                       aria-hidden
                     />
                     <span>
-                      Usa esta opción para sincronizar dentro de la app
-                      instalada sin necesidad de abrir URLs en el navegador.
+                      Usa esta opción para sincronizar desde la app instalada
+                      sin necesidad de abrir URLs en el navegador.
                     </span>
                   </div>
                 )}
@@ -415,7 +415,7 @@ export function SharedSourceSyncModal({
                     Generando…
                   </>
                 ) : (
-                  "Enviar actualización"
+                  "Generar URL de sincronización"
                 )}
               </Button>
             ) : (
