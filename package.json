@@ -1,13 +1,14 @@
 {
   "name": "finanzzz",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "packageManager": "bun@1.3.11",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "splash:ios": "bun run scripts/generate-ios-splash.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

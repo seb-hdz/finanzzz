@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito_Sans, Geist_Mono } from "next/font/google";
 import { appBasePath } from "@/lib/app-base-path";
+import { iosPortraitStartupImages } from "@/lib/ios-splash-portrait";
 import {
   absolutePageUrl,
   canonicalAlternates,
@@ -82,6 +83,15 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "Finanzzz",
+    startupImage: iosPortraitStartupImages(appBasePath),
+  },
+  /**
+   * iOS still expects `apple-mobile-web-app-capable` for standalone splash /
+   * startup images; Next may emit `mobile-web-app-capable` only.
+   * @see https://github.com/vercel/next.js/issues/74524
+   */
+  other: {
+    "apple-mobile-web-app-capable": "yes",
   },
 };
 
