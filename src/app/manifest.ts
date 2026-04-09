@@ -95,7 +95,7 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: SHORTCUT_ICONS("reports"),
       },
       {
-        name: "Configuración",
+        name: "Ajustes",
         description: "Configura tu aplicación",
         url: `${prefix}/settings`,
         icons: SHORTCUT_ICONS("settings"),
