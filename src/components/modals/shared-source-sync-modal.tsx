@@ -375,7 +375,7 @@ export function SharedSourceSyncModal({
                         <Input
                           readOnly
                           value={url}
-                          className="min-w-0 flex-1 font-mono text-xs basis-[min(100%,12rem)]"
+                          className="min-w-0 flex-1 font-mono text-xs basis-[min(100%,10rem)]"
                           autoComplete="off"
                           spellCheck={false}
                           data-lpignore="true"
@@ -429,12 +429,12 @@ export function SharedSourceSyncModal({
                             showQR ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                           )}
                         >
-                          <div className="min-h-0 overflow-hidden">
-                            <div className="flex justify-center border-t px-4 py-4">
+                          <div className="min-h-0 overflow-hidden rounded-lg">
+                            <div className="flex justify-center border-t px-4 pt-4 bg-white">
                               <QRCode
                                 value={sentToken}
                                 size={200}
-                                className="h-auto max-w-full dark:border-2 dark:border-white"
+                                className="h-auto max-w-full"
                                 fgColor={QR_FG_LIGHT_UI}
                                 bgColor={QR_BG_LIGHT_UI}
                               />
