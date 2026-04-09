@@ -14,7 +14,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { BetaBadge } from "@/components/beta-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -290,12 +290,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex flex-wrap items-center gap-2">
             Base de Datos
-            <Badge
-              variant="outline"
-              className="h-5 border-muted-foreground/35 px-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-            >
-              BETA
-            </Badge>
+            <BetaBadge />
           </CardTitle>
           <CardDescription>
             Exporta o importa tu base de datos para mover entre dispositivos. El

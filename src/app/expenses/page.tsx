@@ -280,7 +280,7 @@ function ExpensesPageContent() {
           />
           <Input
             placeholder="Buscar por descripción o monto..."
-            className="w-full pl-9"
+            className="w-full pl-9 py-4"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

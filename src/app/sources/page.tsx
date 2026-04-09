@@ -4,7 +4,7 @@ import type { ReactNode, RefObject } from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
+import { BetaBadge } from "@/components/beta-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -62,7 +62,7 @@ function SourceSectionFilterHeader({
   return (
     <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between md:gap-x-4">
       {leading}
-      <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto md:shrink-0 md:justify-end justify-between">
+      <div className="flex min-[410px]:flex-row w-full min-w-0 gap-2 items-center md:w-auto md:shrink-0 md:justify-end justify-between">
         {children}
       </div>
     </div>
@@ -108,41 +108,82 @@ function SourceSectionFilters({
 
   return (
     <div className="space-y-2">
-      <SourceSectionFilterHeader leading={leading}>
-        {middleControls}
-        {!searchOpen ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-lg"
-            aria-label={openButtonAriaLabel}
-            onClick={onSearchOpen}
-          >
-            <Search className="size-4" />
-          </Button>
-        ) : null}
-      </SourceSectionFilterHeader>
-      {searchOpen ? (
-        <div className="flex w-full min-w-0 animate-in fade-in-0 slide-in-from-top-2 duration-200 motion-reduce:translate-y-0 motion-reduce:animate-none motion-reduce:opacity-100 items-center gap-2">
-          <Input
-            ref={inputRef}
-            className="min-w-0 flex-1 py-4"
-            placeholder={searchPlaceholder}
-            value={searchQuery}
-            onChange={(e) => onQueryChange(e.target.value)}
-            aria-label={inputAriaLabel}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-lg"
-            aria-label={closeButtonAriaLabel}
-            onClick={onSearchClose}
-          >
-            <X className="size-4" />
-          </Button>
+      <div className="flex flex-col gap-2 min-[410px]:hidden">
+        {leading}
+        <div className="flex w-full min-w-0 items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <Input
+              className="w-full min-w-0 py-4 pl-9"
+              placeholder={searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => onQueryChange(e.target.value)}
+              aria-label={inputAriaLabel}
+            />
+          </div>
+          {searchQuery.trim() ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-lg"
+              aria-label="Limpiar búsqueda"
+              onClick={() => onQueryChange("")}
+            >
+              <X className="size-4" />
+            </Button>
+          ) : null}
         </div>
-      ) : null}
+        <div className="flex w-full min-w-0 flex-col gap-2 min-[410px]:flex-row min-[410px]:flex-wrap min-[410px]:items-center max-[409px]:items-stretch max-[409px]:[&>*]:w-full min-[410px]:[&>*]:w-auto">
+          {middleControls}
+        </div>
+      </div>
+
+      <div className="hidden min-[410px]:block space-y-2">
+        <SourceSectionFilterHeader leading={leading}>
+          {middleControls}
+          {!searchOpen ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-lg"
+              aria-label={openButtonAriaLabel}
+              onClick={onSearchOpen}
+            >
+              <Search className="size-4" />
+            </Button>
+          ) : null}
+        </SourceSectionFilterHeader>
+        {searchOpen ? (
+          <div className="flex w-full min-w-0 animate-in fade-in-0 slide-in-from-top-2 duration-200 motion-reduce:translate-y-0 motion-reduce:animate-none motion-reduce:opacity-100 items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                ref={inputRef}
+                className="w-full min-w-0 py-4 pl-9 text-sm"
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => onQueryChange(e.target.value)}
+                aria-label={inputAriaLabel}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-lg"
+              aria-label={closeButtonAriaLabel}
+              onClick={onSearchClose}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -352,12 +393,7 @@ export default function SourcesPage() {
                       <h2 className="text-lg font-semibold tracking-tight">
                         Cuentas compartidas
                       </h2>
-                      <Badge
-                        variant="outline"
-                        className="h-5 shrink-0 border-muted-foreground/35 px-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-                      >
-                        BETA
-                      </Badge>
+                      <BetaBadge />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Cuentas compartidas con el mismo id compartido en{" "}
@@ -423,7 +459,7 @@ export default function SourcesPage() {
                   </h2>
                 }
                 middleControls={
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full min-w-0 flex-col gap-2 max-[409px]:items-stretch max-[409px]:[&>*]:w-full min-[410px]:flex-row min-[410px]:items-center min-[410px]:[&>*]:w-auto">
                     <NonSharedTypeFilterSelect
                       value={otherTypeFilter}
                       onValueChange={setOtherTypeFilter}

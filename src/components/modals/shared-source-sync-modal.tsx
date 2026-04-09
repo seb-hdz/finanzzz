@@ -42,13 +42,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useIsStandalone } from "@/lib/use-standalone";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/providers/theme-provider";
 
 /** SVG fill colors for QR (hex: `react-qr-code` / scanners handle these reliably). */
 const QR_FG_LIGHT_UI = "#171717";
 const QR_BG_LIGHT_UI = "#ffffff";
-const QR_FG_DARK_UI = "#fafafa";
-const QR_BG_DARK_UI = "#1a1a1a";
 
 type SyncTab = "send" | "receive";
 
@@ -66,8 +63,6 @@ export function SharedSourceSyncModal({
   const router = useRouter();
   const sync = useSharedSyncState(source?.id);
   const isStandalone = useIsStandalone();
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
 
   const [tab, setTab] = useState<SyncTab>("send");
   const [url, setUrl] = useState("");
@@ -420,12 +415,8 @@ export function SharedSourceSyncModal({
                             <QRCode
                               value={sentToken}
                               size={512}
-                              fgColor={
-                                isDarkMode ? QR_FG_DARK_UI : QR_FG_LIGHT_UI
-                              }
-                              bgColor={
-                                isDarkMode ? QR_BG_DARK_UI : QR_BG_LIGHT_UI
-                              }
+                              fgColor={QR_FG_LIGHT_UI}
+                              bgColor={QR_BG_LIGHT_UI}
                             />
                           </div>
                         </div>
@@ -443,13 +434,9 @@ export function SharedSourceSyncModal({
                               <QRCode
                                 value={sentToken}
                                 size={200}
-                                className="h-auto max-w-full"
-                                fgColor={
-                                  isDarkMode ? QR_FG_DARK_UI : QR_FG_LIGHT_UI
-                                }
-                                bgColor={
-                                  isDarkMode ? QR_BG_DARK_UI : QR_BG_LIGHT_UI
-                                }
+                                className="h-auto max-w-full dark:border-2 dark:border-white"
+                                fgColor={QR_FG_LIGHT_UI}
+                                bgColor={QR_BG_LIGHT_UI}
                               />
                             </div>
                           </div>
