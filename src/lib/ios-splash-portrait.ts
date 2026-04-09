@@ -3,8 +3,10 @@
  *
  * Each PNG is exactly imgW×imgH px under `public/splash/` as
  * `apple-{imgW}x{imgH}-light.png` / `apple-{imgW}x{imgH}-dark.png`.
- * Light/dark use `prefers-color-scheme` in `media` so the splash matches
- * the system appearance (and reduces white→dark flashes for dark-mode users).
+ * Light/dark use `prefers-color-scheme` in `media` where WebKit supports it.
+ * A **fallback** link per size (same `media` as before, no color-scheme) points at
+ * the dark PNG — iOS PWAs often ignore `prefers-color-scheme` for startup images,
+ * so without this nothing matches and the splash disappears.
  *
  * Generate: `bun run splash:ios` (see `scripts/generate-ios-splash.ts`).
  *
@@ -42,35 +44,49 @@ const PORTRAIT_SPLASH_SPECS = [
 
 const COLOR_SCHEMES: IosSplashColorScheme[] = ["dark", "light"];
 
-function mediaForPortraitSpec(
+function mediaPortraitDimensions(
   spec: (typeof PORTRAIT_SPLASH_SPECS)[number],
-  scheme: IosSplashColorScheme,
+  colorScheme?: IosSplashColorScheme,
 ): string {
   const logicalW = spec.imgW / spec.dpr;
   const logicalH = spec.imgH / spec.dpr;
-  const schemeMedia =
-    scheme === "dark" ? "(prefers-color-scheme: dark)" : "(prefers-color-scheme: light)";
-  return [
-    schemeMedia,
+  const parts: string[] = [];
+  if (colorScheme === "dark") {
+    parts.push("(prefers-color-scheme: dark)");
+  } else if (colorScheme === "light") {
+    parts.push("(prefers-color-scheme: light)");
+  }
+  parts.push(
     "screen",
     `(device-width: ${logicalW}px)`,
     `(device-height: ${logicalH}px)`,
     `(-webkit-device-pixel-ratio: ${spec.dpr})`,
     "(orientation: portrait)",
-  ].join(" and ");
+  );
+  return parts.join(" and ");
 }
 
-/** Next.js `metadata.appleWebApp.startupImage` entries (portrait, light + dark). */
+/**
+ * Next.js `metadata.appleWebApp.startupImage` (portrait).
+ * Order per size: dark → light → fallback (dimensions only, dark asset).
+ */
 export function iosPortraitStartupImages(basePath: string) {
   const prefix = basePath;
   const out: { url: string; media?: string }[] = [];
   for (const spec of PORTRAIT_SPLASH_SPECS) {
-    for (const scheme of COLOR_SCHEMES) {
-      out.push({
-        url: `${prefix}/splash/apple-${spec.imgW}x${spec.imgH}-${scheme}.png`,
-        media: mediaForPortraitSpec(spec, scheme),
-      });
-    }
+    const base = `${prefix}/splash/apple-${spec.imgW}x${spec.imgH}`;
+    out.push({
+      url: `${base}-dark.png`,
+      media: mediaPortraitDimensions(spec, "dark"),
+    });
+    out.push({
+      url: `${base}-light.png`,
+      media: mediaPortraitDimensions(spec, "light"),
+    });
+    out.push({
+      url: `${base}-dark.png`,
+      media: mediaPortraitDimensions(spec),
+    });
   }
   return out;
 }
