@@ -9,10 +9,9 @@ import {
   Send,
   Download,
   AlertTriangle,
-  Eye,
-  EyeOff,
   QrCodeIcon,
-  KeyRound,
+  Share2,
+  Images,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -33,16 +32,18 @@ import {
   buildFullSyncUrl,
   buildSharedSyncToken,
   recordSuccessfulSharedEmission,
-  applySharedSyncFromToken,
-  extractTokenFromInput,
 } from "@/lib/shared-sync";
+import { svgElementToPngFile } from "@/lib/qr-share-image";
+import {
+  SharedSyncReceivePanel,
+  type SharedSyncReceivePanelHandle,
+} from "@/components/shared-sync-receive-panel";
 import { formatPEN } from "@/lib/limits";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useIsStandalone } from "@/lib/use-standalone";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/providers/theme-provider";
-import type { IScannerControls } from "@zxing/browser";
 
 /** SVG fill colors for QR (hex: `react-qr-code` / scanners handle these reliably). */
 const QR_FG_LIGHT_UI = "#171717";
@@ -51,13 +52,6 @@ const QR_FG_DARK_UI = "#fafafa";
 const QR_BG_DARK_UI = "#1a1a1a";
 
 type SyncTab = "send" | "receive";
-
-/** Heuristic: sync tokens are base64url and long enough to distinguish from random QR text. */
-function isPlausibleSharedSyncToken(token: string): boolean {
-  const t = token.trim();
-  if (t.length < 32) return false;
-  return /^[A-Za-z0-9_-]+$/.test(t);
-}
 
 interface SharedSourceSyncModalProps {
   source: Source | null;
@@ -82,98 +76,24 @@ export function SharedSourceSyncModal({
   const [included, setIncluded] = useState<{ id: string; label: string }[]>([]);
   const [sending, setSending] = useState(false);
 
-  const [pastedInput, setPastedInput] = useState("");
-  const [receivePassword, setReceivePassword] = useState("");
-  const [showReceivePassword, setShowReceivePassword] = useState(false);
-  const [receiveRemember, setReceiveRemember] = useState(true);
-  const [inboundPwOverride, setInboundPwOverride] = useState(false);
-  const [receiving, setReceiving] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const scannerControlsRef = useRef<IScannerControls | null>(null);
+  const [receiveNonce, setReceiveNonce] = useState(0);
+  const [recvBusy, setRecvBusy] = useState(false);
   /** Evita que el diálogo enfoque el input readOnly del id (primer tabbable). */
   const dialogInitialFocusRef = useRef<HTMLButtonElement>(null);
+  const receiveRef = useRef<SharedSyncReceivePanelHandle>(null);
+  const qrExportRef = useRef<HTMLDivElement>(null);
 
   function resetState() {
     setUrl("");
     setSentToken("");
     setIncluded([]);
-    setPastedInput("");
-    setReceivePassword("");
-    setShowReceivePassword(false);
-    setReceiveRemember(true);
-    setInboundPwOverride(false);
-    setScannerOpen(false);
     setShowQR(false);
   }
 
   useEffect(() => {
-    if (!open) setScannerOpen(false);
-  }, [open]);
-
-  useEffect(() => {
     if (tab !== "send") setShowQR(false);
   }, [tab]);
-
-  useEffect(() => {
-    if (tab !== "receive") setScannerOpen(false);
-  }, [tab]);
-
-  useEffect(() => {
-    if (!scannerOpen || !open) {
-      scannerControlsRef.current?.stop();
-      scannerControlsRef.current = null;
-      return;
-    }
-
-    const video = videoRef.current;
-    if (!video) return;
-
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const { BrowserQRCodeReader } = await import("@zxing/browser");
-        const reader = new BrowserQRCodeReader();
-        const controls = await reader.decodeFromVideoDevice(
-          undefined,
-          video,
-          (result, _err, ctrl) => {
-            if (cancelled || !result) return;
-            const text = result.getText().trim();
-            const token = extractTokenFromInput(text);
-            if (!isPlausibleSharedSyncToken(token)) return;
-            setPastedInput(text);
-            ctrl.stop();
-            scannerControlsRef.current = null;
-            setScannerOpen(false);
-            toast.success("Enlace capturado desde el código QR");
-          }
-        );
-        if (cancelled) {
-          controls.stop();
-        } else {
-          scannerControlsRef.current = controls;
-        }
-      } catch (e) {
-        if (!cancelled) {
-          toast.error(
-            e instanceof Error
-              ? e.message
-              : "No se pudo usar la cámara para escanear."
-          );
-          setScannerOpen(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      scannerControlsRef.current?.stop();
-      scannerControlsRef.current = null;
-    };
-  }, [scannerOpen, open]);
 
   async function handleSendUpdate() {
     if (!source || source.type !== "shared" || !sync?.outboundPassword) {
@@ -247,50 +167,62 @@ export function SharedSourceSyncModal({
     toast.success("Copiado");
   }
 
-  async function handleReceive() {
-    const token = extractTokenFromInput(pastedInput);
-    if (!token) {
-      toast.error("Pega la URL recibida.");
+  async function shareSyncUrl() {
+    if (!url) return;
+    if (typeof navigator.share !== "function") {
+      toast.error("Compartir no está disponible en este navegador.");
       return;
     }
-
-    const pw = receivePassword || sync?.storedInboundPassword;
-    if (!pw) {
-      toast.error("Introduce la contraseña de enlace.");
-      return;
-    }
-
-    setReceiving(true);
-    const hasStored = Boolean(sync?.storedInboundPassword);
-    const showPwFields = !hasStored || inboundPwOverride;
     try {
-      const result = await applySharedSyncFromToken({
-        token,
-        password: pw,
-        rememberPassword: showPwFields ? receiveRemember : true,
+      await navigator.share({
+        title: "Sincronización Finanzzz",
+        text: "Enlace para sincronizar la cuenta compartida",
+        url,
       });
-      if (result.ok) {
-        toast.success(
-          result.mergedCount > 0
-            ? `Sincronizado: ${result.mergedCount} actualización(es).`
-            : "Sincronizado (sin gastos nuevos en este enlace)."
-        );
-        onOpenChange(false);
-        resetState();
-        router.refresh();
-      } else {
-        toast.error(result.error);
-        if (hasStored && !inboundPwOverride && !receivePassword.trim()) {
-          setInboundPwOverride(true);
-        }
-      }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Error al sincronizar.");
-      if (hasStored && !inboundPwOverride && !receivePassword.trim()) {
-        setInboundPwOverride(true);
+      if (e instanceof Error && e.name === "AbortError") return;
+      toast.error(
+        e instanceof Error ? e.message : "No se pudo abrir el menú de compartir."
+      );
+    }
+  }
+
+  async function shareQrPng() {
+    if (!sentToken) return;
+    const root = qrExportRef.current;
+    const svg = root?.querySelector("svg");
+    if (!svg) {
+      toast.error("No se encontró el código QR.");
+      return;
+    }
+    try {
+      const file = await svgElementToPngFile(
+        svg as SVGSVGElement,
+        "finanzzz-sync-qr.png"
+      );
+      const payload = { files: [file] };
+      if (typeof navigator.share !== "function") {
+        toast.error("Compartir no está disponible en este navegador.");
+        return;
       }
-    } finally {
-      setReceiving(false);
+      if (!navigator.canShare?.(payload)) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(file);
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast.success("Imagen del QR descargada");
+        return;
+      }
+      await navigator.share({
+        files: [file],
+        title: "Código QR de sincronización",
+      });
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") return;
+      toast.error(
+        e instanceof Error ? e.message : "No se pudo compartir el QR."
+      );
     }
   }
 
@@ -299,8 +231,6 @@ export function SharedSourceSyncModal({
   }
 
   const widenForQr = showQR && Boolean(sentToken);
-  const hasStoredInboundPw = Boolean(sync?.storedInboundPassword);
-  const showReceivePwSection = !hasStoredInboundPw || inboundPwOverride;
 
   return (
     <Dialog
@@ -370,7 +300,10 @@ export function SharedSourceSyncModal({
               </button>
               <button
                 type="button"
-                onClick={() => setTab("receive")}
+                onClick={() => {
+                  setTab("receive");
+                  setReceiveNonce((n) => n + 1);
+                }}
                 className={cn(
                   "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                   tab === "receive"
@@ -425,11 +358,11 @@ export function SharedSourceSyncModal({
                       <Link2 className="size-3.5" />
                       URL de sincronización
                     </Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Input
                         readOnly
                         value={url}
-                        className="font-mono text-xs"
+                        className="min-w-0 flex-1 font-mono text-xs basis-[min(100%,12rem)]"
                         autoComplete="off"
                         spellCheck={false}
                         data-lpignore="true"
@@ -441,8 +374,18 @@ export function SharedSourceSyncModal({
                         size="icon"
                         variant="outline"
                         onClick={copyAgain}
+                        aria-label="Copiar URL"
                       >
                         <Copy className="size-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => void shareSyncUrl()}
+                        aria-label="Compartir enlace"
+                      >
+                        <Share2 className="size-4" />
                       </Button>
                       <Button
                         type="button"
@@ -457,7 +400,37 @@ export function SharedSourceSyncModal({
                       >
                         <QrCodeIcon className="size-4" />
                       </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        disabled={!sentToken}
+                        onClick={() => void shareQrPng()}
+                        aria-label="Compartir código QR como imagen"
+                      >
+                        <Images className="size-4" />
+                      </Button>
                     </div>
+
+                    {sentToken ? (
+                      <div
+                        className="pointer-events-none fixed -left-[2000px] top-0 opacity-0"
+                        aria-hidden
+                      >
+                        <div ref={qrExportRef}>
+                          <QRCode
+                            value={sentToken}
+                            size={512}
+                            fgColor={
+                              isDarkMode ? QR_FG_DARK_UI : QR_FG_LIGHT_UI
+                            }
+                            bgColor={
+                              isDarkMode ? QR_BG_DARK_UI : QR_BG_LIGHT_UI
+                            }
+                          />
+                        </div>
+                      </div>
+                    ) : null}
 
                     {sentToken ? (
                       <div
@@ -489,148 +462,20 @@ export function SharedSourceSyncModal({
             )}
 
             {/* ── Receive tab ── */}
-            {tab === "receive" && (
-              <>
-                {isStandalone && (
-                  <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
-                    <AlertTriangle
-                      className="mt-0.5 size-4 shrink-0"
-                      aria-hidden
-                    />
-                    <span>
-                      Usa esta opción para sincronizar desde la app instalada
-                      sin necesidad de abrir URLs en el navegador.
-                    </span>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="paste-token">URL</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="paste-token"
-                      placeholder="Pega aquí la URL"
-                      value={pastedInput}
-                      onChange={(e) => setPastedInput(e.target.value)}
-                      className="min-w-0 flex-1 font-mono text-xs"
-                      autoComplete="off"
-                      spellCheck={false}
-                      autoCorrect="off"
-                      autoCapitalize="off"
-                      data-lpignore="true"
-                      data-1p-ignore
-                      data-bwignore
-                    />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      className="shrink-0"
-                      onClick={() => setScannerOpen((v) => !v)}
-                      aria-expanded={scannerOpen}
-                      aria-controls="shared-sync-qr-scanner"
-                      aria-label={
-                        scannerOpen
-                          ? "Cerrar escáner de código QR"
-                          : "Escanear código QR con la cámara"
-                      }
-                    >
-                      <QrCodeIcon className="size-4" />
-                    </Button>
-                  </div>
-                  {scannerOpen ? (
-                    <div
-                      id="shared-sync-qr-scanner"
-                      className="space-y-2 rounded-md border p-3"
-                    >
-                      <video
-                        ref={videoRef}
-                        className="aspect-video w-full rounded-md bg-black object-cover"
-                        muted
-                        playsInline
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => setScannerOpen(false)}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  ) : null}
-                  <p className="text-muted-foreground">
-                    Pega la URL que te envió la otra persona para sincronizar.
-                  </p>
-                </div>
-
-                {showReceivePwSection ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="receive-pw">Contraseña de enlace</Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          id="receive-pw"
-                          type={showReceivePassword ? "text" : "password"}
-                          value={receivePassword}
-                          onChange={(e) => setReceivePassword(e.target.value)}
-                          placeholder={
-                            hasStoredInboundPw
-                              ? "Vacía para usar la guardada"
-                              : "Introduce la contraseña de la URL"
-                          }
-                          autoComplete="off"
-                          className="min-w-0 text-sm md:text-base"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setShowReceivePassword((v) => !v)}
-                          aria-label={
-                            showReceivePassword
-                              ? "Ocultar contraseña de enlace"
-                              : "Mostrar contraseña de enlace"
-                          }
-                        >
-                          {showReceivePassword ? (
-                            <EyeOff className="size-4" />
-                          ) : (
-                            <Eye className="size-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        className="size-4 rounded border-input accent-primary"
-                        checked={receiveRemember}
-                        onChange={(e) => setReceiveRemember(e.target.checked)}
-                      />
-                      Guardar contraseña en este dispositivo
-                    </label>
-                  </>
-                ) : (
-                  <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm leading-snug text-amber-600 dark:text-amber-400">
-                    <KeyRound className="mt-0.5 size-4 shrink-0" aria-hidden />
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <p>Se usará la contraseña guardada.</p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setInboundPwOverride(true)}
-                        className="font-medium text-white hover:text-white bg-amber-500 hover:bg-amber-500/80 border-none dark:bg-amber-700 dark:hover:bg-amber-700/80"
-                      >
-                        Cambiar
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </>
+            {tab === "receive" && source && (
+              <SharedSyncReceivePanel
+                key={receiveNonce}
+                ref={receiveRef}
+                variant="modal"
+                sourceId={source.id}
+                showSubmitButton={false}
+                onReceivingChange={setRecvBusy}
+                onSuccess={() => {
+                  onOpenChange(false);
+                  resetState();
+                  router.refresh();
+                }}
+              />
             )}
           </div>
 
@@ -655,10 +500,10 @@ export function SharedSourceSyncModal({
               <Button
                 type="button"
                 className="w-full"
-                onClick={handleReceive}
-                disabled={receiving || !pastedInput.trim()}
+                onClick={() => receiveRef.current?.submit()}
+                disabled={recvBusy}
               >
-                {receiving ? (
+                {recvBusy ? (
                   <>
                     <Loader2 className="size-4 animate-spin mr-2" />
                     Aplicando…

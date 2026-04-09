@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   startOfDay,
   endOfDay,
@@ -31,6 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DbLoadingScreen } from "@/components/db-loading-screen";
 import { ExpenseList } from "@/components/expense-list";
 import { ExpenseForm } from "@/components/expense-form";
 import { SourceBadge } from "@/components/source-badge";
@@ -78,7 +80,11 @@ function getRange(period: Period) {
   }
 }
 
-export default function ExpensesPage() {
+function ExpensesPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [period, setPeriod] = useState<Period>("monthly");
   const [search, setSearch] = useState("");
   const [sourceFilterIds, setSourceFilterIds] = useState<string[]>([]);
@@ -88,6 +94,21 @@ export default function ExpensesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | undefined>();
   const [deleting, setDeleting] = useState<Expense | undefined>();
+
+  useEffect(() => {
+    if (!searchParams.has("new")) return;
+    queueMicrotask(() => {
+      setEditing(undefined);
+      setFormOpen(true);
+    });
+  }, [searchParams]);
+
+  function handleFormOpenChange(open: boolean) {
+    setFormOpen(open);
+    if (!open && searchParams.has("new")) {
+      router.replace(pathname);
+    }
+  }
 
   const range = useMemo(() => getRange(period), [period]);
   const expenses = useExpensesByDateRange(range.start, range.end);
@@ -299,7 +320,7 @@ export default function ExpensesPage() {
       <ExpenseForm
         key={editing?.id ?? "new"}
         open={formOpen}
-        onOpenChange={setFormOpen}
+        onOpenChange={handleFormOpenChange}
         expense={editing}
         onDeleteRequest={setDeleting}
       />
@@ -374,5 +395,13 @@ export default function ExpensesPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+export default function ExpensesPage() {
+  return (
+    <Suspense fallback={<DbLoadingScreen showPhrases={false} />}>
+      <ExpensesPageContent />
+    </Suspense>
   );
 }

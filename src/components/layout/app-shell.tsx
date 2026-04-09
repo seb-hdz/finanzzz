@@ -1,6 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { DriftingMeshBackground } from "@/components/decorative/drifting-mesh-background";
+import { shouldShowMainDriftMesh } from "@/lib/main-drift-mesh-routes";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
 import { MainContentEnter } from "./main-content-enter";
@@ -9,12 +12,22 @@ import { ReportProblemModalProvider } from "@/components/modals/report-problem-m
 import { StandaloneInfoModal } from "@/components/modals/standalone-info-modal";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const mainDriftMesh = shouldShowMainDriftMesh(pathname);
+
   return (
     <ReportProblemModalProvider>
       <div className="flex min-h-screen">
         <Sidebar />
-        <main className="min-w-0 flex-1 pb-20 md:pb-0">
-          <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <main
+          className={
+            mainDriftMesh
+              ? "relative isolate min-w-0 flex-1 bg-background pb-20 md:pb-0"
+              : "min-w-0 flex-1 pb-20 md:pb-0"
+          }
+        >
+          {mainDriftMesh ? <DriftingMeshBackground className="z-0" /> : null}
+          <div className="relative z-10 mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
             <MainContentEnter>{children}</MainContentEnter>
           </div>
         </main>

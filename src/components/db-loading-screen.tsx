@@ -9,6 +9,7 @@ import {
   type TransitionEvent,
 } from "react";
 import logoMark from "@/assets/logo.svg";
+import { DriftingMeshBackground } from "@/components/decorative/drifting-mesh-background";
 import { cn } from "@/lib/utils";
 
 const LOADING_PHRASES = [
@@ -33,7 +34,11 @@ function randomPhraseIndex(exclude: number): number {
   return next;
 }
 
-export function DbLoadingScreen() {
+type DbLoadingScreenProps = {
+  showPhrases?: boolean;
+};
+
+export function DbLoadingScreen({ showPhrases = true }: DbLoadingScreenProps) {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const [enterSnap, setEnterSnap] = useState(false);
@@ -64,9 +69,10 @@ export function DbLoadingScreen() {
   }, []);
 
   useEffect(() => {
+    if (!showPhrases) return;
     const scheduled = scheduleNext();
     return () => clearTimeout(scheduled);
-  }, [phraseIndex, scheduleNext]);
+  }, [phraseIndex, scheduleNext, showPhrases]);
 
   const onPhraseTransitionEnd = (e: TransitionEvent<HTMLParagraphElement>) => {
     if (e.propertyName !== "opacity") return;
@@ -100,22 +106,7 @@ export function DbLoadingScreen() {
       )}
 
       {themeReady ? (
-        <>
-          <div
-            className={cn(
-              "pointer-events-none absolute -top-[20%] -left-[25%] size-[min(85vw,520px)] rounded-full bg-linear-to-br from-teal-300/45 via-cyan-200/35 to-sky-200/28 blur-3xl transition-colors duration-1000 ease-out dark:from-teal-600/35 dark:via-cyan-900/28 dark:to-sky-950/32",
-              "db-loading-mesh-a"
-            )}
-            aria-hidden
-          />
-          <div
-            className={cn(
-              "pointer-events-none absolute -right-[20%] -bottom-[25%] size-[min(80vw,480px)] rounded-full bg-linear-to-tl from-violet-200/42 via-sky-200/32 to-teal-200/36 blur-3xl transition-colors duration-1000 ease-out dark:from-indigo-900/40 dark:via-sky-900/30 dark:to-teal-900/34",
-              "db-loading-mesh-b"
-            )}
-            aria-hidden
-          />
-        </>
+        <DriftingMeshBackground className="z-0" />
       ) : (
         <div
           className="pointer-events-none absolute inset-0 z-2 overflow-hidden"
@@ -133,22 +124,24 @@ export function DbLoadingScreen() {
       )}
 
       <div className="relative z-10 flex flex-col items-center px-6">
-        <div
-          className={cn(
-            "transition-opacity duration-300 ease-out motion-reduce:transition-none mb-8",
-            themeReady ? "text-muted-foreground" : "db-loading-pending-muted",
-            leaving && "opacity-0 motion-reduce:opacity-100",
-            enterSnap && "opacity-0 duration-0! motion-reduce:opacity-100",
-            !leaving && !enterSnap && "opacity-100"
-          )}
-          aria-hidden
-        >
-          <span className="db-loading-typing inline-flex h-4 items-end gap-1">
-            <span className="db-loading-typing-dot" />
-            <span className="db-loading-typing-dot" />
-            <span className="db-loading-typing-dot" />
-          </span>
-        </div>
+        {showPhrases ? (
+          <div
+            className={cn(
+              "transition-opacity duration-300 ease-out motion-reduce:transition-none mb-8",
+              themeReady ? "text-muted-foreground" : "db-loading-pending-muted",
+              leaving && "opacity-0 motion-reduce:opacity-100",
+              enterSnap && "opacity-0 duration-0! motion-reduce:opacity-100",
+              !leaving && !enterSnap && "opacity-100"
+            )}
+            aria-hidden
+          >
+            <span className="db-loading-typing inline-flex h-4 items-end gap-1">
+              <span className="db-loading-typing-dot" />
+              <span className="db-loading-typing-dot" />
+              <span className="db-loading-typing-dot" />
+            </span>
+          </div>
+        ) : null}
 
         <div className="db-loading-logo-float">
           <Image
@@ -161,27 +154,31 @@ export function DbLoadingScreen() {
           />
         </div>
 
-        <div
-          className="flex min-h-17 w-full max-w-md flex-col items-center justify-center gap-2 overflow-hidden text-center"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <p
-            className={cn(
-              "text-sm leading-snug transition-all duration-300 ease-out motion-reduce:transition-none",
-              themeReady ? "text-muted-foreground" : "db-loading-pending-muted",
-              leaving &&
-                "-translate-y-3 opacity-0 motion-reduce:translate-y-0 motion-reduce:opacity-100",
-              enterSnap &&
-                "translate-y-5 opacity-0 duration-0! motion-reduce:translate-y-0 motion-reduce:opacity-100",
-              !leaving && !enterSnap && "translate-y-0 opacity-100"
-            )}
-            onTransitionEnd={onPhraseTransitionEnd}
+        {showPhrases ? (
+          <div
+            className="flex min-h-17 w-full max-w-md flex-col items-center justify-center gap-2 overflow-hidden text-center"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
           >
-            {phrase}
-          </p>
-        </div>
+            <p
+              className={cn(
+                "text-sm leading-snug transition-all duration-300 ease-out motion-reduce:transition-none",
+                themeReady
+                  ? "text-muted-foreground"
+                  : "db-loading-pending-muted",
+                leaving &&
+                  "-translate-y-3 opacity-0 motion-reduce:translate-y-0 motion-reduce:opacity-100",
+                enterSnap &&
+                  "translate-y-5 opacity-0 duration-0! motion-reduce:translate-y-0 motion-reduce:opacity-100",
+                !leaving && !enterSnap && "translate-y-0 opacity-100"
+              )}
+              onTransitionEnd={onPhraseTransitionEnd}
+            >
+              {phrase}
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

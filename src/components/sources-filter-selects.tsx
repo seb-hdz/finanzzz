@@ -59,6 +59,10 @@ export type NonSharedTypeFilter = "all" | (typeof NON_SHARED_TYPES)[number];
 export const SOURCE_FILTER_SELECT_TRIGGER_CLASS =
   "min-w-38 max-w-[min(100vw-2rem,14rem)]";
 
+/** Solo filtro de tipo: etiquetas largas («Todos los tipos», tarjetas). */
+export const NON_SHARED_TYPE_FILTER_TRIGGER_CLASS =
+  "min-w-44 max-w-[min(100vw-2rem,14rem)]";
+
 export const SHARED_SOURCE_SORT_OPTIONS: SharedSourceSort[] = [
   "created",
   "expenses_desc",
@@ -138,7 +142,7 @@ export function NonSharedTypeFilterSelect({
         onValueChange(v as NonSharedTypeFilter);
       }}
     >
-      <SelectTrigger size="sm" className={SOURCE_FILTER_SELECT_TRIGGER_CLASS}>
+      <SelectTrigger size="sm" className={NON_SHARED_TYPE_FILTER_TRIGGER_CLASS}>
         <span
           className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
           aria-hidden

@@ -290,6 +290,89 @@
   animation-delay: -16.2s;
 }
 
+/*
+ * DriftingMeshBackground: traslación en px + segunda animación de brillo lento
+ * (opacidad + brightness), desincronizada del movimiento.
+ */
+@keyframes drift-mesh-blob-a-move {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(28px, 18px, 0);
+  }
+  50% {
+    transform: translate3d(12px, 36px, 0);
+  }
+  75% {
+    transform: translate3d(-22px, 14px, 0);
+  }
+}
+
+@keyframes drift-mesh-blob-b-move {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-26px, -20px, 0);
+  }
+  50% {
+    transform: translate3d(18px, -32px, 0);
+  }
+  75% {
+    transform: translate3d(14px, 10px, 0);
+  }
+}
+
+/*
+ * Cada keyframe debe repetir blur(): si solo se anima brightness(), el `filter`
+ * sustituye al de `blur-3xl` y el desenfoque desaparece. blur(64px) ≈ blur-3xl.
+ */
+@keyframes drift-mesh-blob-a-glow {
+  0%,
+  100% {
+    opacity: 0.82;
+    filter: blur(64px) brightness(0.92);
+  }
+  35% {
+    opacity: 1;
+    filter: blur(64px) brightness(1.18);
+  }
+  70% {
+    opacity: 0.72;
+    filter: blur(64px) brightness(1.04);
+  }
+}
+
+@keyframes drift-mesh-blob-b-glow {
+  0%,
+  100% {
+    opacity: 0.75;
+    filter: blur(64px) brightness(0.9);
+  }
+  40% {
+    opacity: 0.98;
+    filter: blur(64px) brightness(1.22);
+  }
+  65% {
+    opacity: 0.68;
+    filter: blur(64px) brightness(1.08);
+  }
+}
+
+.drift-mesh-blob-a {
+  animation: drift-mesh-blob-a-move 18s ease-in-out infinite,
+    drift-mesh-blob-a-glow 10.5s ease-in-out infinite;
+}
+
+.drift-mesh-blob-b {
+  animation: drift-mesh-blob-b-move 22s ease-in-out infinite,
+    drift-mesh-blob-b-glow 12.75s ease-in-out infinite;
+  animation-delay: -7s, -3s;
+}
+
 @keyframes db-loading-typing-bounce {
   0%,
   100% {
@@ -330,13 +413,21 @@
 
   .db-loading-logo-float,
   .db-loading-mesh-a,
-  .db-loading-mesh-b {
+  .db-loading-mesh-b,
+  .drift-mesh-blob-a,
+  .drift-mesh-blob-b {
     animation: none;
   }
 
   .db-loading-mesh-a,
   .db-loading-mesh-b {
     opacity: 0.92;
+    transform: none;
+  }
+
+  .drift-mesh-blob-a,
+  .drift-mesh-blob-b {
+    opacity: 0.9;
     transform: none;
   }
 }
