@@ -3,12 +3,24 @@ import { appBasePath } from "@/lib/app-base-path";
 
 export const dynamic = "force-static";
 
+/**
+ * Orden: PNG por acceso → icono general de la app → SVG (p. ej. Android/WebAPK).
+ */
 const SHORTCUT_ICONS = (name: string) => {
   const prefix = appBasePath;
-  const src = `${prefix}/icons/shortcut-${name}.svg`;
   return [
     {
-      src,
+      src: `${prefix}/icons/shortcut-${name}.png`,
+      sizes: "192x192",
+      type: "image/png",
+    },
+    {
+      src: `${prefix}/icons/icon-192.png`,
+      sizes: "192x192",
+      type: "image/png",
+    },
+    {
+      src: `${prefix}/icons/shortcut-${name}.svg`,
       sizes: "192x192",
       type: "image/svg+xml",
     },
@@ -24,6 +36,14 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Control de gastos personales",
     start_url: `${prefix}/`,
     scope: `${prefix}/`,
+    /**
+     * Chrome (p. ej. macOS): sin esto, `auto` suele abrir un cliente nuevo al usar
+     * accesos del manifiesto. `navigate-existing` reutiliza la ventana y navega.
+     * @see https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference/launch_handler
+     */
+    launch_handler: {
+      client_mode: ["navigate-existing", "auto"],
+    },
     display: "standalone",
     background_color: "#0a0a0a",
     theme_color: "#0a0a0a",
