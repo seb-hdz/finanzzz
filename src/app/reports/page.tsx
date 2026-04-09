@@ -6,10 +6,7 @@ import { CalendarIcon, FileDown, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Badge,
-  tagBadgeResponsiveClassName,
-} from "@/components/ui/badge";
+import { Badge, tagBadgeResponsiveClassName } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -250,7 +247,7 @@ export default function ReportsPage() {
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-xs -mt-2 block text-center self-center">
+              <p className="text-muted-foreground text-xs -mt-2 block">
                 No hay cuentas configuradas.
               </p>
             )}
