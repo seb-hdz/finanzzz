@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { ContextHint } from "@/components/ui/context-hint";
 import { LimitIntervalSelect } from "@/components/limit-interval-select";
 import { useGlobalConfig, updateGlobalConfig } from "@/lib/db-hooks";
@@ -63,7 +64,8 @@ const DevSeedFakeDataButton = dynamic(
 
 export default function SettingsPage() {
   const config = useGlobalConfig();
-  const { theme, toggle } = useTheme();
+  const { theme, themeMode, setThemeMode, autoDarkAt, setAutoDarkAt, toggle } =
+    useTheme();
   const { openReportProblemModal } = useReportProblemModal();
 
   const [exportOpen, setExportOpen] = useState(false);
@@ -272,17 +274,63 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Apariencia</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Button variant="outline" onClick={toggle} className="gap-2">
-            {theme === "dark" ? (
-              <Sun className="size-4" />
-            ) : (
-              <Moon className="size-4" />
-            )}
-            {theme === "dark"
-              ? "Cambiar a modo claro"
-              : "Cambiar a modo oscuro"}
-          </Button>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={toggle} className="gap-2">
+              {theme === "dark" ? (
+                <Sun className="size-4" />
+              ) : (
+                <Moon className="size-4" />
+              )}
+              {theme === "dark"
+                ? "Cambiar a modo claro"
+                : "Cambiar a modo oscuro"}
+            </Button>
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5">
+            <div className="min-w-0 space-y-0.5">
+              <Label
+                htmlFor="appearance-auto"
+                className="text-sm font-medium leading-none"
+              >
+                Modo de tema automático
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Oscuro desde la hora indicada hasta medianoche
+              </p>
+            </div>
+            <Switch
+              id="appearance-auto"
+              size="sm"
+              checked={themeMode === "auto"}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setThemeMode("auto");
+                } else {
+                  setThemeMode(theme);
+                }
+              }}
+              aria-label="Activar tema automático según la hora"
+            />
+          </div>
+          {themeMode === "auto" && (
+            <div className="flex flex-wrap items-center gap-2 pl-0.5">
+              <Label
+                htmlFor="auto-dark-at"
+                className="text-xs font-normal text-muted-foreground"
+              >
+                Cambiar a oscuro a las
+              </Label>
+              <Input
+                id="auto-dark-at"
+                type="time"
+                value={autoDarkAt}
+                onChange={(e) => setAutoDarkAt(e.target.value)}
+                className="h-7 w-[4.85rem] min-w-0 shrink-0 px-1.5 py-0 font-mono text-[11px] leading-none tabular-nums [&::-webkit-datetime-edit]:p-0 [&::-webkit-datetime-edit-fields-wrapper]:p-0 [&::-webkit-datetime-edit-hour-field]:p-0 [&::-webkit-datetime-edit-minute-field]:p-0 [&::-webkit-datetime-edit-text]:p-0 [&::-webkit-datetime-edit-ampm-field]:p-0"
+                aria-label="Hora a la que aplicar modo oscuro"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
