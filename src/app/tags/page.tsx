@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge, tagBadgeResponsiveClassName } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,7 +70,10 @@ export default function TagsPage() {
             {predefined.map((tag) => (
               <Badge
                 key={tag.id}
-                className="text-white cursor-pointer"
+                className={cn(
+                  tagBadgeResponsiveClassName,
+                  "cursor-pointer text-white"
+                )}
                 style={{ backgroundColor: tag.color }}
                 onClick={() => handleEdit(tag)}
               >
@@ -93,7 +97,10 @@ export default function TagsPage() {
             {custom.map((tag) => (
               <Badge
                 key={tag.id}
-                className="text-white cursor-pointer"
+                className={cn(
+                  tagBadgeResponsiveClassName,
+                  "cursor-pointer text-white"
+                )}
                 style={{ backgroundColor: tag.color }}
                 onClick={() => handleEdit(tag)}
               >

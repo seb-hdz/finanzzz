@@ -30,10 +30,17 @@ function summaryLabel(
   return `${value.length} seleccionados`;
 }
 
+export type MultiSelectOptionGroup = {
+  label: string;
+  options: MultiSelectDropdownOption[];
+};
+
 export type MultiSelectDropdownProps = {
   value: readonly string[];
   onValueChange: (next: string[]) => void;
   options: MultiSelectDropdownOption[];
+  /** Si se define, la lista se muestra agrupada (p. ej. por tipo de fuente). */
+  optionGroups?: MultiSelectOptionGroup[];
   /** Label on the trigger when the selection is empty */
   emptyLabel: string;
   /** Accessible name for the options list */
@@ -49,6 +56,7 @@ export function MultiSelectDropdown({
   value,
   onValueChange,
   options,
+  optionGroups,
   emptyLabel,
   listLabel,
   triggerIcon,
@@ -59,6 +67,8 @@ export function MultiSelectDropdown({
   const hasOptions = options.length > 0;
   const summary = summaryLabel(options, value, emptyLabel);
   const selected = React.useMemo(() => new Set(value), [value]);
+  const groups = optionGroups?.filter((g) => g.options.length > 0);
+  const useGroups = Boolean(groups && groups.length > 0);
 
   function toggle(v: string) {
     if (selected.has(v)) {
@@ -69,6 +79,48 @@ export function MultiSelectDropdown({
   }
 
   const listId = React.useId();
+
+  function renderOptionRow(opt: MultiSelectDropdownOption) {
+    const isOn = selected.has(opt.value);
+    return (
+      <button
+        key={opt.value}
+        type="button"
+        role="option"
+        aria-selected={isOn}
+        className={cn(
+          "group flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none select-none transition-colors",
+          isOn
+            ? "bg-accent/60 text-accent-foreground"
+            : "hover:bg-muted/70"
+        )}
+        onClick={() => toggle(opt.value)}
+      >
+        <span
+          aria-hidden
+          className={cn(
+            "flex size-4 shrink-0 items-center justify-center rounded border border-input bg-background shadow-none transition-shadow group-hover:shadow-sm group-focus-visible:shadow-sm dark:bg-input/30",
+            isOn &&
+              "border-primary bg-primary text-primary-foreground dark:bg-primary"
+          )}
+        >
+          {isOn ? (
+            <CheckIcon className="size-3" strokeWidth={2.5} />
+          ) : null}
+        </span>
+        {opt.swatchColor ? (
+          <span
+            className="size-2 shrink-0 rounded-full"
+            style={{ backgroundColor: opt.swatchColor }}
+            aria-hidden
+          />
+        ) : null}
+        <span className="min-w-0 flex-1 leading-snug wrap-break-word">
+          {opt.label}
+        </span>
+      </button>
+    );
+  }
 
   return (
     <Popover>
@@ -105,47 +157,23 @@ export function MultiSelectDropdown({
           aria-multiselectable="true"
           className="flex flex-col"
         >
-          {options.map((opt) => {
-            const isOn = selected.has(opt.value);
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                role="option"
-                aria-selected={isOn}
-                className={cn(
-                  "group flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none select-none transition-colors",
-                  isOn
-                    ? "bg-accent/60 text-accent-foreground"
-                    : "hover:bg-muted/70"
-                )}
-                onClick={() => toggle(opt.value)}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "flex size-4 shrink-0 items-center justify-center rounded border border-input bg-background shadow-none transition-shadow group-hover:shadow-sm group-focus-visible:shadow-sm dark:bg-input/30",
-                    isOn &&
-                      "border-primary bg-primary text-primary-foreground dark:bg-primary"
-                  )}
-                >
-                  {isOn ? (
-                    <CheckIcon className="size-3" strokeWidth={2.5} />
+          {useGroups && groups
+            ? groups.map((group, gi) => (
+                <React.Fragment key={group.label}>
+                  {gi > 0 ? (
+                    <div
+                      className="mx-1 my-1 h-px shrink-0 bg-border"
+                      role="separator"
+                      aria-hidden
+                    />
                   ) : null}
-                </span>
-                {opt.swatchColor ? (
-                  <span
-                    className="size-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: opt.swatchColor }}
-                    aria-hidden
-                  />
-                ) : null}
-                <span className="min-w-0 flex-1 leading-snug wrap-break-word">
-                  {opt.label}
-                </span>
-              </button>
-            );
-          })}
+                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground">
+                    {group.label}
+                  </div>
+                  {group.options.map((opt) => renderOptionRow(opt))}
+                </React.Fragment>
+              ))
+            : options.map((opt) => renderOptionRow(opt))}
         </div>
       </PopoverContent>
     </Popover>

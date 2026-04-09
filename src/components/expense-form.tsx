@@ -32,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
+import { Badge, tagBadgeResponsiveClassName } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   useSources,
@@ -49,19 +49,9 @@ import {
   getAlertMessage,
 } from "@/lib/limits";
 import { db } from "@/lib/db";
-import type { Expense, Source, SourceType } from "@/lib/types";
+import type { Expense, Source } from "@/lib/types";
 import Link from "next/link";
-
-/** Agrupación solo para el select de fuente en este formulario. */
-const PAYMENT_SOURCE_SECTIONS: {
-  label: string;
-  types: readonly SourceType[];
-}[] = [
-  { label: "Cuentas Bancarias", types: ["bank_account"] },
-  { label: "Tarjetas", types: ["debit_card", "credit_card"] },
-  { label: "Monederos digitales", types: ["mobile_payment"] },
-  { label: "Cuentas compartidas", types: ["shared"] },
-];
+import { PAYMENT_SOURCE_SECTIONS } from "@/lib/payment-source-sections";
 
 function defaultPaymentSourceId(sources: Source[]): string {
   const sections = PAYMENT_SOURCE_SECTIONS.map((section) =>
@@ -385,6 +375,7 @@ export function ExpenseForm({
                     selectedTags.includes(tag.id) ? "default" : "outline"
                   }
                   className={cn(
+                    tagBadgeResponsiveClassName,
                     "cursor-pointer transition-colors",
                     selectedTags.includes(tag.id) && "text-white"
                   )}

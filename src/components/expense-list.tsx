@@ -5,7 +5,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Badge,
+  tagBadgeCompactResponsiveClassName,
+} from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Expense, Source, Tag } from "@/lib/types";
 import { formatPEN } from "@/lib/limits";
@@ -112,7 +115,10 @@ export function ExpenseList({
                     <Badge
                       key={tag!.id}
                       variant="secondary"
-                      className="text-[10px] px-1.5 py-0 h-4 text-white"
+                      className={cn(
+                        tagBadgeCompactResponsiveClassName,
+                        "text-white"
+                      )}
                       style={{ backgroundColor: tag!.color }}
                     >
                       {tag!.name}

@@ -114,8 +114,8 @@ export function StandaloneInfoModal() {
             <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-left text-sm leading-snug text-amber-600 dark:text-amber-400">
               <ArrowRightLeft className="mt-0.5 size-4 shrink-0" aria-hidden />
               <span>
-                Ve a <strong>&quot;Recibir actualización&quot;</strong> en el
-                modal de cuentas compartidas.
+                Ve a <strong>&quot;Recibir actualización&quot;</strong> en
+                cuentas compartidas.
               </span>
             </div>
           </div>

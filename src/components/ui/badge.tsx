@@ -27,6 +27,14 @@ const badgeVariants = cva(
   }
 )
 
+/** ~+10% sobre el badge estándar en viewports &lt; md; en `md+` el tamaño base del badge. */
+export const tagBadgeResponsiveClassName =
+  "text-[0.825rem] min-h-[1.375rem] gap-[0.275rem] px-[0.6875rem] py-[0.275rem] md:text-xs md:min-h-5 md:gap-1 md:px-2.5 md:py-1 [&>svg]:size-[0.825rem] md:[&>svg]:size-3";
+
+/** Tags compactos en filas densas (p. ej. lista de gastos), misma regla responsive. */
+export const tagBadgeCompactResponsiveClassName =
+  "h-[1.1rem] px-[7px] py-0 text-[11px] md:h-4 md:px-1.5 md:text-[10px]";
+
 function Badge({
   className,
   variant = "default",

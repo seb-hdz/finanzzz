@@ -32,8 +32,8 @@ export function Sidebar() {
           const active = external
             ? false
             : href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(href);
+            ? pathname === "/"
+            : pathname.startsWith(href);
           const itemClass = cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
             active

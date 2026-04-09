@@ -2,11 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { CalendarIcon, FileDown } from "lucide-react";
+import { CalendarIcon, FileDown, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import {
+  Badge,
+  tagBadgeResponsiveClassName,
+} from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -19,12 +22,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ContextHint } from "@/components/ui/context-hint";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useSources, useTags, useExpensesByDateRange } from "@/lib/db-hooks";
 import { formatPEN } from "@/lib/limits";
 import { generateExpenseReport } from "@/lib/pdf";
+import { PAYMENT_SOURCE_SECTIONS } from "@/lib/payment-source-sections";
+import { SourceTypeIcon } from "@/components/source-type-icon";
 import { ExpenseList } from "@/components/expense-list";
 
 export default function ReportsPage() {
@@ -37,6 +43,17 @@ export default function ReportsPage() {
 
   const sources = useSources();
   const tags = useTags();
+
+  const sourceSections = useMemo(
+    () =>
+      PAYMENT_SOURCE_SECTIONS.map((section) => ({
+        label: section.label,
+        sectionIconType: section.types[0],
+        sources: sources.filter((s) => section.types.includes(s.type)),
+      })).filter((s) => s.sources.length > 0),
+    [sources]
+  );
+
   const allExpenses = useExpensesByDateRange(
     startDate.getTime(),
     endDate.getTime()
@@ -170,31 +187,67 @@ export default function ReportsPage() {
           <Separator />
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold">Fuentes </Label>
-            <span className="text-muted-foreground text-xs -mt-2 block">
-              (vacío = todas)
-            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Label className="text-xs font-bold">Fuentes</Label>
+              <ContextHint
+                mode="popover"
+                side="bottom"
+                align="start"
+                aria-label="Cómo filtrar por fuentes en el reporte"
+                trigger={<Info className="size-3.5" />}
+                triggerClassName="size-5"
+                contentClassName="max-w-sm"
+              >
+                <p className="text-xs leading-snug">
+                  Selecciona una o varias fuentes para el reporte. Se incluyen{" "}
+                  <span className="font-medium">todas las fuentes</span> por
+                  defecto.
+                </p>
+              </ContextHint>
+            </div>
 
             {!!sources.length ? (
-              <div className="flex flex-wrap gap-1.5">
-                {sources.map((s) => (
-                  <Badge
-                    key={s.id}
-                    variant={selectedSources.has(s.id) ? "default" : "outline"}
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedSources.has(s.id) && "text-white"
-                    )}
-                    style={
-                      selectedSources.has(s.id)
-                        ? { backgroundColor: s.color, borderColor: s.color }
-                        : {}
-                    }
-                    onClick={() => toggleSource(s.id)}
-                  >
-                    {s.name}
-                  </Badge>
-                ))}
+              <div className="space-y-3">
+                {sourceSections.map(
+                  ({ label, sectionIconType, sources: sectionSources }) => (
+                    <div key={label} className="space-y-1.5">
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                        <SourceTypeIcon
+                          type={sectionIconType}
+                          className="size-3.5 shrink-0 opacity-90"
+                        />
+                        {label}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {sectionSources.map((s) => {
+                          const on = selectedSources.has(s.id);
+                          return (
+                            <Badge
+                              key={s.id}
+                              variant={on ? "default" : "outline"}
+                              className={cn(
+                                "cursor-pointer border transition-colors",
+                                on && "text-white"
+                              )}
+                              style={
+                                on
+                                  ? {
+                                      backgroundColor: s.color,
+                                      borderColor: s.color,
+                                      color: "#fff",
+                                    }
+                                  : { borderColor: s.color }
+                              }
+                              onClick={() => toggleSource(s.id)}
+                            >
+                              {s.name}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
             ) : (
               <p className="text-muted-foreground text-xs -mt-2 block text-center self-center">
@@ -203,30 +256,54 @@ export default function ReportsPage() {
             )}
           </div>
 
+          <Separator />
+
           <div className="space-y-2">
-            <Label className="text-xs font-bold">Tags </Label>
-            <span className="text-muted-foreground text-xs -mt-2 block">
-              (vacío = todos)
-            </span>
+            <div className="flex flex-wrap items-start gap-1.5">
+              <Label className="text-xs font-bold">Tags</Label>
+              <ContextHint
+                mode="popover"
+                side="bottom"
+                align="start"
+                aria-label="Cómo filtrar por tags en el reporte"
+                trigger={<Info className="size-3.5" />}
+                triggerClassName="size-5"
+                contentClassName="max-w-sm"
+              >
+                <p className="text-xs leading-snug">
+                  Selecciona uno o varios tags para el reporte. Se incluyen{" "}
+                  <span className="font-medium">todos los tags</span> por
+                  defecto.
+                </p>
+              </ContextHint>
+            </div>
             <div className="flex flex-wrap gap-1.5">
-              {tags.map((t) => (
-                <Badge
-                  key={t.id}
-                  variant={selectedTags.has(t.id) ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer transition-colors",
-                    selectedTags.has(t.id) && "text-white"
-                  )}
-                  style={
-                    selectedTags.has(t.id)
-                      ? { backgroundColor: t.color, borderColor: t.color }
-                      : {}
-                  }
-                  onClick={() => toggleTag(t.id)}
-                >
-                  {t.name}
-                </Badge>
-              ))}
+              {tags.map((t) => {
+                const on = selectedTags.has(t.id);
+                return (
+                  <Badge
+                    key={t.id}
+                    variant={on ? "default" : "outline"}
+                    className={cn(
+                      tagBadgeResponsiveClassName,
+                      "cursor-pointer border transition-colors",
+                      on && "text-white"
+                    )}
+                    style={
+                      on
+                        ? {
+                            backgroundColor: t.color,
+                            borderColor: t.color,
+                            color: "#fff",
+                          }
+                        : { borderColor: t.color }
+                    }
+                    onClick={() => toggleTag(t.id)}
+                  >
+                    {t.name}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
         </CardContent>

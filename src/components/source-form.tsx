@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Eye, EyeOff, Info, Regex, Trash2 } from "lucide-react";
 import { ContextHint } from "@/components/ui/context-hint";
+import { SourceTypeIcon } from "@/components/source-type-icon";
 
 interface SourceFormProps {
   open: boolean;
@@ -71,6 +72,8 @@ export function SourceForm({
 
   const syncState = useSharedSyncState(source?.id);
   const isEditing = !!source;
+  const sharedTypeLocked =
+    isEditing && source !== undefined && source.type === "shared";
   const [showOutboundPw, setShowOutboundPw] = useState(false);
   const [showLinkPassword, setShowLinkPassword] = useState(false);
 
@@ -182,12 +185,19 @@ export function SourceForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Tipo</Label>
+            <Label>Tipo de cuenta</Label>
             <Select
               value={type}
               onValueChange={(v) => v && setType(v as SourceType)}
+              disabled={sharedTypeLocked}
             >
               <SelectTrigger className="w-full min-w-0">
+                <span
+                  className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
+                  aria-hidden
+                >
+                  <SourceTypeIcon type={type} className="size-4" />
+                </span>
                 <span
                   data-slot="select-value"
                   className="min-w-0 flex-1 text-left"
@@ -196,13 +206,24 @@ export function SourceForm({
                 </span>
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(SOURCE_TYPE_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
+                {(Object.keys(SOURCE_TYPE_LABELS) as SourceType[]).map((t) => (
+                  <SelectItem key={t} value={t}>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <SourceTypeIcon
+                        type={t}
+                        className="size-4 shrink-0 text-muted-foreground"
+                      />
+                      <span className="min-w-0">{SOURCE_TYPE_LABELS[t]}</span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {sharedTypeLocked ? (
+              <p className="text-xs text-muted-foreground">
+                El tipo de una cuenta compartida no se puede cambiar.
+              </p>
+            ) : null}
           </div>
 
           {type === "shared" && (

@@ -2,17 +2,21 @@
 
 import type { ReactNode, RefObject } from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { ArrowUpDown, Layers, Plus, Search, X } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+  ALL_SOURCE_SORT_OPTIONS,
+  NonSharedTypeFilterSelect,
+  SHARED_SOURCE_SORT_OPTIONS,
+  SortOrderSelect,
+  SOURCE_SORT_LABELS,
+  type NonSharedTypeFilter,
+  type SharedSourceSort,
+  type SourceSort,
+} from "@/components/sources-filter-selects";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,50 +39,8 @@ import {
   useSharedSourcePendingOutboundCount,
   isSharedSourceLinked,
 } from "@/lib/db-hooks";
-import type { Expense, Source, SourceType } from "@/lib/types";
+import type { Expense, Source } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
-
-const NON_SHARED_TYPES = [
-  "bank_account",
-  "mobile_payment",
-  "debit_card",
-  "credit_card",
-] as const satisfies readonly Exclude<SourceType, "shared">[];
-
-type NonSharedTypeFilter = "all" | (typeof NON_SHARED_TYPES)[number];
-
-type SourceSort =
-  | "created"
-  | "expenses_desc"
-  | "expenses_asc"
-  | "name"
-  | "type";
-
-const SOURCE_SORT_LABELS: Record<SourceSort, string> = {
-  created: "Nuevos",
-  expenses_desc: "Más gastos",
-  expenses_asc: "Menos gastos",
-  name: "Alfabético",
-  type: "Tipo de fuente",
-};
-
-/** Orden en fuentes compartidas: sin "por tipo" (todas son el mismo tipo). */
-type SharedSourceSort = Exclude<SourceSort, "type">;
-
-const SHARED_SOURCE_SORT_OPTIONS: SharedSourceSort[] = [
-  "created",
-  "expenses_desc",
-  "expenses_asc",
-  "name",
-];
-
-const ALL_SOURCE_SORT_OPTIONS: SourceSort[] = [
-  ...SHARED_SOURCE_SORT_OPTIONS,
-  "type",
-];
-
-const SOURCE_FILTER_SELECT_TRIGGER_CLASS =
-  "min-w-38 max-w-[min(100vw-2rem,14rem)]";
 
 function useFocusInputWhen(
   ref: RefObject<HTMLInputElement | null>,
@@ -103,91 +65,6 @@ function SourceSectionFilterHeader({
         {children}
       </div>
     </div>
-  );
-}
-
-function SortOrderSelect<T extends string>({
-  value,
-  optionKeys,
-  labels,
-  onValueChange,
-}: {
-  value: T;
-  optionKeys: readonly T[];
-  labels: Record<T, string>;
-  onValueChange: (v: T) => void;
-}) {
-  return (
-    <Select
-      value={value}
-      onValueChange={(v) => {
-        if (!v) return;
-        onValueChange(v as T);
-      }}
-    >
-      <SelectTrigger size="sm" className={SOURCE_FILTER_SELECT_TRIGGER_CLASS}>
-        <span
-          className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
-          aria-hidden
-        >
-          <ArrowUpDown />
-        </span>
-        <span
-          data-slot="select-value"
-          className="min-w-0 flex-1 truncate text-left"
-        >
-          {labels[value]}
-        </span>
-      </SelectTrigger>
-      <SelectContent>
-        {optionKeys.map((key) => (
-          <SelectItem key={key} value={key}>
-            {labels[key]}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function NonSharedTypeFilterSelect({
-  value,
-  onValueChange,
-}: {
-  value: NonSharedTypeFilter;
-  onValueChange: (v: NonSharedTypeFilter) => void;
-}) {
-  return (
-    <Select
-      value={value}
-      onValueChange={(v) => {
-        if (!v) return;
-        onValueChange(v as NonSharedTypeFilter);
-      }}
-    >
-      <SelectTrigger size="sm" className={SOURCE_FILTER_SELECT_TRIGGER_CLASS}>
-        <span
-          className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
-          aria-hidden
-        >
-          <Layers />
-        </span>
-        <span
-          data-slot="select-value"
-          className="min-w-0 flex-1 truncate text-left"
-        >
-          {value === "all" ? "Todos los tipos" : SOURCE_TYPE_LABELS[value]}
-        </span>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">Todos</SelectItem>
-        {NON_SHARED_TYPES.map((t) => (
-          <SelectItem key={t} value={t}>
-            {SOURCE_TYPE_LABELS[t]}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }
 

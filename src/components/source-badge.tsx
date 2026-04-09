@@ -1,18 +1,10 @@
 "use client";
 
-import { Landmark, Smartphone, CreditCard, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SOURCE_TYPE_ICONS } from "@/components/source-type-icon";
 import type { SourceType } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
 import { twMerge } from "tailwind-merge";
-
-const ICONS: Record<SourceType, React.ElementType> = {
-  bank_account: Landmark,
-  mobile_payment: Smartphone,
-  debit_card: CreditCard,
-  credit_card: CreditCard,
-  shared: Users,
-};
 
 export function SourceBadge({
   type,
@@ -21,7 +13,7 @@ export function SourceBadge({
   type: SourceType;
   className?: string;
 }) {
-  const Icon = ICONS[type];
+  const Icon = SOURCE_TYPE_ICONS[type];
   return (
     <Badge
       variant="secondary"

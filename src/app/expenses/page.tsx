@@ -12,6 +12,10 @@ import {
   endOfYear,
 } from "date-fns";
 import { Landmark, Layers, Plus, Search, Tag } from "lucide-react";
+import {
+  getSourceTypeMultiSelectTriggerIcon,
+  SourceTypeIcon,
+} from "@/components/source-type-icon";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +41,7 @@ import {
   deleteExpense,
 } from "@/lib/db-hooks";
 import { formatPEN } from "@/lib/limits";
+import { PAYMENT_SOURCE_SECTIONS } from "@/lib/payment-source-sections";
 import type { Expense, SourceType } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
 
@@ -100,12 +105,36 @@ export default function ExpensesPage() {
     [sources]
   );
 
+  const sourceOptionGroups = useMemo(
+    () =>
+      PAYMENT_SOURCE_SECTIONS.map((section) => ({
+        label: section.label,
+        options: sources
+          .filter((s) => section.types.includes(s.type))
+          .map((s) => ({
+            value: s.id,
+            text: s.name,
+            label: s.name,
+            swatchColor: s.color,
+          })),
+      })).filter((g) => g.options.length > 0),
+    [sources]
+  );
+
   const typeOptions = useMemo(
     () =>
       SOURCE_TYPES.map((t) => ({
         value: t,
         text: SOURCE_TYPE_LABELS[t],
-        label: SOURCE_TYPE_LABELS[t],
+        label: (
+          <span className="flex min-w-0 items-center gap-2">
+            <SourceTypeIcon
+              type={t}
+              className="size-4 shrink-0 text-muted-foreground"
+            />
+            <span className="min-w-0">{SOURCE_TYPE_LABELS[t]}</span>
+          </span>
+        ),
       })),
     []
   );
@@ -231,6 +260,7 @@ export default function ExpensesPage() {
             emptyLabel="Todas las fuentes"
             listLabel="Filtrar por fuente"
             options={sourceOptions}
+            optionGroups={sourceOptionGroups}
             value={sourceFilterIds}
             onValueChange={setSourceFilterIds}
             triggerIcon={<Landmark />}
@@ -242,7 +272,10 @@ export default function ExpensesPage() {
             options={typeOptions}
             value={sourceTypeFilterIds}
             onValueChange={setSourceTypeFilterIds}
-            triggerIcon={<Layers />}
+            triggerIcon={getSourceTypeMultiSelectTriggerIcon(
+              sourceTypeFilterIds,
+              Layers
+            )}
           />
           <MultiSelectDropdown
             className="md:flex-1"
