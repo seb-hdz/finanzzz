@@ -129,6 +129,15 @@
   }
 }
 
+/*
+ * Sonner default: align-items:center on the toast row → custom icon sits mid title+description.
+ * Higher specificity than bundled [data-styled] so it wins over runtime-injected Sonner CSS.
+ */
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
 /* Main area: stagger top-level sections (page root → space-y-6 → rows/cards). */
 @keyframes page-section-enter {
   from {

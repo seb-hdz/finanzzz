@@ -1,6 +1,6 @@
 import type { SourceType } from "@/lib/types";
 
-/** Agrupación de fuentes por tipo (formulario de gastos, filtros, etc.). */
+/** Agrupación de cuentas por tipo (formulario de gastos, filtros, etc.). */
 export const PAYMENT_SOURCE_SECTIONS: readonly {
   readonly label: string;
   readonly types: readonly SourceType[];

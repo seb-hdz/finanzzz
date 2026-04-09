@@ -59,7 +59,7 @@ async function insertDefaultTagsAndConfig(
   await configTable.add(DEFAULT_GLOBAL_CONFIG);
 }
 
-/** Borra fuentes, gastos, etiquetas, ajustes y estado de sync; deja la app como recién instalada. */
+/** Borra cuentas, gastos, etiquetas, ajustes y estado de sync; deja la app como recién instalada. */
 export async function resetLocalDatabase() {
   await db.transaction(
     "rw",

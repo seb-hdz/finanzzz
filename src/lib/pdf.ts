@@ -85,7 +85,7 @@ export function generateExpenseReport(data: ReportData): jsPDF {
 
   autoTable(doc, {
     startY: 54,
-    head: [["Fecha", "Descripción", "Fuente", "Tags", "Monto (S/.)"]],
+    head: [["Fecha", "Descripción", "Cuenta", "Tags", "Monto (S/.)"]],
     body: tableData,
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 30, 30] },
@@ -110,7 +110,7 @@ export function generateExpenseReport(data: ReportData): jsPDF {
 
   doc.setFontSize(13);
   doc.setTextColor(0);
-  doc.text("Resumen por Fuente", 14, y);
+  doc.text("Resumen por cuenta", 14, y);
   y += 8;
 
   const summaryData = Array.from(bySource.entries()).map(
@@ -123,7 +123,7 @@ export function generateExpenseReport(data: ReportData): jsPDF {
 
   autoTable(doc, {
     startY: y,
-    head: [["Fuente", "Monto (S/.)", "% del Total"]],
+    head: [["Cuenta", "Monto (S/.)", "% del Total"]],
     body: summaryData,
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 30, 30] },

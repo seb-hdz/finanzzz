@@ -40,7 +40,7 @@ export function StandaloneInfoModal() {
     if (!appleReady || !appleKind) {
       return (
         <>
-          La app instalada puede funcionar
+          La app instalada puede funcionar{" "}
           <strong className="text-foreground">separada</strong> del navegador.
         </>
       );
@@ -52,7 +52,8 @@ export function StandaloneInfoModal() {
       <p className="">
         En <strong className="text-foreground">{applePlatform}</strong>, el uso
         de URLs para sincronizar cuentas compartidas{" "}
-        <strong className="text-foreground">es distinto</strong> a Safari.
+        <strong className="text-foreground">funciona distinto</strong> que en el
+        navegador.
       </p>
     );
   };
@@ -92,14 +93,11 @@ export function StandaloneInfoModal() {
           </div>
           <div className="w-full space-y-3 text-left">
             <AlertDialogTitle className="text-center">
+              Estás usando la app instalada
               <ContextHint
                 mode="popover"
                 side="bottom"
-                trigger={
-                  <span className="inline-flex items-center gap-1.5">
-                    Estás usando la app instalada <Info className="size-3.5" />{" "}
-                  </span>
-                }
+                trigger={<Info className="size-4 ml-1 pt-1.5" />}
                 triggerClassName="hover:bg-transparent active:bg-transparent focus-visible:bg-transparent"
               >
                 <p className="text-xs">
@@ -114,8 +112,8 @@ export function StandaloneInfoModal() {
             <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-left text-sm leading-snug text-amber-600 dark:text-amber-400">
               <ArrowRightLeft className="mt-0.5 size-4 shrink-0" aria-hidden />
               <span>
-                Ve a <strong>&quot;Recibir actualización&quot;</strong> en
-                cuentas compartidas.
+                Ve a <strong>&quot;Recibir&quot;</strong> en cuentas
+                compartidas.
               </span>
             </div>
           </div>

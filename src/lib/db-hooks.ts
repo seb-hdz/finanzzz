@@ -226,7 +226,7 @@ export async function deleteSource(id: string) {
   const expenses = await db.expenses.where("sourceId").equals(id).count();
   if (expenses > 0) {
     throw new Error(
-      `No se puede eliminar: hay ${expenses} gasto(s) asociado(s) a esta fuente.`
+      `No se puede eliminar: hay ${expenses} gasto(s) asociado(s) a esta cuenta.`
     );
   }
   await db.sharedSync.delete(id);

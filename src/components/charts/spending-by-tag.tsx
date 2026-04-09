@@ -10,6 +10,7 @@ import {
 } from "@/components/charts/chart-theme";
 import type { Expense, Tag } from "@/lib/types";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { Separator } from "../ui/separator";
 
 const NONE_BUCKET = "__none__";
 const COLOR_NO_TAG = "#737373";
@@ -24,7 +25,7 @@ function orderTagSlicesForDisplay(rows: TagSlice[]): TagSlice[] {
   const sinTag = rows.find((d) => d.name === LABEL_SIN_TAG);
   const noSync = rows.find((d) => d.name === LABEL_NO_SYNC);
   const rest = rows.filter(
-    (d) => d.name !== LABEL_SIN_TAG && d.name !== LABEL_NO_SYNC,
+    (d) => d.name !== LABEL_SIN_TAG && d.name !== LABEL_NO_SYNC
   );
   rest.sort((a, b) => b.amount - a.amount);
   return [...rest, ...(noSync ? [noSync] : []), ...(sinTag ? [sinTag] : [])];
@@ -67,10 +68,7 @@ function TagPieTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0];
   const name = String(row.name ?? row.payload?.name ?? "");
-  const amount = numericFromTooltipValue(
-    row.value,
-    row.payload?.amount ?? 0,
-  );
+  const amount = numericFromTooltipValue(row.value, row.payload?.amount ?? 0);
   const pct =
     totalAmount > 0 ? ((amount / totalAmount) * 100).toFixed(1) : "0.0";
 
@@ -81,6 +79,7 @@ function TagPieTooltip({
       style={chartTooltipContentStyle}
     >
       <div style={chartTooltipLabelStyle}>{name}</div>
+      <Separator className="mt-1 mb-2" />
       <div className="text-xs text-muted-foreground">{pct}% del total</div>
       <div style={{ ...chartTooltipItemStyle, paddingTop: 6 }}>
         {`${CURRENCY_SYMBOL} ${amount.toFixed(2)}`}
@@ -131,7 +130,9 @@ export function SpendingByTag({ expenses, tags }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Distribución por Tags</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Distribución por Tags
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-8">
@@ -145,7 +146,9 @@ export function SpendingByTag({ expenses, tags }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium">Distribución por Tags</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          Distribución por Tags
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col">
         <div className="h-[250px] w-full min-h-0 shrink-0">
@@ -185,7 +188,10 @@ export function SpendingByTag({ expenses, tags }: Props) {
           aria-label="Leyenda de tags"
         >
           {dataOrdered.map((entry, i) => (
-            <li key={`${entry.name}-${i}`} className="flex items-center gap-1.5 text-xs text-foreground">
+            <li
+              key={`${entry.name}-${i}`}
+              className="flex items-center gap-1.5 text-xs text-foreground"
+            >
               <span
                 className="size-2 shrink-0 rounded-sm"
                 style={{ backgroundColor: entry.color }}

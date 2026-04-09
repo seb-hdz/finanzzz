@@ -13,7 +13,7 @@ export default function DevSeedFakeDataButton() {
     try {
       const r = await seedFakeData();
       toast.success(
-        `Datos de prueba: +${r.tagsAdded} etiquetas, +${r.sourcesAdded} fuentes, +${r.expensesAdded} gastos`
+        `Datos de prueba: +${r.tagsAdded} etiquetas, +${r.sourcesAdded} cuentas, +${r.expensesAdded} gastos`
       );
     } catch (e) {
       toast.error(

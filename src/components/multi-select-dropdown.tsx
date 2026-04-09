@@ -31,7 +31,9 @@ function summaryLabel(
 }
 
 export type MultiSelectOptionGroup = {
-  label: string;
+  /** Clave estable para la lista (el `label` puede ser ReactNode). */
+  id: string;
+  label: React.ReactNode;
   options: MultiSelectDropdownOption[];
 };
 
@@ -39,7 +41,7 @@ export type MultiSelectDropdownProps = {
   value: readonly string[];
   onValueChange: (next: string[]) => void;
   options: MultiSelectDropdownOption[];
-  /** Si se define, la lista se muestra agrupada (p. ej. por tipo de fuente). */
+  /** Si se define, la lista se muestra agrupada (p. ej. por tipo de cuenta). */
   optionGroups?: MultiSelectOptionGroup[];
   /** Label on the trigger when the selection is empty */
   emptyLabel: string;
@@ -159,7 +161,7 @@ export function MultiSelectDropdown({
         >
           {useGroups && groups
             ? groups.map((group, gi) => (
-                <React.Fragment key={group.label}>
+                <React.Fragment key={group.id}>
                   {gi > 0 ? (
                     <div
                       className="mx-1 my-1 h-px shrink-0 bg-border"
@@ -167,7 +169,7 @@ export function MultiSelectDropdown({
                       aria-hidden
                     />
                   ) : null}
-                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-muted-foreground">
                     {group.label}
                   </div>
                   {group.options.map((opt) => renderOptionRow(opt))}

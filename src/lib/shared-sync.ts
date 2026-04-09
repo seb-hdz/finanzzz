@@ -141,7 +141,7 @@ export async function buildSharedSyncToken(
   password: string
 ): Promise<BuildSharedSyncResult> {
   if (source.type !== "shared" || !source.sharedPublicId) {
-    throw new Error("La fuente no es compartida.");
+    throw new Error("La cuenta no es compartida.");
   }
 
   const all = await db.expenses.where("sourceId").equals(source.id).toArray();
@@ -256,13 +256,13 @@ export async function applySharedSyncFromToken(
   if (sources.length === 0) {
     return {
       ok: false,
-      error: `No hay fuente compartida con id "${plain.sharedPublicId}". Créala primero con el mismo id.`,
+      error: `No hay cuenta compartida con id "${plain.sharedPublicId}". Créala primero con el mismo id.`,
     };
   }
   if (sources.length > 1) {
     return {
       ok: false,
-      error: "Hay más de una fuente con el mismo id compartido; deja solo una.",
+      error: "Hay más de una cuenta con el mismo id compartido; deja solo una.",
     };
   }
 

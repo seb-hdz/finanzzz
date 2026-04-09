@@ -161,15 +161,11 @@ export function SourceForm({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      disablePointerDismissal
-    >
+    <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Editar Fuente" : "Nueva Fuente de Pago"}
+            {isEditing ? "Editar cuenta" : "Nueva cuenta"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -229,42 +225,42 @@ export function SourceForm({
           {type === "shared" && (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-1.5">
-                <Label htmlFor="sharedPublicId">Id compartido</Label>
+                <Label htmlFor="sharedPublicId">ID compartido</Label>
+              </div>
+              <div className="relative">
                 <ContextHint
                   mode="popover"
                   side="bottom"
                   aria-label="Reglas de formato del id compartido"
-                  trigger={<Info className="size-3.5" />}
+                  trigger={<Regex className="size-3.5 text-muted-foreground" />}
                   triggerClassName="size-5"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
                 >
-                  <div className="flex items-start gap-2 text-sm leading-snug">
-                    <Regex
-                      className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                      aria-hidden
-                    />
-                    <span>Solo minúsculas, números, y símbolos</span>
-                  </div>
+                  <p className="text-sm leading-snug">
+                    Solo minúsculas, números, y símbolos:{" "}
+                    <strong>* - _ .</strong>
+                  </p>
                 </ContextHint>
+                <Input
+                  id="sharedPublicId"
+                  placeholder="ej: casa2024"
+                  value={sharedPublicId}
+                  readOnly={sharedPublicIdLocked}
+                  onChange={(e) => {
+                    if (sharedPublicIdLocked) return;
+                    setSharedPublicId(
+                      normalizeSharedPublicId(e.target.value).slice(
+                        0,
+                        SHARED_PUBLIC_ID_MAX_LEN
+                      )
+                    );
+                  }}
+                  maxLength={SHARED_PUBLIC_ID_MAX_LEN}
+                  required
+                  autoComplete="off"
+                  className={cn(sharedPublicIdLocked && "bg-muted/50")}
+                />
               </div>
-              <Input
-                id="sharedPublicId"
-                placeholder="ej: casa2024"
-                value={sharedPublicId}
-                readOnly={sharedPublicIdLocked}
-                onChange={(e) => {
-                  if (sharedPublicIdLocked) return;
-                  setSharedPublicId(
-                    normalizeSharedPublicId(e.target.value).slice(
-                      0,
-                      SHARED_PUBLIC_ID_MAX_LEN
-                    )
-                  );
-                }}
-                maxLength={SHARED_PUBLIC_ID_MAX_LEN}
-                required
-                autoComplete="off"
-                className={cn(sharedPublicIdLocked && "bg-muted/50")}
-              />
               <p className="text-xs text-muted-foreground">
                 {sharedPublicIdLocked ? (
                   <>Solo lectura. El id compartido no se puede cambiar.</>
@@ -310,9 +306,21 @@ export function SourceForm({
                     )}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Debe introducirse al sincronizar en el{" "}
-                  <span className="underline">otro dispositivo</span>.
+                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                  <span>
+                    Debe introducirse al sincronizar en el{" "}
+                    <span className="underline">otro dispositivo</span>.
+                  </span>
+                  <ContextHint
+                    mode="popover"
+                    side="bottom"
+                    trigger={<Info className="size-3.5" />}
+                  >
+                    <p className="text-sm leading-snug">
+                      No es necesario crear la cuenta compartida con la misma
+                      contraseña en ambos dispositivos.
+                    </p>
+                  </ContextHint>
                 </p>
               </div>
             </>
@@ -343,7 +351,7 @@ export function SourceForm({
               </div>
               <p className="text-xs text-muted-foreground">
                 Solo lectura. Para sincronizar, usa &quot;Enviar
-                actualización&quot; en Fuentes compartidas.
+                actualización&quot; en Cuentas compartidas.
               </p>
             </div>
           )}
@@ -405,7 +413,7 @@ export function SourceForm({
                   triggerClassName="size-5"
                 >
                   <p className="text-sm leading-snug">
-                    Puede ser el máximo real de la fuente (saldo, crédito o lo
+                    Puede ser el máximo real de la cuenta (saldo, crédito o lo
                     que tengas disponible) o uno que elijas.
                   </p>
                 </ContextHint>
@@ -438,10 +446,10 @@ export function SourceForm({
                 }}
               >
                 <Trash2 className="size-3.5" />
-                Eliminar fuente
+                Eliminar cuenta
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
-                Solo se puede eliminar si no hay gastos asociados a la fuente.
+                Solo se puede eliminar si no hay gastos asociados a la cuenta.
               </p>
             </div>
           ) : null}

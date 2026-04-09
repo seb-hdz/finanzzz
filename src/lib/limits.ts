@@ -8,7 +8,7 @@ import type {
   LimitInterval,
 } from "./types";
 
-/** Etiqueta junto al monto gastado en tarjetas de fuente (intervalo global). */
+/** Etiqueta junto al monto gastado en tarjetas de cuenta (intervalo global). */
 export const LIMIT_INTERVAL_SPENT_LABELS: Record<LimitInterval, string> = {
   daily: "Gastado este día",
   weekly: "Gastado esta semana",

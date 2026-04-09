@@ -137,7 +137,7 @@ export default function ReportsPage() {
         <CardHeader>
           <CardTitle className="text-base">Configurar Reporte</CardTitle>
           <CardDescription>
-            Selecciona el período y filtra por fuentes o tags
+            Selecciona el período y filtra por cuentas o tags
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -188,19 +188,19 @@ export default function ReportsPage() {
 
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1.5">
-              <Label className="text-xs font-bold">Fuentes</Label>
+              <Label className="text-xs font-bold">Cuentas</Label>
               <ContextHint
                 mode="popover"
                 side="bottom"
                 align="start"
-                aria-label="Cómo filtrar por fuentes en el reporte"
+                aria-label="Cómo filtrar por cuentas en el reporte"
                 trigger={<Info className="size-3.5" />}
                 triggerClassName="size-5"
                 contentClassName="max-w-sm"
               >
                 <p className="text-xs leading-snug">
-                  Selecciona una o varias fuentes para el reporte. Se incluyen{" "}
-                  <span className="font-medium">todas las fuentes</span> por
+                  Selecciona una o varias cuentas para el reporte. Se incluyen{" "}
+                  <span className="font-medium">todas las cuentas</span> por
                   defecto.
                 </p>
               </ContextHint>
@@ -251,7 +251,7 @@ export default function ReportsPage() {
               </div>
             ) : (
               <p className="text-muted-foreground text-xs -mt-2 block text-center self-center">
-                No hay fuentes configuradas.
+                No hay cuentas configuradas.
               </p>
             )}
           </div>

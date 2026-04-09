@@ -166,7 +166,7 @@ export default function SettingsPage() {
                 >
                   <p className="text-sm leading-snug">
                     Es el valor máximo para la suma de gastos de{" "}
-                    <span className="font-medium">todas las fuentes</span>.
+                    <span className="font-medium">todas las cuentas</span>.
                   </p>
                 </ContextHint>
               </div>
@@ -248,7 +248,7 @@ export default function SettingsPage() {
           <Separator />
 
           <div className="space-y-2">
-            <Label>Aviso de sincronización de fuentes compartidas (días)</Label>
+            <Label>Aviso de sincronización de cuentas compartidas (días)</Label>
             <Input
               type="number"
               min="1"
@@ -261,7 +261,7 @@ export default function SettingsPage() {
               }}
             />
             <p className="text-xs text-muted-foreground">
-              En Fuentes compartidas, se mostrará un indicador si no recibes una
+              En Cuentas compartidas, se mostrará un indicador si no recibes una
               actualización del otro dispositivo en este número de días.
             </p>
           </div>
@@ -299,8 +299,8 @@ export default function SettingsPage() {
           </CardTitle>
           <CardDescription>
             Exporta o importa tu base de datos para mover entre dispositivos. El
-            respaldo incluye fuentes, gastos, etiquetas, ajustes y el estado de
-            sincronización actual de fuentes compartidas.
+            respaldo incluye cuentas, gastos, etiquetas, ajustes y el estado de
+            sincronización actual de cuentas compartidas.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -332,8 +332,8 @@ export default function SettingsPage() {
           <CardDescription>
             Elimina de forma permanente:{" "}
             <span className="text-foreground">
-              fuentes, gastos, etiquetas personalizadas, ajustes de la app y el
-              estado de sincronización de fuentes compartidas
+              cuentas, gastos, etiquetas personalizadas, ajustes de la app y el
+              estado de sincronización de cuentas compartidas
             </span>{" "}
             en este dispositivo. Se restaurarán solo las etiquetas y valores por
             defecto. Exporta un respaldo antes si quieres conservar algo.
@@ -510,7 +510,7 @@ export default function SettingsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar todos los datos?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Perderás gastos, fuentes y
+              Esta acción no se puede deshacer. Perderás gastos, cuentas y
               configuración en este navegador o app instalada.
             </AlertDialogDescription>
           </AlertDialogHeader>

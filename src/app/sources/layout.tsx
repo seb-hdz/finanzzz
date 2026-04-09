@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { sectionMetadata } from "@/lib/site-metadata";
 
 export const metadata: Metadata = sectionMetadata(
-  "Fuentes",
-  "Organiza tus fuentes de gasto en un solo lugar.",
+  "Cuentas",
+  "Organiza tus cuentas de gasto en un solo lugar.",
   "/sources"
 );
 

@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, Trash2 } from "lucide-react";
+import { CalendarIcon, Globe, Info, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,18 @@ import { db } from "@/lib/db";
 import type { Expense, Source } from "@/lib/types";
 import Link from "next/link";
 import { PAYMENT_SOURCE_SECTIONS } from "@/lib/payment-source-sections";
+import { SourceTypeIcon } from "@/components/source-type-icon";
+import { ContextHint } from "./ui/context-hint";
+
+const toastAccountIconClassName = "size-3 shrink-0 pt-1";
+
+function expenseToastSourceIcon(type: Source["type"]) {
+  return <SourceTypeIcon type={type} className={toastAccountIconClassName} />;
+}
+
+function expenseToastGlobalIcon() {
+  return <Globe className={toastAccountIconClassName} aria-hidden />;
+}
 
 function defaultPaymentSourceId(sources: Source[]): string {
   const sections = PAYMENT_SOURCE_SECTIONS.map((section) =>
@@ -77,6 +89,7 @@ export function ExpenseForm({
   const sources = useSources();
   const sourceSections = PAYMENT_SOURCE_SECTIONS.map((section) => ({
     label: section.label,
+    types: section.types,
     sources: sources.filter((s) => section.types.includes(s.type)),
   })).filter((s) => s.sources.length > 0);
   const tags = useTags();
@@ -101,7 +114,7 @@ export function ExpenseForm({
     [sources]
   );
 
-  /** Nuevo gasto: si el usuario no eligió otra, usar la primera fuente del orden del formulario. */
+  /** Nuevo gasto: si el usuario no eligió otra, usar la primera cuenta del orden del formulario. */
   const resolvedSourceId = isEditing
     ? sourceId
     : sourceId || defaultNewSourceId;
@@ -128,7 +141,10 @@ export function ExpenseForm({
     if (!parsedAmount || parsedAmount <= 0 || !resolvedSourceId) return;
     if (sharedBlocked) {
       toast.error(
-        "Vincula la fuente compartida (envía y recibe una actualización) antes de registrar gastos."
+        "Vincula la cuenta compartida (envía y recibe una actualización) antes de registrar gastos.",
+        {
+          icon: expenseToastSourceIcon("shared"),
+        }
       );
       return;
     }
@@ -143,7 +159,12 @@ export function ExpenseForm({
 
     if (isEditing) {
       await updateExpense(expense.id, data);
-      toast.success("Gasto actualizado");
+      const updatedFromSource = sources.find((s) => s.id === expense.sourceId);
+      toast.success("Gasto actualizado", {
+        ...(updatedFromSource && {
+          icon: expenseToastSourceIcon(updatedFromSource.type),
+        }),
+      });
     } else {
       await addExpense(data);
       await showAlerts(resolvedSourceId);
@@ -171,11 +192,22 @@ export function ExpenseForm({
       );
       const level = evaluateAlert(spent, source.maxLimit, config);
       const msg = getAlertMessage(level, spent, source.maxLimit);
+      const sourceIcon = expenseToastSourceIcon(source.type);
       if (level === "danger")
-        toast.error(`${source.name}`, { description: msg });
+        toast.error(`${source.name}`, {
+          description: msg,
+          icon: sourceIcon,
+        });
       else if (level === "warning")
-        toast.warning(`${source.name}`, { description: msg });
-      else toast.success(source.name, { description: msg });
+        toast.warning(`${source.name}`, {
+          description: msg,
+          icon: sourceIcon,
+        });
+      else
+        toast.success(source.name, {
+          description: msg,
+          icon: sourceIcon,
+        });
     }
 
     if (config.totalMaxLimit > 0) {
@@ -193,16 +225,26 @@ export function ExpenseForm({
         totalSpent,
         config.totalMaxLimit
       );
+      const globalIcon = expenseToastGlobalIcon();
       if (globalLevel === "danger")
-        toast.error(`Global`, { description: globalMsg });
+        toast.error(`Global`, {
+          description: globalMsg,
+          icon: globalIcon,
+        });
       else if (globalLevel === "warning")
-        toast.warning(`Global`, { description: globalMsg });
+        toast.warning(`Global`, {
+          description: globalMsg,
+          icon: globalIcon,
+        });
     }
 
     if (!source || source.maxLimit <= 0) {
       if (config.totalMaxLimit <= 0) {
         if (source) {
-          toast.success(source.name, { description: "Gasto registrado" });
+          toast.success(source.name, {
+            description: "Gasto registrado",
+            icon: expenseToastSourceIcon(source.type),
+          });
         } else {
           toast.success("Gasto registrado");
         }
@@ -211,11 +253,7 @@ export function ExpenseForm({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      disablePointerDismissal
-    >
+    <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -254,7 +292,18 @@ export function ExpenseForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Fuente de pago</Label>
+            <Label>
+              Cuenta
+              <ContextHint
+                mode="popover"
+                side="bottom"
+                trigger={<Info className="ml-1 size-3.5" />}
+              >
+                <p className="text-sm leading-snug">
+                  Elige la cuenta a la que corresponde el gasto
+                </p>
+              </ContextHint>
+            </Label>
             <Select
               value={resolvedSourceId}
               onValueChange={(v) => v && setSourceId(v)}
@@ -262,12 +311,19 @@ export function ExpenseForm({
             >
               <SelectTrigger
                 className="w-full min-w-0"
-                title={
-                  resolvedSourceId
-                    ? sources.find((s) => s.id === resolvedSourceId)?.name
-                    : undefined
-                }
+                title={resolvedSourceId ? selectedSource?.name : undefined}
               >
+                {selectedSource ? (
+                  <span
+                    className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
+                    aria-hidden
+                  >
+                    <SourceTypeIcon
+                      type={selectedSource.type}
+                      className="size-4"
+                    />
+                  </span>
+                ) : null}
                 <span
                   data-slot="select-value"
                   className={cn(
@@ -276,9 +332,8 @@ export function ExpenseForm({
                   )}
                 >
                   {resolvedSourceId
-                    ? sources.find((s) => s.id === resolvedSourceId)?.name ??
-                      "Fuente"
-                    : "Seleccionar fuente"}
+                    ? selectedSource?.name ?? "Cuenta"
+                    : "Seleccionar cuenta"}
                 </span>
               </SelectTrigger>
               <SelectContent className="py-2">
@@ -288,8 +343,12 @@ export function ExpenseForm({
                       <SelectSeparator className="mx-1 my-0.5 shrink-0" />
                     )}
                     <SelectGroup className="scroll-my-1 p-0 px-1 py-0">
-                      <SelectLabel className="px-1.5 py-0.5">
-                        {section.label}
+                      <SelectLabel className="flex items-center gap-1.5 px-1.5 py-0.5">
+                        <SourceTypeIcon
+                          type={section.types[0]}
+                          className="size-3.5 shrink-0 opacity-90"
+                        />
+                        <span className="min-w-0">{section.label}</span>
                       </SelectLabel>
                       {section.sources.map((s) => (
                         <SelectItem
@@ -315,21 +374,21 @@ export function ExpenseForm({
             </Select>
             {sources.length === 0 && (
               <p className="text-xs text-destructive">
-                Primero crea una fuente de pago en la sección{" "}
+                Primero crea una cuenta en la sección{" "}
                 <Link href="/sources" className="underline">
-                  Fuentes
+                  Cuentas
                 </Link>
                 .
               </p>
             )}
             {sharedBlocked && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                Esta fuente compartida aún no está vinculada en este
+                Esta cuenta compartida aún no está vinculada en este
                 dispositivo. Ve a{" "}
                 <Link href="/sources" className="underline">
-                  Fuentes
+                  Cuentas
                 </Link>{" "}
-                → Fuentes compartidas, sincroniza con la otra persona y vuelve
+                → Cuentas compartidas, sincroniza con la otra persona y vuelve
                 aquí.
               </p>
             )}

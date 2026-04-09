@@ -41,6 +41,7 @@ import {
 } from "@/lib/db-hooks";
 import type { Expense, Source } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
+import { Separator } from "@/components/ui/separator";
 
 function useFocusInputWhen(
   ref: RefObject<HTMLInputElement | null>,
@@ -311,7 +312,7 @@ export default function SourcesPage() {
     if (!deleting) return;
     try {
       await deleteSource(deleting.id);
-      toast.success("Fuente eliminada");
+      toast.success("Cuenta eliminada");
     } catch (err) {
       toast.error((err as Error).message);
     }
@@ -322,9 +323,9 @@ export default function SourcesPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Fuentes de Pago</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Cuentas</h1>
           <p className="text-sm text-muted-foreground">
-            Administra tus cuentas, tarjetas y métodos de pago
+            Administra tus cuentas, tarjetas y monederos digitales
           </p>
         </div>
         <Button className="mt-2 md:mt-0" onClick={handleNew} size="sm">
@@ -335,9 +336,9 @@ export default function SourcesPage() {
 
       {sources.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No hay fuentes de pago configuradas.</p>
+          <p>No hay cuentas configuradas.</p>
           <Button variant="outline" className="mt-4" onClick={handleNew}>
-            Crear primera fuente
+            Crear primera cuenta
           </Button>
         </div>
       ) : (
@@ -349,7 +350,7 @@ export default function SourcesPage() {
                   <div className="min-w-0">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <h2 className="text-lg font-semibold tracking-tight">
-                        Fuentes compartidas
+                        Cuentas compartidas
                       </h2>
                       <Badge
                         variant="outline"
@@ -383,14 +384,14 @@ export default function SourcesPage() {
                   },
                   inputRef: sharedSearchInputRef,
                   placeholder: "Buscar por nombre o id compartido…",
-                  inputAriaLabel: "Buscar fuentes compartidas",
-                  openButtonAriaLabel: "Buscar fuentes compartidas",
+                  inputAriaLabel: "Buscar cuentas compartidas",
+                  openButtonAriaLabel: "Buscar cuentas compartidas",
                   closeButtonAriaLabel: "Cerrar búsqueda",
                 }}
               />
               {sharedSources.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Ninguna fuente compartida coincide con la búsqueda.
+                  Ninguna cuenta compartida coincide con la búsqueda.
                 </p>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -409,12 +410,16 @@ export default function SourcesPage() {
             </section>
           )}
 
+          {!!sharedSourcesRaw.length && !!otherSourcesRaw.length ? (
+            <Separator />
+          ) : null}
+
           {otherSourcesRaw.length > 0 && (
             <section className="space-y-3">
               <SourceSectionFilters
                 leading={
                   <h2 className="text-lg font-semibold tracking-tight md:min-w-0">
-                    Mis fuentes
+                    Mis cuentas
                   </h2>
                 }
                 middleControls={
@@ -442,14 +447,14 @@ export default function SourcesPage() {
                   },
                   inputRef: otherSearchInputRef,
                   placeholder: "Buscar por nombre…",
-                  inputAriaLabel: "Buscar fuentes",
-                  openButtonAriaLabel: "Buscar fuentes",
+                  inputAriaLabel: "Buscar cuentas",
+                  openButtonAriaLabel: "Buscar cuentas",
                   closeButtonAriaLabel: "Cerrar búsqueda",
                 }}
               />
               {otherSources.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Ninguna fuente coincide con los filtros.
+                  Ninguna cuenta coincide con los filtros.
                 </p>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -491,7 +496,7 @@ export default function SourcesPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar fuente?</AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar cuenta?</AlertDialogTitle>
             <AlertDialogDescription>
               Se eliminará &quot;{deleting?.name}&quot;. Esta acción no se puede
               deshacer.

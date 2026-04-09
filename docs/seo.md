@@ -40,7 +40,7 @@ La construcción de `metadataBase` concatena `siteOrigin` + `appBasePath` (`/fin
 
 - **Plantilla global:** `Finanzzz | %s` (`siteTitleTemplate` en `site-metadata.ts`; debe coincidir con `layout.tsx` raíz).
 - **Home:** título completo en `homeDocumentTitle` (p. ej. `Finanzzz | Registra y controla tus gastos`) vía `title.default` en el layout raíz; **no** pasa por la plantilla `%s`.
-- **Secciones:** cada layout pasa el **segmento** (p. ej. `"Gastos"`, `"Fuentes"`) → documento `<title>Finanzzz | Gastos</title>`, etc.
+- **Secciones:** cada layout pasa el **segmento** (p. ej. `"Gastos"`, `"Cuentas"`) → documento `<title>Finanzzz | Gastos</title>`, etc.
 
 **Mejora futura posible:** revisar consistencia con etiquetas de UI (`nav-config.tsx`) y longitud de títulos para SERP.
 

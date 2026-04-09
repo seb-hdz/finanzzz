@@ -104,7 +104,7 @@ export function SharedSourceSyncModal({
     successToast?: string | null;
   }): Promise<GenerateResult> {
     if (!source || source.type !== "shared" || !sync?.outboundPassword) {
-      toast.error("Define la contraseña de enlace editando la fuente.");
+      toast.error("Define la contraseña de enlace editando la cuenta.");
       return { ok: false };
     }
     setSending(true);
@@ -272,7 +272,7 @@ export function SharedSourceSyncModal({
             onSubmit={(e) => e.preventDefault()}
           >
             <DialogHeader>
-              <DialogTitle>Sincronizar fuente compartida</DialogTitle>
+              <DialogTitle>Sincronizar cuenta compartida</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4 text-sm">

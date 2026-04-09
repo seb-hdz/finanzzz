@@ -46,6 +46,7 @@ import { formatPEN } from "@/lib/limits";
 import { PAYMENT_SOURCE_SECTIONS } from "@/lib/payment-source-sections";
 import type { Expense, SourceType } from "@/lib/types";
 import { SOURCE_TYPE_LABELS } from "@/lib/types";
+import { Separator } from "@/components/ui/separator";
 
 const SOURCE_TYPES: SourceType[] = [
   "bank_account",
@@ -129,7 +130,16 @@ function ExpensesPageContent() {
   const sourceOptionGroups = useMemo(
     () =>
       PAYMENT_SOURCE_SECTIONS.map((section) => ({
-        label: section.label,
+        id: section.label,
+        label: (
+          <span className="flex min-w-0 items-center gap-1.5">
+            <SourceTypeIcon
+              type={section.types[0]}
+              className="size-3.5 shrink-0 opacity-90"
+            />
+            <span className="min-w-0">{section.label}</span>
+          </span>
+        ),
         options: sources
           .filter((s) => section.types.includes(s.type))
           .map((s) => ({
@@ -278,8 +288,8 @@ function ExpensesPageContent() {
         <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
           <MultiSelectDropdown
             className="md:flex-1"
-            emptyLabel="Todas las fuentes"
-            listLabel="Filtrar por fuente"
+            emptyLabel="Todas las cuentas"
+            listLabel="Filtrar por cuenta"
             options={sourceOptions}
             optionGroups={sourceOptionGroups}
             value={sourceFilterIds}
@@ -289,7 +299,7 @@ function ExpensesPageContent() {
           <MultiSelectDropdown
             className="md:flex-1"
             emptyLabel="Todos los tipos"
-            listLabel="Filtrar por tipo de fuente"
+            listLabel="Filtrar por tipo de cuenta"
             options={typeOptions}
             value={sourceTypeFilterIds}
             onValueChange={setSourceTypeFilterIds}
@@ -346,6 +356,7 @@ function ExpensesPageContent() {
                 <p className="text-xs font-medium text-muted-foreground">
                   Monto
                 </p>
+                <Separator className="my-1" />
                 <p className="mt-0.5 text-lg font-semibold tabular-nums tracking-tight">
                   {formatPEN(deleting.amount)}
                 </p>
@@ -355,6 +366,7 @@ function ExpensesPageContent() {
                   <p className="text-xs font-medium text-muted-foreground">
                     Descripción
                   </p>
+                  <Separator className="my-1" />
                   <p className="mt-0.5 text-sm font-medium wrap-break-word">
                     {deleting.description}
                   </p>
@@ -362,24 +374,30 @@ function ExpensesPageContent() {
               ) : null}
               <div>
                 <p className="text-xs font-medium text-muted-foreground">
-                  Fuente
+                  Cuenta
                 </p>
+                <Separator className="my-1" />
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   {deletingSource ? (
-                    <>
-                      <span
-                        className="size-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: deletingSource.color }}
-                        aria-hidden
+                    <div>
+                      <div className="flex items-start gap-2">
+                        <div
+                          className="size-2.5 shrink-0 rounded-full mt-1"
+                          style={{ backgroundColor: deletingSource.color }}
+                          aria-hidden
+                        />
+                        <p className="min-w-0 text-sm font-medium">
+                          {deletingSource.name}
+                        </p>
+                      </div>
+                      <SourceBadge
+                        className="ml-3.5 mt-1.5"
+                        type={deletingSource.type}
                       />
-                      <span className="min-w-0 text-sm font-medium">
-                        {deletingSource.name}
-                      </span>
-                      <SourceBadge type={deletingSource.type} />
-                    </>
+                    </div>
                   ) : (
                     <span className="text-sm text-muted-foreground">
-                      Fuente no encontrada (pudo haberse eliminado)
+                      Cuenta no encontrada (pudo haberse eliminado)
                     </span>
                   )}
                 </div>

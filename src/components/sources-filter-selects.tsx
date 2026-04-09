@@ -36,7 +36,7 @@ export const SOURCE_SORT_LABELS: Record<SourceSort, string> = {
   expenses_desc: "Más gastos",
   expenses_asc: "Menos gastos",
   name: "Alfabético",
-  type: "Por fuente",
+  type: "Por tipo",
 };
 
 const SOURCE_SORT_ICONS: Record<SourceSort, LucideIcon> = {

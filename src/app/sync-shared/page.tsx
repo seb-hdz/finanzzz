@@ -97,7 +97,7 @@ export default function SyncSharedPage() {
       <div className="mx-auto max-w-md space-y-6 py-8">
         <div>
           <h1 className="text-xl font-semibold">
-            Actualizando fuente compartida
+            Actualizando cuenta compartida
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Introduce la contraseña acordada con la otra persona para aplicar los
@@ -165,7 +165,7 @@ export default function SyncSharedPage() {
         className="w-full sm:w-auto"
         onClick={() => router.replace("/sources")}
       >
-        Ir a Fuentes
+        Ir a Cuentas
       </Button>
     </div>
   );

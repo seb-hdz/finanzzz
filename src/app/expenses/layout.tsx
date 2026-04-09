@@ -3,7 +3,7 @@ import { sectionMetadata } from "@/lib/site-metadata";
 
 export const metadata: Metadata = sectionMetadata(
   "Gastos",
-  "Registra y revisa tus gastos: montos, fechas, fuentes y tags.",
+  "Registra y revisa tus gastos: montos, fechas, cuentas y tags.",
   "/expenses"
 );
 

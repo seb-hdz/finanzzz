@@ -24,10 +24,10 @@ import { CURRENCY_SYMBOL } from "@/lib/constants";
 
 /** Viewport >= lg (Tailwind): más filas; por debajo, menos para que quepa en móvil. */
 const MEDIA_LG_UP = "(min-width: 1024px)";
-/** Evita barras demasiado finas y etiquetas superpuestas; el resto se agrupa en "Otras fuentes". */
+/** Evita barras demasiado finas y etiquetas superpuestas; el resto se agrupa en "Otras cuentas". */
 const MAX_SOURCES_IN_CHART_LG = 10;
 const MAX_SOURCES_IN_CHART_COMPACT = 5;
-const OTHERS_LABEL = "Otras fuentes";
+const OTHERS_LABEL = "Otras cuentas";
 const OTHERS_COLOR = "#737373";
 /** ~ancho del eje Y en px; el texto largo se trunca a una línea (nombre completo en hover). */
 const Y_AXIS_WIDTH = 132;
@@ -111,7 +111,7 @@ export function SpendingBySource({ expenses, sources }: Props) {
       <Card className="flex h-full min-h-0 flex-col">
         <CardHeader>
           <CardTitle className="text-sm font-medium">
-            Gasto por Fuente
+            Gasto por cuenta
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -126,7 +126,7 @@ export function SpendingBySource({ expenses, sources }: Props) {
   return (
     <Card className="flex h-full min-h-0 flex-col">
       <CardHeader>
-        <CardTitle className="text-sm font-medium">Gasto por Fuente</CardTitle>
+        <CardTitle className="text-sm font-medium">Gasto por cuenta</CardTitle>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col">
         <div className="w-full min-h-[250px] flex-1">

@@ -87,7 +87,7 @@ export default function DashboardPage() {
         <Card className="flex h-full min-h-0 max-lg:order-2 flex-col lg:min-h-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2 lg:pb-3">
             <CardTitle className="text-sm font-medium lg:text-base">
-              Top Fuente
+              Top cuenta
             </CardTitle>
             <Wallet className="size-4 text-muted-foreground lg:size-5" />
           </CardHeader>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         <Card className="flex h-full min-h-0 max-lg:order-4 flex-col lg:min-h-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Fuentes Activas
+              Cuentas activas
             </CardTitle>
             <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>

@@ -21,7 +21,7 @@ export type NavItemConfig = {
 export const NAV_ITEMS: NavItemConfig[] = [
   { href: "/", label: "Inicio", icon: LayoutDashboard, mobile: "tab" },
   { href: "/expenses", label: "Gastos", icon: Receipt, mobile: "tab" },
-  { href: "/sources", label: "Fuentes", icon: Wallet, mobile: "tab" },
+  { href: "/sources", label: "Cuentas", icon: Wallet, mobile: "tab" },
   { href: "/tags", label: "Tags", icon: Tags, mobile: "tab" },
   { href: "/reports", label: "Reportes", icon: FileText, mobile: "more" },
   { href: "/settings", label: "Ajustes", icon: Settings, mobile: "more" },
