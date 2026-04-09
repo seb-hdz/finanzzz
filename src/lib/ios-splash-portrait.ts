@@ -1,24 +1,18 @@
 /**
  * iOS standalone (Safari “Add to Home Screen”) splash screens.
  *
- * Each PNG is exactly imgW×imgH px under `public/splash/` as
- * `apple-{imgW}x{imgH}-light.png` / `apple-{imgW}x{imgH}-dark.png`.
- * Light/dark use `prefers-color-scheme` in `media` where WebKit supports it.
- * A **fallback** link per size (same `media` as before, no color-scheme) points at
- * the dark PNG — iOS PWAs often ignore `prefers-color-scheme` for startup images,
- * so without this nothing matches and the splash disappears.
+ * Each PNG is exactly imgW×imgH px under `public/splash/` as `apple-{imgW}x{imgH}.png`.
+ * Background is a **linear gradient** (see `IOS_SPLASH_GRADIENT_*`) baked in at export time
+ * via `scripts/generate-ios-splash.ts` + Inkscape.
  *
- * Generate: `bun run splash:ios` (see `scripts/generate-ios-splash.ts`).
+ * Generate: `bun run splash:ios`
  *
  * Deduped from Apple HIG–aligned lists (e.g. pwa-asset-generator’s fallback data).
  */
-export type IosSplashColorScheme = "light" | "dark";
 
-/** Light: matches `:root` app background (`oklch(1 0 0)`). Dark: manifest / shell. */
-export const IOS_SPLASH_BACKGROUND: Record<IosSplashColorScheme, string> = {
-  light: "#ffffff",
-  dark: "#0a0a0a",
-};
+/** Gradient top → bottom (#a3d926ff → #185e63ff). */
+export const IOS_SPLASH_GRADIENT_TOP = "#a3d926";
+export const IOS_SPLASH_GRADIENT_BOTTOM = "#185e63";
 
 const PORTRAIT_SPLASH_SPECS = [
   { imgW: 2048, imgH: 2732, dpr: 2 },
@@ -42,56 +36,28 @@ const PORTRAIT_SPLASH_SPECS = [
   { imgW: 640, imgH: 1136, dpr: 2 },
 ] as const;
 
-const COLOR_SCHEMES: IosSplashColorScheme[] = ["dark", "light"];
-
-function mediaPortraitDimensions(
-  spec: (typeof PORTRAIT_SPLASH_SPECS)[number],
-  colorScheme?: IosSplashColorScheme,
-): string {
+function mediaForPortraitSpec(spec: (typeof PORTRAIT_SPLASH_SPECS)[number]): string {
   const logicalW = spec.imgW / spec.dpr;
   const logicalH = spec.imgH / spec.dpr;
-  const parts: string[] = [];
-  if (colorScheme === "dark") {
-    parts.push("(prefers-color-scheme: dark)");
-  } else if (colorScheme === "light") {
-    parts.push("(prefers-color-scheme: light)");
-  }
-  parts.push(
+  return [
     "screen",
     `(device-width: ${logicalW}px)`,
     `(device-height: ${logicalH}px)`,
     `(-webkit-device-pixel-ratio: ${spec.dpr})`,
     "(orientation: portrait)",
-  );
-  return parts.join(" and ");
+  ].join(" and ");
 }
 
-/**
- * Next.js `metadata.appleWebApp.startupImage` (portrait).
- * Order per size: dark → light → fallback (dimensions only, dark asset).
- */
+/** Next.js `metadata.appleWebApp.startupImage` entries (portrait only). */
 export function iosPortraitStartupImages(basePath: string) {
   const prefix = basePath;
-  const out: { url: string; media?: string }[] = [];
-  for (const spec of PORTRAIT_SPLASH_SPECS) {
-    const base = `${prefix}/splash/apple-${spec.imgW}x${spec.imgH}`;
-    out.push({
-      url: `${base}-dark.png`,
-      media: mediaPortraitDimensions(spec, "dark"),
-    });
-    out.push({
-      url: `${base}-light.png`,
-      media: mediaPortraitDimensions(spec, "light"),
-    });
-    out.push({
-      url: `${base}-dark.png`,
-      media: mediaPortraitDimensions(spec),
-    });
-  }
-  return out;
+  return PORTRAIT_SPLASH_SPECS.map((spec) => ({
+    url: `${prefix}/splash/apple-${spec.imgW}x${spec.imgH}.png`,
+    media: mediaForPortraitSpec(spec),
+  }));
 }
 
 /** Filenames to generate under `public/splash/` (Inkscape script). */
-export const IOS_PORTRAIT_SPLASH_FILENAMES = PORTRAIT_SPLASH_SPECS.flatMap((s) =>
-  COLOR_SCHEMES.map((scheme) => `apple-${s.imgW}x${s.imgH}-${scheme}.png`),
+export const IOS_PORTRAIT_SPLASH_FILENAMES = PORTRAIT_SPLASH_SPECS.map(
+  (s) => `apple-${s.imgW}x${s.imgH}.png`,
 );
