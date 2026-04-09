@@ -430,7 +430,7 @@ export function SharedSourceSyncModal({
                           )}
                         >
                           <div className="min-h-0 overflow-hidden rounded-lg">
-                            <div className="flex justify-center border-t px-4 pt-4 bg-white">
+                            <div className="flex justify-center border-t px-4 pt-4 dark:pb-4 bg-white">
                               <QRCode
                                 value={sentToken}
                                 size={200}
