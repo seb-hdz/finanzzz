@@ -29,37 +29,39 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80 pb-[env(safe-area-inset-bottom,0px)]">
-        <div className="flex items-center justify-around py-2">
-          {MOBILE_TAB_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = isActivePath(pathname, href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-medium transition-colors min-w-0 flex-1",
-                  active ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                <Icon className="size-5 shrink-0" />
-                <span className="truncate max-w-full">{label}</span>
-              </Link>
-            );
-          })}
-          <button
-            type="button"
-            onClick={() => setMoreOpen(true)}
-            className={cn(
-              "flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-medium transition-colors min-w-0 flex-1",
-              moreActive ? "text-primary" : "text-muted-foreground"
-            )}
-            aria-expanded={moreOpen}
-            aria-haspopup="dialog"
-          >
-            <MoreHorizontal className="size-5 shrink-0" />
-            <span>Más</span>
-          </button>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80">
+        <div className="pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+          <div className="flex min-h-12 items-center justify-around px-0.5">
+            {MOBILE_TAB_ITEMS.map(({ href, label, icon: Icon }) => {
+              const active = isActivePath(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1.5 py-1 text-[11px] font-medium leading-none transition-colors",
+                    active ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <Icon className="size-5 shrink-0" />
+                  <span className="max-w-full truncate">{label}</span>
+                </Link>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setMoreOpen(true)}
+              className={cn(
+                "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1.5 py-1 text-[11px] font-medium leading-none transition-colors",
+                moreActive ? "text-primary" : "text-muted-foreground"
+              )}
+              aria-expanded={moreOpen}
+              aria-haspopup="dialog"
+            >
+              <MoreHorizontal className="size-5 shrink-0" />
+              <span>Más</span>
+            </button>
+          </div>
         </div>
       </nav>
 

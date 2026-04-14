@@ -22,8 +22,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main
           className={
             mainDriftMesh
-              ? "relative isolate min-w-0 flex-1 bg-background pb-20 md:pb-0"
-              : "min-w-0 flex-1 pb-20 md:pb-0"
+              ? "relative isolate min-w-0 flex-1 bg-background pb-[calc(3.5rem+max(0.75rem,env(safe-area-inset-bottom,0px)))] md:pb-0"
+              : "min-w-0 flex-1 pb-[calc(3.5rem+max(0.75rem,env(safe-area-inset-bottom,0px)))] md:pb-0"
           }
         >
           {mainDriftMesh ? <DriftingMeshBackground className="z-0" /> : null}

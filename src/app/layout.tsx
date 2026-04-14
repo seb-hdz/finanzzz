@@ -100,6 +100,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  /** Lets `env(safe-area-inset-*)` resolve on notched iOS (PWA / Safari). */
+  viewportFit: "cover",
 };
 
 const themeBootstrapScript = getThemeBootstrapScript();
