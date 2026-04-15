@@ -128,13 +128,13 @@ export function SpendingByTag({ expenses, tags }: Props) {
 
   if (dataOrdered.length === 0) {
     return (
-      <Card className="flex h-full min-h-0 flex-col">
+      <Card className="flex h-auto min-h-0 flex-col lg:h-full">
         <CardHeader>
           <CardTitle className="text-sm font-medium">
             Distribución por Tags
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-1 flex-col justify-center">
+        <CardContent className="flex flex-col justify-center max-lg:flex-none lg:flex-1">
           <p className="text-center text-sm text-muted-foreground py-8">
             Sin datos para mostrar
           </p>
@@ -144,13 +144,13 @@ export function SpendingByTag({ expenses, tags }: Props) {
   }
 
   return (
-    <Card className="flex h-full min-h-0 flex-col">
+    <Card className="flex h-auto min-h-0 flex-col lg:h-full">
       <CardHeader>
         <CardTitle className="text-sm font-medium">
           Distribución por Tags
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col">
+      <CardContent className="flex min-h-0 flex-col max-lg:flex-none lg:flex-1">
         <div className="h-[250px] w-full min-h-0 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

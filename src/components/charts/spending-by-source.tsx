@@ -108,13 +108,13 @@ export function SpendingBySource({ expenses, sources }: Props) {
 
   if (rawData.length === 0) {
     return (
-      <Card className="flex h-full min-h-0 flex-col">
+      <Card className="flex h-auto min-h-0 flex-col lg:h-full">
         <CardHeader>
           <CardTitle className="text-sm font-medium">
             Gasto por cuenta
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-1 flex-col justify-center">
+        <CardContent className="flex flex-col justify-center max-lg:flex-none lg:flex-1">
           <p className="text-center text-sm text-muted-foreground py-8">
             Sin datos para mostrar
           </p>
@@ -124,12 +124,12 @@ export function SpendingBySource({ expenses, sources }: Props) {
   }
 
   return (
-    <Card className="flex h-full min-h-0 flex-col">
+    <Card className="flex h-auto min-h-0 flex-col lg:h-full">
       <CardHeader>
         <CardTitle className="text-sm font-medium">Gasto por cuenta</CardTitle>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col">
-        <div className="w-full min-h-[250px] flex-1">
+      <CardContent className="flex min-h-0 flex-col max-lg:flex-none lg:flex-1">
+        <div className="w-full min-h-[250px] max-lg:flex-none lg:flex-1">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}

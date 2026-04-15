@@ -167,7 +167,7 @@ function SortableWidgetShell({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative flex h-full min-h-0 flex-col self-stretch",
+        "relative flex h-auto min-h-0 flex-col self-stretch lg:h-full",
         !showContent && "hidden",
         hidden && editMode && "opacity-[0.38]",
         !hidden && editMode && "opacity-[0.72]",
@@ -209,7 +209,7 @@ function SortableWidgetShell({
       {showContent ? (
         <div
           className={cn(
-            "flex min-h-0 h-full flex-1 flex-col",
+            "flex min-h-0 flex-col max-lg:h-auto max-lg:flex-none lg:h-full lg:flex-1",
             editMode && "ring-1 ring-border/60 rounded-xl"
           )}
         >
@@ -445,7 +445,7 @@ export function HomeDashboard({
           </div>
         ) : null}
         {rowId === "charts" ? (
-          <div className="grid min-h-0 items-stretch gap-4 lg:grid-cols-2">
+          <div className="grid min-h-0 gap-4 max-lg:items-start lg:grid-cols-2 lg:items-stretch">
             {ids.map((wid) => (
               <SortableWidgetShell
                 key={wid}
