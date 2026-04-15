@@ -100,15 +100,15 @@ export function SpendingTrend({ expenses, globalLimit }: Props) {
   }, [] as TrendPoint[]);
 
   return (
-    <Card>
+    <Card className="flex h-full min-h-0 flex-col">
       <CardHeader>
         <CardTitle className="text-sm font-medium">
           Tendencia Diaria (Mes Actual)
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex min-h-0 flex-1 flex-col">
         {expenses.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
+          <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground py-8">
             Sin datos para mostrar
           </p>
         ) : (

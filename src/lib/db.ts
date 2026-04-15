@@ -9,6 +9,7 @@ import type {
 import { PREDEFINED_TAGS, DEFAULT_GLOBAL_CONFIG } from "./constants";
 import { HOME_QUICK_ACTION_CONFIG_NONE } from "./home-quick-action-paths";
 import { normalizeUiZoomPercent } from "./ui-zoom";
+import { clearHomeDashboardLayoutStorage } from "./home-dashboard-layout";
 import { v4 as uuid } from "uuid";
 
 export const db = new Dexie("finanzzz") as Dexie & {
@@ -83,6 +84,7 @@ export async function resetLocalDatabase() {
       await insertDefaultTagsAndConfig(tx.table("tags"), tx.table("config"));
     }
   );
+  clearHomeDashboardLayoutStorage();
 }
 
 export async function seedDatabase() {

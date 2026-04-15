@@ -114,8 +114,8 @@ export function SpendingBySource({ expenses, sources }: Props) {
             Gasto por cuenta
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-8">
+        <CardContent className="flex flex-1 flex-col justify-center">
+          <p className="text-center text-sm text-muted-foreground py-8">
             Sin datos para mostrar
           </p>
         </CardContent>
