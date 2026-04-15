@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { DbLoadingScreen } from "@/components/db-loading-screen";
 import { seedDatabase } from "@/lib/db";
+import { UiZoomSync } from "@/providers/ui-zoom-sync";
 
 export function DbProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -13,5 +14,10 @@ export function DbProvider({ children }: { children: ReactNode }) {
 
   if (!ready) return <DbLoadingScreen />;
 
-  return <>{children}</>;
+  return (
+    <>
+      <UiZoomSync />
+      {children}
+    </>
+  );
 }

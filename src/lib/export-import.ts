@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db, seedDatabase } from "./db";
 import { decryptBinaryWithPassword, encryptBinaryWithPassword } from "./crypto-blob";
 
 export async function exportDatabase(password: string): Promise<Blob> {
@@ -63,4 +63,6 @@ export async function importDatabase(file: File, password: string): Promise<void
       }
     }
   );
+
+  await seedDatabase();
 }

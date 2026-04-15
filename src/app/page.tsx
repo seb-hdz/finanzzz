@@ -11,10 +11,16 @@ import {
   useGlobalConfig,
 } from "@/lib/db-hooks";
 import { formatPEN } from "@/lib/limits";
+import { HomeQuickActionButton } from "@/components/home-quick-action-button";
+import { HomeQuickActionPlaceholder } from "@/components/home-quick-action-placeholder";
 import { GlobalLimitGauge } from "@/components/charts/global-limit-gauge";
 import { SpendingBySource } from "@/components/charts/spending-by-source";
 import { SpendingByTag } from "@/components/charts/spending-by-tag";
 import { SpendingTrend } from "@/components/charts/spending-trend";
+import {
+  HOME_QUICK_ACTION_CONFIG_NONE,
+  resolveHomeQuickActionConfigId,
+} from "@/lib/home-quick-action-paths";
 import type { LimitInterval } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -22,11 +28,14 @@ export default function DashboardPage() {
   const [viewInterval, setViewInterval] = useState<LimitInterval | undefined>(
     undefined
   );
-  const interval =
-    viewInterval ?? config?.limitInterval ?? "monthly";
+  const interval = viewInterval ?? config?.limitInterval ?? "monthly";
   const expenses = useExpensesInInterval(interval);
   const sources = useSources();
   const tags = useTags();
+
+  const homeQuickActionConfigId = resolveHomeQuickActionConfigId(
+    config?.homeQuickActionId
+  );
 
   const stats = useMemo(() => {
     const total = expenses.reduce((s, e) => s + e.amount, 0);
@@ -55,8 +64,16 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Inicio</h1>
-        <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5">
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">Inicio</h1>
+          {config?.homeQuickActionEnabled !== false &&
+            (homeQuickActionConfigId === HOME_QUICK_ACTION_CONFIG_NONE ? (
+              <HomeQuickActionPlaceholder />
+            ) : (
+              <HomeQuickActionButton actionId={homeQuickActionConfigId} />
+            ))}
+        </div>
+        <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5 -mt-2">
           <span>Resumen de gastos</span>
           <LimitIntervalSelect
             variant="inline"

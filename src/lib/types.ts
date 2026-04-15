@@ -1,3 +1,5 @@
+import type { HomeQuickActionConfigId } from "./home-quick-action-paths";
+
 export type SourceType =
   | "bank_account"
   | "mobile_payment"
@@ -67,6 +69,12 @@ export interface GlobalConfig {
   dangerThreshold: number; // 0-1, e.g. 0.9
   /** Hours without receiving a shared sync before showing stale UI. */
   sharedStaleHours: number;
+  /** When false, nothing is shown next to Inicio (shortcut or placeholder). */
+  homeQuickActionEnabled: boolean;
+  /** Shortcut next to Inicio, or `none` (see `home-quick-action-paths`). */
+  homeQuickActionId: HomeQuickActionConfigId;
+  /** Root font scale for UI density (80–130, stored as exact step; see `ui-zoom.ts`). */
+  uiZoomPercent: number;
 }
 
 export type AlertLevel = "success" | "warning" | "danger";

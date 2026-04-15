@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { appBasePath } from "@/lib/app-base-path";
+import { HOME_QUICK_ACTION_PATHS } from "@/lib/home-quick-action-paths";
 
 export const dynamic = "force-static";
 
@@ -78,20 +79,20 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: "Nuevo gasto",
         description: "Registra un nuevo gasto",
-        url: `${prefix}/expenses?new`,
+        url: `${prefix}${HOME_QUICK_ACTION_PATHS.new_expense}`,
         icons: SHORTCUT_ICONS("expense"),
       },
       {
         name: "Sincronizar cuenta compartida",
         short_name: "Sincronizar",
         description: "Sincroniza una cuenta compartida",
-        url: `${prefix}/sync-shared`,
+        url: `${prefix}${HOME_QUICK_ACTION_PATHS.sync_shared}`,
         icons: SHORTCUT_ICONS("sync"),
       },
       {
         name: "Generar reporte",
         description: "Genera un reporte de tus gastos",
-        url: `${prefix}/reports`,
+        url: `${prefix}${HOME_QUICK_ACTION_PATHS.report}`,
         icons: SHORTCUT_ICONS("reports"),
       },
       {

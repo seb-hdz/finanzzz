@@ -15,7 +15,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   return (
-    <aside className="hidden md:flex md:w-56 lg:w-64 flex-col border-r bg-card h-screen sticky top-0">
+    <aside className="hidden h-full min-h-0 shrink-0 self-stretch border-r bg-card md:flex md:w-56 lg:w-64 flex-col">
       <div className="flex items-center gap-2 px-5 py-3 border-b">
         <Image
           src={logoMark}

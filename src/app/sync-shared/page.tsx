@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, MonitorSmartphone } from "lucide-react";
+import { Loader2, MonitorSmartphone, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SharedSyncReceivePanel } from "@/components/shared-sync-receive-panel";
 import { applySharedSyncFromToken } from "@/lib/shared-sync";
@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { useIsStandalone } from "@/lib/use-standalone";
 import { useApplePlatformKind } from "@/lib/use-apple-platform";
 import { consumeShareTargetStash } from "@/lib/share-stash";
+import { Separator } from "@/components/ui/separator";
 
 type Phase = "boot" | "d-auto" | "d-password" | "receive";
 
@@ -100,8 +101,8 @@ export default function SyncSharedPage() {
             Actualizando cuenta compartida
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Introduce la contraseña acordada con la otra persona para aplicar los
-            cambios.
+            Introduce la contraseña acordada con la otra persona para aplicar
+            los cambios.
           </p>
         </div>
         <SharedSyncReceivePanel
@@ -122,7 +123,8 @@ export default function SyncSharedPage() {
               ) : (
                 <>el navegador puede no compartir datos con la app instalada.</>
               )}{" "}
-              Usa <strong>Sincronizar &rarr; Recibir</strong> en la app instalada.
+              Usa <strong>Sincronizar &rarr; Recibir</strong> en la app
+              instalada.
             </span>
           </div>
         )}
@@ -159,12 +161,14 @@ export default function SyncSharedPage() {
           </span>
         </div>
       )}
+      <Separator />
       <Button
         type="button"
         variant="outline"
-        className="w-full sm:w-auto"
+        className="w-full sm:w-auto py-4.5"
         onClick={() => router.replace("/sources")}
       >
+        <Wallet className="size-4 mr-1" />
         Ir a Cuentas
       </Button>
     </div>

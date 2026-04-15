@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import {
   Bug,
@@ -18,6 +19,12 @@ import { BetaBadge } from "@/components/beta-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -47,10 +54,25 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { ContextHint } from "@/components/ui/context-hint";
 import { LimitIntervalSelect } from "@/components/limit-interval-select";
+import {
+  HOME_QUICK_ACTION_CONFIG_NONE,
+  HOME_QUICK_ACTION_NONE_OPTION,
+  HOME_QUICK_ACTION_ORDER,
+  HOME_QUICK_ACTION_SETTINGS_HASH,
+  HOME_QUICK_ACTIONS,
+  isHomeQuickActionConfigId,
+  resolveHomeQuickActionConfigId,
+} from "@/lib/home-quick-actions";
+import {
+  isSettingsPathname,
+  MAIN_VIEWPORT_ANCHOR_SCROLL_DELAY_MS,
+  scrollMainRegionToElementId,
+} from "@/lib/main-scroll-region";
 import { useGlobalConfig, updateGlobalConfig } from "@/lib/db-hooks";
 import { exportDatabase, importDatabase } from "@/lib/export-import";
 import { resetLocalDatabase } from "@/lib/db";
 import { useTheme } from "@/providers/theme-provider";
+import { AppearanceZoomSetting } from "@/components/appearance-zoom-setting";
 import { Logo } from "@/components/logo";
 import { useReportProblemModal } from "@/components/modals/report-problem-modal";
 import { AppVersionCard } from "@/components/app-version-card";
@@ -63,6 +85,7 @@ const DevSeedFakeDataButton = dynamic(
 );
 
 export default function SettingsPage() {
+  const pathname = usePathname();
   const config = useGlobalConfig();
   const { theme, themeMode, setThemeMode, autoDarkAt, setAutoDarkAt, toggle } =
     useTheme();
@@ -79,9 +102,37 @@ export default function SettingsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    if (!isSettingsPathname(pathname)) return;
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== HOME_QUICK_ACTION_SETTINGS_HASH) return;
+
+    const timer = window.setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          scrollMainRegionToElementId("home-quick-action");
+        });
+      });
+    }, MAIN_VIEWPORT_ANCHOR_SCROLL_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [pathname]);
+
   async function handleSaveConfig(field: string, value: string | number) {
     if (!config) return;
     await updateGlobalConfig({ [field]: value });
+    toast.success("Configuración guardada");
+  }
+
+  async function handleHomeQuickActionChange(value: string | null) {
+    if (!config || !value || !isHomeQuickActionConfigId(value)) return;
+    await updateGlobalConfig({ homeQuickActionId: value });
+    toast.success("Configuración guardada");
+  }
+
+  async function handleHomeQuickActionEnabledChange(enabled: boolean) {
+    if (!config) return;
+    await updateGlobalConfig({ homeQuickActionEnabled: enabled });
     toast.success("Configuración guardada");
   }
 
@@ -135,6 +186,25 @@ export default function SettingsPage() {
   }
 
   if (!config) return null;
+
+  const getDescription = () => {
+    const isNone =
+      resolvedHomeQuickActionConfigId === HOME_QUICK_ACTION_CONFIG_NONE;
+
+    if (!config.homeQuickActionEnabled) {
+      return "Activa «Mostrar en Inicio» para usar el selector y el atajo.";
+    } else if (isNone) return HOME_QUICK_ACTION_NONE_OPTION.description;
+    else return HOME_QUICK_ACTIONS[resolvedHomeQuickActionConfigId].description;
+  };
+
+  const resolvedHomeQuickActionConfigId = resolveHomeQuickActionConfigId(
+    config.homeQuickActionId
+  );
+  const NoneOptionIcon = HOME_QUICK_ACTION_NONE_OPTION.Icon;
+  const HomeQuickActionTriggerIcon =
+    resolvedHomeQuickActionConfigId === HOME_QUICK_ACTION_CONFIG_NONE
+      ? NoneOptionIcon
+      : HOME_QUICK_ACTIONS[resolvedHomeQuickActionConfigId].Icon;
 
   return (
     <div className="space-y-6">
@@ -331,6 +401,110 @@ export default function SettingsPage() {
               />
             </div>
           )}
+          <Separator className="my-5" />
+          <AppearanceZoomSetting
+            value={config.uiZoomPercent}
+            onSave={async (p) => {
+              await updateGlobalConfig({ uiZoomPercent: p });
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card id="home-quick-action">
+        <CardHeader>
+          <CardTitle>Botón de acción rápida</CardTitle>
+          <CardDescription>
+            Elige el acceso directo que aparece en Inicio
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Select
+            value={resolvedHomeQuickActionConfigId}
+            onValueChange={(v) => v && void handleHomeQuickActionChange(v)}
+            disabled={config.homeQuickActionEnabled === false}
+          >
+            <SelectTrigger className="w-full max-w-md">
+              <span
+                className="inline-flex shrink-0 text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4"
+                aria-hidden
+              >
+                <HomeQuickActionTriggerIcon className="size-4" />
+              </span>
+              <span
+                data-slot="select-value"
+                className="min-w-0 flex-1 truncate text-left"
+              >
+                {resolvedHomeQuickActionConfigId ===
+                HOME_QUICK_ACTION_CONFIG_NONE
+                  ? HOME_QUICK_ACTION_NONE_OPTION.label
+                  : HOME_QUICK_ACTIONS[resolvedHomeQuickActionConfigId].label}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                value={HOME_QUICK_ACTION_NONE_OPTION.value}
+                className="py-0.5 pr-8 pl-1.5"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <NoneOptionIcon
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <span className="min-w-0">
+                    {HOME_QUICK_ACTION_NONE_OPTION.label}
+                  </span>
+                </div>
+              </SelectItem>
+              {HOME_QUICK_ACTION_ORDER.map((id) => {
+                const item = HOME_QUICK_ACTIONS[id];
+                const ItemIcon = item.Icon;
+                return (
+                  <SelectItem
+                    key={id}
+                    value={id}
+                    className="py-0.5 pr-8 pl-1.5"
+                  >
+                    <div className="flex min-w-0 items-center gap-2">
+                      <ItemIcon
+                        className="size-4 shrink-0 text-muted-foreground"
+                        aria-hidden
+                      />
+                      <span className="min-w-0">{item.label}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground -mt-2">
+            {getDescription()}
+          </p>
+
+          <Separator />
+
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5">
+            <div className="min-w-0 space-y-0.5">
+              <Label
+                htmlFor="home-quick-action-enabled"
+                className="text-sm font-medium leading-none"
+              >
+                Mostrar en Inicio
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Si está desactivado, no verás ningún indicador en Inicio.
+              </p>
+            </div>
+            <Switch
+              id="home-quick-action-enabled"
+              size="sm"
+              checked={config.homeQuickActionEnabled ?? true}
+              onCheckedChange={(v) =>
+                void handleHomeQuickActionEnabledChange(v)
+              }
+              aria-label="Mostrar acción rápida o aviso en Inicio"
+            />
+          </div>
         </CardContent>
       </Card>
 

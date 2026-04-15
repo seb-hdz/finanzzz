@@ -1,4 +1,6 @@
 import type { Tag, GlobalConfig } from "./types";
+import { HOME_QUICK_ACTION_CONFIG_NONE } from "./home-quick-action-paths";
+import { DEFAULT_UI_ZOOM_PERCENT } from "./ui-zoom";
 
 export const PREDEFINED_TAGS: Omit<Tag, "id">[] = [
   { name: "Comida", color: "#f97316", isPredefined: true },
@@ -22,6 +24,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfig = {
   warningThreshold: 0.7,
   dangerThreshold: 0.9,
   sharedStaleHours: 168,
+  homeQuickActionEnabled: true,
+  homeQuickActionId: HOME_QUICK_ACTION_CONFIG_NONE,
+  uiZoomPercent: DEFAULT_UI_ZOOM_PERCENT,
 };
 
 export const CURRENCY = "PEN";

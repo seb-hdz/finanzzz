@@ -350,7 +350,7 @@ export const SharedSyncReceivePanel = forwardRef<
       {showSubmit ? (
         <Button
           type="button"
-          className="w-full"
+          className="w-full py-4.5"
           onClick={() => void handleReceive()}
           disabled={receiving || !pastedInput.trim()}
         >

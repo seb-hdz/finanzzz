@@ -88,7 +88,7 @@ export function DbLoadingScreen({ showPhrases = true }: DbLoadingScreenProps) {
   return (
     <div
       className={cn(
-        "relative flex min-h-screen flex-col items-center justify-center overflow-hidden",
+        "relative flex h-dvh min-h-0 w-full flex-col items-center justify-center overflow-hidden",
         themeReady && "bg-background transition-colors duration-500 ease-out"
       )}
     >

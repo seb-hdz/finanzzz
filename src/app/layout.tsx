@@ -114,7 +114,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${nunitoSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${nunitoSans.variable} ${geistMono.variable} h-full min-h-0 antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -123,12 +123,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeBootstrapScript }}
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="flex h-dvh min-h-0 flex-col overflow-hidden">
         <ThemeProvider>
           <TooltipProvider>
             <DbProvider>
               <ServiceWorkerProvider>
-                <AppShell>{children}</AppShell>
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                  <AppShell>{children}</AppShell>
+                </div>
               </ServiceWorkerProvider>
             </DbProvider>
           </TooltipProvider>

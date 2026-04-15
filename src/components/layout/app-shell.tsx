@@ -17,13 +17,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <ReportProblemModalProvider>
-      <div className="flex min-h-screen">
+      <div className="flex h-full min-h-0 w-full flex-1 flex-row overflow-hidden">
         <Sidebar />
         <main
+          data-app-main-scroll-region
           className={
             mainDriftMesh
-              ? "relative isolate min-w-0 flex-1 bg-background pb-[calc(3.5rem+max(0.75rem,env(safe-area-inset-bottom,0px)))] md:pb-0"
-              : "min-w-0 flex-1 pb-[calc(3.5rem+max(0.75rem,env(safe-area-inset-bottom,0px)))] md:pb-0"
+              ? "relative isolate min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-background pb-[calc(3.5rem+max(0.75rem,env(safe-area-inset-bottom,0px)))] md:pb-0"
+              : "min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[calc(3.5rem+max(0.75rem,env(safe-area-inset-bottom,0px)))] md:pb-0"
           }
         >
           {mainDriftMesh ? <DriftingMeshBackground className="z-0" /> : null}

@@ -1,6 +1,14 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Source, Expense, Tag, GlobalConfig, SharedSourceSync } from "./types";
+import type {
+  Source,
+  Expense,
+  Tag,
+  GlobalConfig,
+  SharedSourceSync,
+} from "./types";
 import { PREDEFINED_TAGS, DEFAULT_GLOBAL_CONFIG } from "./constants";
+import { HOME_QUICK_ACTION_CONFIG_NONE } from "./home-quick-action-paths";
+import { normalizeUiZoomPercent } from "./ui-zoom";
 import { v4 as uuid } from "uuid";
 
 export const db = new Dexie("finanzzz") as Dexie & {
@@ -36,7 +44,9 @@ db.version(2)
     }
   });
 
-export function createDefaultSharedSyncState(sourceId: string): SharedSourceSync {
+export function createDefaultSharedSyncState(
+  sourceId: string
+): SharedSourceSync {
   return {
     sourceId,
     emissions: [],
@@ -88,5 +98,22 @@ export async function seedDatabase() {
     await db.config.update("global", {
       sharedStaleHours: DEFAULT_GLOBAL_CONFIG.sharedStaleHours,
     });
+  }
+  if (configExists?.homeQuickActionId === undefined) {
+    await db.config.update("global", {
+      homeQuickActionId: HOME_QUICK_ACTION_CONFIG_NONE,
+    });
+  }
+  if (configExists?.homeQuickActionEnabled === undefined) {
+    await db.config.update("global", {
+      homeQuickActionEnabled: DEFAULT_GLOBAL_CONFIG.homeQuickActionEnabled,
+    });
+  }
+  const configRow = await db.config.get("global");
+  if (configRow) {
+    const normalized = normalizeUiZoomPercent(configRow.uiZoomPercent);
+    if (configRow.uiZoomPercent !== normalized) {
+      await db.config.update("global", { uiZoomPercent: normalized });
+    }
   }
 }
