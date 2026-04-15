@@ -64,6 +64,6 @@ export const HOME_QUICK_ACTIONS: Record<HomeQuickActionId, HomeQuickActionDef> =
 export const HOME_QUICK_ACTION_NONE_OPTION = {
   value: HOME_QUICK_ACTION_CONFIG_NONE,
   label: "Ninguno",
-  description: "No se muestra un atajo en Inicio. Puedes configurar uno aquí.",
+  description: "No se muestra un atajo en Inicio",
   Icon: Ban,
 } as const;

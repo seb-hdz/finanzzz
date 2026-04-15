@@ -384,20 +384,20 @@ export default function SettingsPage() {
             />
           </div>
           {themeMode === "auto" && (
-            <div className="flex flex-wrap items-center gap-2 pl-0.5">
+            <div className="flex flex-col gap-2 pl-0.5 sm:flex-row sm:flex-wrap sm:items-center">
               <Label
                 htmlFor="auto-dark-at"
-                className="text-xs font-normal text-muted-foreground"
+                className="text-xs font-normal text-muted-foreground sm:shrink-0"
               >
-                Cambiar a oscuro a las
+                Cambiar a modo oscuro a las
               </Label>
               <Input
                 id="auto-dark-at"
                 type="time"
                 value={autoDarkAt}
                 onChange={(e) => setAutoDarkAt(e.target.value)}
-                className="h-7 w-[4.85rem] min-w-0 shrink-0 px-1.5 py-0 font-mono text-[11px] leading-none tabular-nums [&::-webkit-datetime-edit]:p-0 [&::-webkit-datetime-edit-fields-wrapper]:p-0 [&::-webkit-datetime-edit-hour-field]:p-0 [&::-webkit-datetime-edit-minute-field]:p-0 [&::-webkit-datetime-edit-text]:p-0 [&::-webkit-datetime-edit-ampm-field]:p-0"
-                aria-label="Hora a la que aplicar modo oscuro"
+                className="h-7 min-h-0 w-full min-w-0 px-1.5 py-0 text-xs leading-none tabular-nums sm:w-24 sm:shrink-0 [&::-webkit-datetime-edit]:p-0 [&::-webkit-datetime-edit-fields-wrapper]:p-0 [&::-webkit-datetime-edit-hour-field]:p-0 [&::-webkit-datetime-edit-minute-field]:p-0 [&::-webkit-datetime-edit-text]:p-0 [&::-webkit-datetime-edit-ampm-field]:p-0"
+                aria-label="Hora a la que aplicar el modo oscuro"
               />
             </div>
           )}
@@ -582,7 +582,7 @@ export default function SettingsPage() {
         </Button>
       </div>
 
-      <div className="mt-12 flex justify-center md:hidden">
+      <div className="mt-8 flex justify-center md:hidden">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Image
             src={logoMark}

@@ -49,6 +49,8 @@
 }
 
 :root {
+  /* Lets Chrome/Safari render native controls (time/date icons, pickers) for the active theme. */
+  color-scheme: light;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -86,6 +88,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
