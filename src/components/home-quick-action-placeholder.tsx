@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SlidersHorizontal } from "lucide-react";
+import { Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HOME_QUICK_ACTION_SETTINGS_HREF } from "@/lib/home-quick-actions";
@@ -18,9 +18,9 @@ export function HomeQuickActionPlaceholder() {
       aria-label="Ir a Ajustes para configurar la acción rápida en Inicio"
       title="Configurar acción rápida"
     >
-      <SlidersHorizontal className="mt-0.5 size-4 shrink-0 self-start opacity-80" />
+      <Zap className="mt-0.5 size-4 shrink-0 self-start opacity-80" />
       <span className="min-w-0 flex-1 text-left text-xs leading-snug wrap-break-word hyphens-auto line-clamp-2">
-        Acción rápida...
+        Acción rápida
       </span>
     </Link>
   );

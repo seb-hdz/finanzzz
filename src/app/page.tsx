@@ -73,7 +73,7 @@ export default function DashboardPage() {
               <HomeQuickActionButton actionId={homeQuickActionConfigId} />
             ))}
         </div>
-        <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5 -mt-2">
+        <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5 mt-0 [@media(min-width:374px)]:-mt-2">
           <span>Resumen de gastos</span>
           <LimitIntervalSelect
             variant="inline"
