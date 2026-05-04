@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
-import { CalendarIcon, FileDown, Info } from "lucide-react";
+import { FileDown, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -14,13 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ContextHint } from "@/components/ui/context-hint";
-import { Calendar } from "@/components/ui/calendar";
+import { DateIntervalRangeFields } from "@/components/date-interval-range-fields";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useSources, useTags, useExpensesByDateRange } from "@/lib/db-hooks";
@@ -138,48 +133,12 @@ export default function ReportsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs">Desde</Label>
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <Button variant="outline" size="sm" className="gap-2" />
-                  }
-                >
-                  <CalendarIcon className="size-3.5" />
-                  {format(startDate, "dd/MM/yyyy")}
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={(d) => d && setStartDate(d)}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Hasta</Label>
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <Button variant="outline" size="sm" className="gap-2" />
-                  }
-                >
-                  <CalendarIcon className="size-3.5" />
-                  {format(endDate, "dd/MM/yyyy")}
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={(d) => d && setEndDate(d)}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
+          <DateIntervalRangeFields
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+          />
 
           <Separator />
 

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DateIntervalRangeFields } from "@/components/date-interval-range-fields";
 import { MultiSelectDropdown } from "@/components/multi-select-dropdown";
 import {
   AlertDialog,
@@ -58,6 +59,8 @@ const SOURCE_TYPES: SourceType[] = [
 
 type Period = "daily" | "weekly" | "monthly" | "yearly";
 
+type ExpensePeriodTab = Period | "interval";
+
 function getRange(period: Period) {
   const now = new Date();
   switch (period) {
@@ -86,7 +89,14 @@ function ExpensesPageContent() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [period, setPeriod] = useState<Period>("monthly");
+  const [periodTab, setPeriodTab] = useState<ExpensePeriodTab>("monthly");
+  const [intervalStart, setIntervalStart] = useState<Date>(() =>
+    startOfMonth(new Date())
+  );
+  const [intervalEnd, setIntervalEnd] = useState<Date>(() =>
+    endOfMonth(new Date())
+  );
+
   const [search, setSearch] = useState("");
   const [sourceFilterIds, setSourceFilterIds] = useState<string[]>([]);
   const [sourceTypeFilterIds, setSourceTypeFilterIds] = useState<string[]>([]);
@@ -111,7 +121,20 @@ function ExpensesPageContent() {
     }
   }
 
-  const range = useMemo(() => getRange(period), [period]);
+  const range = useMemo(() => {
+    if (periodTab === "interval") {
+      let start = startOfDay(intervalStart).getTime();
+      let end = endOfDay(intervalEnd).getTime();
+      if (start > end) {
+        const t = start;
+        start = end;
+        end = t;
+      }
+      return { start, end };
+    }
+    return getRange(periodTab);
+  }, [periodTab, intervalStart, intervalEnd]);
+
   const expenses = useExpensesByDateRange(range.start, range.end);
   const sources = useSources();
   const tags = useTags();
@@ -255,22 +278,44 @@ function ExpensesPageContent() {
         </Button>
       </div>
 
-      <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
-        <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="daily" className="flex-1 sm:flex-none">
-            Hoy
-          </TabsTrigger>
-          <TabsTrigger value="weekly" className="flex-1 sm:flex-none">
-            Semana
-          </TabsTrigger>
-          <TabsTrigger value="monthly" className="flex-1 sm:flex-none">
-            Mes
-          </TabsTrigger>
-          <TabsTrigger value="yearly" className="flex-1 sm:flex-none">
-            Año
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="space-y-3">
+        <Tabs
+          value={periodTab}
+          onValueChange={(v) => setPeriodTab(v as ExpensePeriodTab)}
+        >
+          <TabsList className="h-auto w-full flex-wrap gap-1 p-1 sm:w-auto">
+            <TabsTrigger value="daily" className="flex-1 sm:flex-none">
+              Hoy
+            </TabsTrigger>
+            <TabsTrigger value="weekly" className="flex-1 sm:flex-none">
+              Semana
+            </TabsTrigger>
+            <TabsTrigger value="monthly" className="flex-1 sm:flex-none">
+              Mes
+            </TabsTrigger>
+            <TabsTrigger value="yearly" className="flex-1 sm:flex-none">
+              Año
+            </TabsTrigger>
+            <TabsTrigger value="interval" className="flex-1 sm:flex-none">
+              Intervalo
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {periodTab === "interval" ? (
+          <div className="rounded-lg border bg-muted/30 p-3">
+            <DateIntervalRangeFields
+              startDate={intervalStart}
+              endDate={intervalEnd}
+              onStartDateChange={setIntervalStart}
+              onEndDateChange={setIntervalEnd}
+              className="gap-4 justify-center"
+              elementClassName="flex flex-row items-center gap-1.5"
+              startLabel={<span className="text-sm block mb-0">Desde</span>}
+              endLabel={<span className="text-sm block mb-0">Hasta</span>}
+            />
+          </div>
+        ) : null}
+      </div>
 
       <div className="space-y-3">
         <div className="relative w-full">
